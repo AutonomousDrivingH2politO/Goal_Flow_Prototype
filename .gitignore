@@ -1,0 +1,15 @@
+data/
+!data/.gitkeep
+*.svo
+*.svo2
+*.mp4
+*.webm
+*.mkv
+__pycache__/
+*.pyc
+.venv/
+runs/
+*.zarr
+*.npz
+reports/videos/
+docs/*.pdf
