@@ -1,0 +1,21 @@
+# Manual classification after visual review of data/audit/*_contact.jpg (PROMPT.md §2).
+# class: A | B | C | D ; exclude: [[t_start_s, t_end_s], ...] removes non-driving parts.
+# Reviewed 2026-11-18 (Phase 0).
+files:
+  shell/output.mp4:
+    class: C
+    notes: >-
+      Onboard, very low wide-angle/fisheye camera (not a ZED; intrinsics unknown).
+      Large flat asphalt circuit, open track, no bollards or cones seen. Moving the whole clip.
+  zed/morano_video.mp4:
+    class: C
+    notes: >-
+      Monocular 1280x720 at 5 fps (likely ZED left image exported at HD720, re-encoded MPEG-4).
+      Vehicle part visible at bottom centre. Strong colour cast. Open track, no obstacles seen.
+  zed/video_cerrina1.webm:
+    class: C
+    exclude: [[190.0, 221.5]]
+    notes: >-
+      Monocular 1280x720@30 (GStreamer, 2023-05-11), kart circuit. Stationary on start line 0-13 s.
+      Drives the lap, enters pit lane ~178 s; from ~190 s the camera is parked/handled among people
+      (excluded). No bollards/cones; colour hints were kerbs, blue fencing and pit floor.
