@@ -1,4 +1,5 @@
 /data/
+reports/feature_feasibility/*.jpg
 !/data/.gitkeep
 *.svo
 *.svo2

@@ -2,8 +2,8 @@
 vehicle:
   name: Juno
   wheelbase_m: 1.65
-  length_m: TODO(Can)        # still needed for the shadow-vehicle box
-  width_m: TODO(Can)         # still needed for the shadow-vehicle box
+  length_m: 2.55
+  width_m: 1.85
 camera:
   model: ZED 2i
   serial: 39159302           # from the SVO2 headers
@@ -19,6 +19,8 @@ obstacles:
 segmentation:
   # TwinLiteNetPlus (drivable area + lane), team model. Used read-only, offline, for pseudo-labels.
   repo: /home/bylogix/AD-SEM/src/shared_objects/src/shared_objects/TwinLiteNetPlus
-  checkpoint: TODO          # resolved in Phase 2 from <repo>/pretrained
+  checkpoint: pretrained/twinliteplus_pretrained/large.pth
 units:
-  ecu_speed: km/h           # /ECU/speed verified: bag 'saw_15kmh_max' peaks at 15.08
+  ecu_speed: km/h           # /ECU/speed verified: bag "saw_15kmh_max" peaks at 15.08
+scale_source: ecu           # Can 2026-11-18: ECU speed is accurate, ZED odometry is not (use ZED only for rotation, if at all)
+target_obstacles: [bollard, cone]   # Can 2026-11-18: people are NOT the intended obstacle class

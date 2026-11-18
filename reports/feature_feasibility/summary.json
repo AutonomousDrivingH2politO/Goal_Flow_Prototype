@@ -1,0 +1,44 @@
+{
+  "latency_ms": {
+    "dinov2_vits14_fp32_ms": 44.95127156666665,
+    "dinov2_vits14_fp16_ms": 23.306753966668715,
+    "dinov2_vits14_fp16_batch8_per_frame_ms": 8.34093788333045,
+    "peak_gpu_mem_mb": 176.2578125
+  },
+  "storage": {
+    "frames_extracted": 580,
+    "overexposed_dropped": 7,
+    "dinov2_bytes_per_frame_fp16": 596736,
+    "usable_track_s": 594.6,
+    "full_cache_5hz_gb": 1.774096128,
+    "full_cache_5hz_with_flip_gb": 3.548192256,
+    "extract_ms_per_frame_incl_preproc": 38.34897165689372
+  },
+  "probes": {
+    "colour+position (linear)": {
+      "iou_mean": 0.7971368016955253,
+      "iou_std": 0.0,
+      "acc_mean": 0.9183880308880309,
+      "n_train_patches": 326340,
+      "n_test_patches": 124320
+    },
+    "DINOv2 ViT-S/14 (linear)": {
+      "iou_mean": 0.953982424978966,
+      "iou_std": 0.0,
+      "acc_mean": 0.9841618404118404,
+      "n_train_patches": 326340,
+      "n_test_patches": 124320
+    }
+  },
+  "frames": {
+    "train": 420,
+    "test_holdout": 160,
+    "holdout_key": "2026-05-21T170951"
+  },
+  "recordings": [
+    "bags/2025-05-28T111357__lombardone_where_it_worked.db3",
+    "bags/2026-05-21T170951__Morano_21_05_2026__long_run_with_obs_avoided.db3",
+    "bags/2026-05-26T125445__26_May_2026_All_Worked__8km_stopped_properly_then_continued.db3",
+    "bags/2026-06-05T142247__5_June_2026_Morano__drove_with5hz_ZED_bad_roadseg_speed_7to_10kmh.db3"
+  ]
+}
