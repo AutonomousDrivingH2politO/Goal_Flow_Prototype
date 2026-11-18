@@ -1,5 +1,5 @@
-data/
-!data/.gitkeep
+/data/
+!/data/.gitkeep
 *.svo
 *.svo2
 *.mp4
