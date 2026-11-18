@@ -1,62 +1,85 @@
-# Phase 0 — video audit
+# Phase 0 — data audit (revision 2)
 
-2026-11-18 · produced by `scripts/audit_videos.py` (+ manual review recorded in `configs/audit_overrides.yaml`)
+2026-11-18 · `scripts/audit_videos.py`, `scripts/count_obstacle_passes.py`, manual review in `configs/audit_overrides.yaml`
 
-Outputs (git-ignored): `data/inventory.csv`, `data/audit/<stem>_contact.jpg`, `<stem>_timeline.csv`, `<stem>_obstacles.jpg`.
+Revision 1 covered only the three videos in `data/raw/{zed,shell}` (7.5 min, no obstacles). After Can confirmed rosbags exist,
+the whole disk was searched: 7 unique ZED SVO2 files and 66 ROS 2 bags were found and symlinked (read-only) into
+`data/raw/svo/` and `data/raw/bags/`. Outputs (git-ignored): `data/inventory.csv`, `data/audit/*_contact.jpg`,
+`*_timeline.csv`, `obstacle_events.csv`, `events/*.jpg`.
 
-## Inventory
+## Values from Can (in `configs/vehicle.yaml`)
 
-| File | Class | Container | Res | fps | Duration | Usable (moving, not excluded) | Obstacle passes |
-|---|---|---|---|---|---|---|---|
-| shell/output.mp4 | C | MP4 / H.264 | 1280×720 | 29.97 | 175.8 s | 175.6 s | 0 |
-| zed/morano_video.mp4 | C | MP4 / MPEG-4 | 1280×720 | 5.00 | 101.6 s | 101.0 s | 0 |
-| zed/video_cerrina1.webm | C | WebM / VP8 | 1280×720 | 30.00 | 221.5 s | 175.6 s | 0 |
+Wheelbase 1.65 m; ZED 2i (S/N 39159302) at 1.25 m, pitch 0°; cone r = 0.25 m, h = 0.40 m; all footage from the team ZED 2i;
+segmentation = TwinLiteNetPlus (`nano/small/medium/large.pth` present). HD720 rectified intrinsics read from the SVO2 headers:
+fx = fy = 533.7, cx = 638.4, cy = 362.1 (≈100° HFOV); baseline 0.120 m. `/ECU/speed` is km/h (verified: bag "saw_15kmh_max" peaks at 15.08).
 
-| Class | Files | Total | Usable |
-|---|---|---|---|
-| A (SVO/SVO2) | 0 | 0 | 0 |
-| B (side-by-side stereo) | 0 | 0 | 0 |
-| C (monocular onboard) | 3 | 8.3 min | **7.5 min** |
-| D (not ego view) | 0 | 0 | 0 |
+## New classes for bags
 
-**Obstacle-course passes: 0.** The HSV hint detector flagged 6 short events in the kart video; all were checked by eye and are
-false positives (red/white kerbs, blue fence, blue pit-lane floor, people). No blue bollards or orange cones appear in any file.
+| Class | Meaning | Ego-motion source |
+|---|---|---|
+| R1 | ZED rectified RGB + `/zed/zed_node/odom` (+ IMU, ECU speed) | ZED stereo-inertial odometry, as class A |
+| R2 | ZED rectified RGB + `/ECU/speed`, no odometry/IMU/tf | ECU speed for scale + visual rotation for yaw |
+| X | camera stream < 2 Hz or absent | none (excluded) |
 
-Rough sample count at 5 Hz with a full 4 s future: ≈ 2 200 samples (≈ 4 400 with flips), from 3 sessions on 3 different tracks
-with 3 different cameras/mounts. A session-level split leaves one session for test.
+## Inventory (usable = moving > 1.8 km/h with images present, minus excluded ranges)
+
+| Domain | Class | Files | Total | Usable |
+|---|---|---|---|---|
+| **track** | A (SVO2) | 1 | 0.6 min | 0.4 min |
+| **track** | R1 | 13 | 14.4 min | 7.5 min |
+| **track** | R2 | 12 | 22.9 min | 15.3 min |
+| **track** | C (mono video) | 4 | 8.6 min | 7.8 min |
+| urban (campus roads) | A + R1 | 19 | 13.7 min | 5.7 min |
+| handheld (bike path SVO2) | D | 4 | 6.7 min | 0 |
+| lab / static | D | 3 | 1.9 min | 0 |
+| unusable bags | X / ERR | 19 | 37.1 min | 0 |
+| duplicate copies | dup | 3 | 9.8 min | 0 |
+
+**Track total: ≈ 31 min usable, of which ≈ 23 min has metric ego-motion (A/R1/R2).** Urban adds 5.7 min. This is above the
+20-minute threshold, but it is spread over ~25 short sessions (median ≈ 40 s) on 4 sites (Morano, Lombardone, the kart circuit,
+the Shell circuit).
+
+## Obstacles
+
+* **There are no blue bollards or orange cones in any recording.** All obstacles are **people standing on the runway**
+  (Morano 21 May, 26 May, 5 June 2026; Lombardone 2025 has people at the track edge). Every HSV bollard/cone hit was checked by
+  eye: blue jeans, kerbs, blue fencing, pit-lane floor.
+* YOLOv8m person events in path (2–20 m ahead, |y| ≤ 3 m), track recordings only: **26 events — 13 stopped in front,
+  5 passed (2 left, 3 right), 8 unresolved.** Bag names suggest a few more avoidances inside long "stopped" events
+  (e.g. `long_run_with_obs_avoided`, `obs_avoided_very_nays`). Realistic estimate: **about 5–10 avoidance passes and
+  about 13 stop events**, to be counted exactly from lateral ego-motion in Phase 2.
 
 ## Assumptions in PROMPT.md that the data contradicts
 
-1. **No class A or B data.** No SVO/SVO2 and no side-by-side frames (all files are 1280×720, 16:9). Consequences: no ZED
-   positional tracking, no IMU, no floor-plane estimate of camera height/pitch, no intrinsics, and the class B/C-vs-A agreement
-   check in the quality gate cannot be run. All ego-motion would have to come from monocular ground-plane VO with camera height
-   and intrinsics supplied by hand (TODO(Can)).
-2. **No obstacle course anywhere.** The project's core question (left/right multimodality around bollards) cannot be trained or
-   evaluated on this footage — the obstacle-subset metrics, `ambiguous`-flag precision and pseudo-collision would all be empty.
-3. **The "Shell" video is onboard footage** (good, class C), but from a very low wide-angle/fisheye camera that is not the ZED, on
-   an open circuit. It is a different camera model and mount from the other two files.
-4. **Under the 20-minute threshold** (7.5 min usable) → options below, per the Phase 0 checkpoint.
-5. **Hardware:** this workspace is the Jetson AGX Orin (JetPack R36.4.7, 12 cores, ~30 GB RAM, PyTorch 2.7 with CUDA, pyzed 5.3),
-   not the Quadro P2000 desktop. Disk is 94 % full (30 GB free). `uv` is not installed; system Python 3.10 was used.
+1. **Obstacles are people, not bollards/cones.** HSV obstacle pseudo-labels won't work; obstacles must come from an offline
+   person detector (labels only). The obstacle disc radius should be about 0.3 m for a person. Many runs are *stop* tests
+   (the car brakes in front of the person), not pass-left/pass-right, so the multimodal "pass on either side" case is rare.
+2. **No measured steering.** Only commands exist: `/commands/KalmanAngle` (R2 bags, ~1.5 Hz) and `/cmd_vel`. The "control error"
+   metric must use steering derived from ego-motion.
+3. **Scale disagreement.** Where both exist, ZED odometry distance is 10–60 % *below* integrated ECU speed (e.g. 61 vs 111 m,
+   48 vs 119 m in `turning_with_pushing`), and drifts badly in one near-static bag (166 m vs 6 m). Either the ECU wheel-speed
+   calibration is off or ZED tracking drops out. This must be settled before trusting either for R2 labels.
+4. **Low camera rate in most R1 bags.** 3–6 Hz (the 26 May and 5 June sessions), so 5 Hz samples there fall back to image
+   timestamps. R2 bags are 13–15 Hz.
+5. **The best obstacle session (Morano 21 May) is R2.** No odometry/IMU, so ego-motion relies on ECU speed + visual yaw. The
+   R1 bags (with both ZED odometry and ECU speed) can validate that method with the 5 % / 3° check in place of class A.
+6. **Over-exposed (white) frames** at the start of many bags (auto-exposure). The quality gate needs an exposure check.
+7. **`shell/output.mp4` looks unrectified** (curved horizon), so it needs rectifying with the factory calibration of
+   S/N 39159302. `morano_video.mp4` is *not* the 2025-11-18 SVO2 (frames don't match).
+8. **Hardware.** Everything runs on this AGX Orin (JetPack R36.4.7, PyTorch 2.7 + CUDA, pyzed 5.3, ROS Humble). Disk is
+   94 % full (30 GB free). `uv` is not installed, so system Python 3.10 was used.
 
-Detector note: the left/right-half correlation alone is not discriminative on real road scenes (mono frames score 0.47–0.91
-because sky and road are self-similar), so SBS detection is gated on aspect ratio ≥ 3 (a ZED HD720 SBS frame is 2560×720).
+## Proposed plan (needs Can's go-ahead)
 
-## Options (need Can's decision)
+* **Training set:** track A/R1/R2 (≈ 23 min) as the core. Track C videos (≈ 8 min) only if they pass the quality gate.
+  Urban (≈ 6 min) as optional extra/pretraining data.
+* **Test set:** hold out the Morano 21 May session (the most avoidance passes), or one 21 May bag plus one 5 June bag.
+* **Obstacles:** person detector → ground contact point → BEV discs, replacing the HSV path. Keep HSV for future cone/bollard runs.
+* **Still worth recording:** a dedicated session with real bollards/cones, passing each side about 15 times, recorded as SVO2
+  (or a bag with ZED odometry) at ≥ 10 Hz camera rate, to answer the original multimodality question directly.
 
-1. **Record class A data (recommended, required for the obstacle question).** SVO2 from Juno's ZED 2i at HD720/15–30 fps with
-   IMU, on the obstacle course or a mock-up (bollards + cones on any flat lot). Target ≥ 30 passes, moving the obstacles between
-   passes and passing each side; plus ≥ 20 min of open-track driving. SVO gives metric ego-motion, camera height/pitch and
-   intrinsics for free. A rosbag with ECU speed/steering recorded alongside would also settle scale and control labels.
-2. **Look for originals.** `morano_video.mp4` is 5 fps, which suggests an export from an SVO or rosbag — if the source exists it
-   becomes class A. Same question for the 2023 kart recording.
-3. **Pretrain on public driving video, fine-tune on ours.** For example comma2k19 (front camera + GNSS/CAN poses) or the nuScenes
-   front camera, using only low-speed segments and a distance-matched horizon (≈12 m) to reduce the domain gap. This helps the
-   image→ground mapping and goal scorer but cannot supply bollard passes.
-4. **Proceed with Phase 1 now regardless.** The toy flow-matching work is data-independent, so it can run while data is collected.
+## Still open (TODO(Can))
 
-## Open TODO(Can) values
-
-Juno length and wheelbase; ZED mount height and pitch; which camera/vehicle recorded each of the three files (and the
-Shell camera's model, for intrinsics); ZED 2i serial number (factory calibration); cone radius; path to the team segmentation
-model; whether rosbags with ECU speed/steering exist for any of these runs.
+Juno **length and width** (for the shadow-vehicle box); whether people are the intended obstacle class for this study or a
+bollard/cone session is planned; which of ZED odometry or ECU speed is trusted for scale (has the ECU wheel circumference
+been calibrated?).

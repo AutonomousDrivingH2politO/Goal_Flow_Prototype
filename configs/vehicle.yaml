@@ -1,0 +1,24 @@
+# Vehicle and camera constants (PROMPT.md TODO(Can) values). Provided by Can on 2026-11-18.
+vehicle:
+  name: Juno
+  wheelbase_m: 1.65
+  length_m: TODO(Can)        # still needed for the shadow-vehicle box
+  width_m: TODO(Can)         # still needed for the shadow-vehicle box
+camera:
+  model: ZED 2i
+  serial: 39159302           # from the SVO2 headers
+  height_m: 1.25             # above ground
+  pitch_deg: 0.0             # optical axis parallel to the ground
+  # Factory-rectified left intrinsics read from the SVO2 files:
+  hd720: {width: 1280, height: 720, fx: 533.7, fy: 533.7, cx: 638.4, cy: 362.1}
+  hd2k:  {width: 2208, height: 1242, fx: 1074.6, cx: 1105.5, cy: 627.0}
+  baseline_m: 0.120
+obstacles:
+  bollard: {radius_m: 0.225, height_m: 1.10, colour: blue}
+  cone:    {radius_m: 0.25, height_m: 0.40, colour: orange}
+segmentation:
+  # TwinLiteNetPlus (drivable area + lane), team model. Used read-only, offline, for pseudo-labels.
+  repo: /home/bylogix/AD-SEM/src/shared_objects/src/shared_objects/TwinLiteNetPlus
+  checkpoint: TODO          # resolved in Phase 2 from <repo>/pretrained
+units:
+  ecu_speed: km/h           # /ECU/speed verified: bag 'saw_15kmh_max' peaks at 15.08

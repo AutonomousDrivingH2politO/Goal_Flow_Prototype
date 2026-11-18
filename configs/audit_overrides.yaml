@@ -1,21 +1,181 @@
 # Manual classification after visual review of data/audit/*_contact.jpg (PROMPT.md §2).
-# class: A | B | C | D ; exclude: [[t_start_s, t_end_s], ...] removes non-driving parts.
-# Reviewed 2026-11-18 (Phase 0).
+# class: A | B | C | D | R1 | R2 ; domain: track | urban | handheld | lab
+# exclude: [[t_start_s, t_end_s], ...] removes non-driving parts.
+# Reviewed 2026-11-18 (Phase 0, second pass after adding SVO2 files and rosbags).
 files:
+  bags/2025-05-16T220443__rosbag_seg.db3:
+    class: C
+    domain: track
+    notes: Image only (no speed/odom), 18 s on a track.
+  bags/2025-05-21T102017.db3:
+    domain: track
+  bags/2025-05-28T102913__lombardone_where_it_worked2.db3:
+    domain: track
+  bags/2025-05-28T103634.db3:
+    domain: track
+  bags/2025-05-28T111357__lombardone_where_it_worked.db3:
+    domain: track
+  bags/2025-11-12T160224__imu_infron_toolbox.db3:
+    class: D
+    domain: lab
+    notes: Bench/static test, no driving.
+  bags/2025-11-12T165700__toolbox_camera_on_ground.db3:
+    class: D
+    domain: lab
+    notes: Bench/static test, no driving.
+  bags/2025-11-17T144058__erdeniz_face_toolbox.db3:
+    class: D
+    domain: lab
+    notes: Bench/static test, no driving.
+  bags/2026-04-17T195435__rosbag_toolbox_on_car1_17April.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-04-17T195536__rosbag_toolbox_on_car2_17April.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-04-17T202329.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-04-28T163434__morano_28_04_2026_bags.db3:
+    domain: track
+  bags/2026-05-21T164127__Morano_21_05_2026__can_in_middle_didnt_avoid_obstacle.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-21T164306__Morano_21_05_2026__obstacle_working_3_people.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-21T170125__Morano_21_05_2026__short_run.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-21T170201__Morano_21_05_2026__avoided_can_stopped_at_blacco.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-21T170509__Morano_21_05_2026__avoided_then_went_to_left.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-21T170951__Morano_21_05_2026__long_run_with_obs_avoided.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-21T171616__Morano_21_05_2026__gianluca_slipped.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T122511__26_May_2026_All_Worked__not_moving_why_blue_depth.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T123552__26_May_2026_All_Worked__didnt_move_much_blue_persist.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T124418__26_May_2026_All_Worked__max_speed_13kmh_went_out_of_road_saw_stop_but_didnt_brake.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T124908__26_May_2026_All_Worked__bartu_braked_12kmh_saw_15kmh_max.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T125445__26_May_2026_All_Worked__8km_stopped_properly_then_continued.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T130333__26_May_2026_All_Worked__obs_avoided_very_nays.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-05-26T131013__26_May_2026_All_Worked__amk_zed_fusionu_olmadi.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-05T134346__5_June_2026_Morano__short_bag.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-05T134430__5_June_2026_Morano__zed_hz_started_fuckingup6hz-13_44_30.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-05T142247__5_June_2026_Morano__drove_with5hz_ZED_bad_roadseg_speed_7to_10kmh.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-05T142647__5_June_2026_Morano__stop_worked_8km.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-05T143516__5_June_2026_Morano__turning_with_pushing.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-05T143717__5_June_2026_Morano__couldnt_brake_system_shut_and_was_really_fast_but_detected2.db3:
+    domain: track
+    notes: Juno on track; obstacles in this session are people standing on the runway, not bollards/cones.
+  bags/2026-06-14T143408__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T143853__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T145610__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T151138__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T154505__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T155546__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T155957__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T160323__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T161144__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T182037__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T182431__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T182935__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T183132__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  bags/2026-06-14T183258__stop_testliyoruz.db3:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
   shell/output.mp4:
     class: C
-    notes: >-
-      Onboard, very low wide-angle/fisheye camera (not a ZED; intrinsics unknown).
-      Large flat asphalt circuit, open track, no bollards or cones seen. Moving the whole clip.
+    domain: track
+    notes: Onboard ZED 2i (per Can), apparently unrectified (curved horizon); open circuit, no obstacles.
+  svo/Calibration__HD2K_SN39159302_17-35-02.svo2:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  svo/Downloads__HD2K_SN39159302_17-12-47.svo2:
+    domain: urban
+    notes: Campus/city road driving with ZED odometry; not the track environment.
+  svo/Morano_SVO_rosbag__HD720_SN39159302_11-55-11.svo2:
+    domain: track
+  svo/SVOs__Desktop.svo2:
+    class: D
+    domain: handheld
+    notes: Bike path / pavement, low and handheld-looking camera; not Juno.
+  svo/SVOs__pose_mulpt_10000try.svo2:
+    class: D
+    domain: handheld
+    notes: Bike path / pavement, low and handheld-looking camera; not Juno.
+  svo/SVOs__pose_try.svo2:
+    class: D
+    domain: handheld
+    notes: Bike path / pavement, low and handheld-looking camera; not Juno.
+  svo/SVOs__to_toolboxrecording.svo2:
+    class: D
+    domain: handheld
+    notes: Bike path / pavement, low and handheld-looking camera; not Juno.
   zed/morano_video.mp4:
     class: C
-    notes: >-
-      Monocular 1280x720 at 5 fps (likely ZED left image exported at HD720, re-encoded MPEG-4).
-      Vehicle part visible at bottom centre. Strong colour cast. Open track, no obstacles seen.
+    domain: track
+    notes: 'ZED 2i left image at 5 fps (not the 2025-11-18 SVO2: frames do not match). Morano, no obstacles seen.'
   zed/video_cerrina1.webm:
     class: C
-    exclude: [[190.0, 221.5]]
-    notes: >-
-      Monocular 1280x720@30 (GStreamer, 2023-05-11), kart circuit. Stationary on start line 0-13 s.
-      Drives the lap, enters pit lane ~178 s; from ~190 s the camera is parked/handled among people
-      (excluded). No bollards/cones; colour hints were kerbs, blue fencing and pit floor.
+    domain: track
+    exclude:
+    - - 190.0
+      - 221.5
+    notes: ZED 2i, kart circuit 2023-05-11; from ~190 s camera is parked among people (excluded).
