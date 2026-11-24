@@ -140,6 +140,14 @@ def _seg_dist(p: np.ndarray, a: np.ndarray, b: np.ndarray) -> float:
     return float(np.linalg.norm(a + t * ab - p))
 
 
+def _polyline_dist(p: np.ndarray, line: np.ndarray) -> float:
+    a, b = line[:-1], line[1:]
+    ab = b - a
+    t = np.clip(((p - a) * ab).sum(1) / np.maximum((ab * ab).sum(1), 1e-12), 0, 1)
+    q = a + t[:, None] * ab
+    return float(np.hypot(*(q - p).T).min())
+
+
 def _arclen(e: np.ndarray) -> np.ndarray:
     return np.concatenate([[0.0], np.cumsum(np.hypot(*np.diff(e, axis=0).T))])
 
@@ -147,6 +155,7 @@ def _arclen(e: np.ndarray) -> np.ndarray:
 def _cut(e: np.ndarray, s_cut: float) -> np.ndarray:
     s = _arclen(e)
     keep = s < s_cut
+    keep[0] = True                      # never cut an edge down to a single point
     p = np.array([np.interp(s_cut, s, e[:, 0]), np.interp(s_cut, s, e[:, 1])])
     return np.concatenate([e[keep], p[None]])
 
@@ -249,10 +258,34 @@ def make_unknown_fn(obs: Observation):
     return fn
 
 
+def _offset_edge(e: np.ndarray, d: float) -> np.ndarray:
+    """Offset a polyline by d to its left (negative = right)."""
+    if len(e) < 2:
+        return np.zeros((0, 2))
+    t = np.gradient(e, axis=0)
+    t /= np.maximum(np.linalg.norm(t, axis=1, keepdims=True), 1e-9)
+    return e + d * np.stack([-t[:, 1], t[:, 0]], -1)
+
+
+def complete_edges(left: np.ndarray, right: np.ndarray, width: float, gap: float = 2.0):
+    """Fill unobserved stretches of one edge from the other, offset by the nominal track width.
+    Observed points always win; synthetic ones only where no observed point is within ``gap``."""
+    def fill(own, synth):
+        if len(synth) == 0:
+            return own
+        if len(own):
+            d = np.min(np.hypot(synth[:, None, 0] - own[None, :, 0], synth[:, None, 1] - own[None, :, 1]), 1)
+            synth = synth[d > gap]
+        out = np.concatenate([own, synth]) if len(own) else synth
+        return out[np.argsort(out[:, 0])]
+    return fill(left, _offset_edge(right, width)), fill(right, _offset_edge(left, -width))
+
+
 def input_from_observation(obs: Observation, cfg: CorridorConfig, scfg: SceneConfig) -> PlannerInput:
     C, R, _ = cluster_obstacles(obs, cfg, scfg)
     left = _bin_edge(obs.edge_points[obs.edge_side > 0].astype(float), cfg.edge_bin)
     right = _bin_edge(obs.edge_points[obs.edge_side < 0].astype(float), cfg.edge_bin)
+    left, right = complete_edges(left, right, scfg.track_width)
     return PlannerInput(C, R, left, right, obs.goal_line.astype(float), make_unknown_fn(obs),
                         np.asarray(obs.pose_odom, float))
 
@@ -415,9 +448,10 @@ class CorridorPlanner:
         cen = V[S].mean(1)
         valid = points_in_polygon(cen, poly)
         thr = veh.width + 2 * cfg.door_clearance
+        thr_edge = veh.width + cfg.door_clearance
         unknown = inp.unknown_fn
         return dict(V=V, T=T, rad=rad, is_goal=is_goal, bpos=bpos, nB=len(poly), tri=tri, S=S, cen=cen, valid=valid,
-                    poly=poly, thr=thr, unknown=unknown, nC=len(C),
+                    poly=poly, thr=thr, thr_edge=thr_edge, unknown=unknown, nC=len(C),
                     left=Ls, right=Rs, goal=(gL, gR), goal_inside=goal_inside)
 
     def _edge_kind(self, G, a: int, b: int):
@@ -431,6 +465,15 @@ class CorridorPlanner:
                 if G["is_goal"][a] and G["is_goal"][b]:
                     return "exit", float(np.linalg.norm(V[a] - V[b]))
                 return "wall", 0.0
+        T = G["T"]
+        if (T[a] == OBST) != (T[b] == OBST) and {T[a], T[b]} & {LEFT, RIGHT}:
+            # obstacle <-> track edge: gap to the edge *line*, clearance on the obstacle side only
+            # (the oracle keeps 0.25 m from obstacles and 0 m from the track edge)
+            o, e = (a, b) if T[a] == OBST else (b, a)
+            line = G["left"] if T[e] == LEFT else G["right"]
+            d = _polyline_dist(V[o], line)
+            gap = float(d - rad[o])
+            return ("door" if gap >= G["thr_edge"] else "wall"), gap
         gap = float(np.linalg.norm(V[a] - V[b]) - rad[a] - rad[b])
         return ("door" if gap >= G["thr"] else "wall"), gap
 
@@ -446,7 +489,7 @@ class CorridorPlanner:
                 return None
             t0 = int(vi[np.argmin(np.hypot(*(cen[vi] - start_pt).T))])
         gL, gR = G["goal"]
-        cache: dict = {}
+        cache: dict = G.setdefault("edge_cache", {})   # shared across A* calls on this graph
         bias = self.lr_bias if self.lr_bias is not None else float(self.rng.uniform(-0.5, 0.5))
         noise_cache: dict = {}
 

@@ -174,7 +174,7 @@ def lattice_search(world: CollisionWorld, start, goal: tuple[np.ndarray, np.ndar
             cand = np.nonzero(done)[0]
             i = int(cand[np.argmin(g[cand])])
             layers.append((end, par, kk))
-            return _reconstruct(layers, i, cfg)
+            return extend_straight(_reconstruct(layers, i, cfg))
         key = (np.round(end[:, 0] / cfg.xy_res).astype(np.int64) * 2_000_003
                + np.round(end[:, 1] / cfg.xy_res).astype(np.int64) * 1009
                + np.round(end[:, 2] / psi_res).astype(np.int64))
@@ -191,6 +191,14 @@ def lattice_search(world: CollisionWorld, start, goal: tuple[np.ndarray, np.ndar
         layers.append((end[first], par[first], kk[first]))
         front, front_k, front_g = end[first], kk[first], g[first]
     return None
+
+
+def extend_straight(path: np.ndarray, length: float = 5.0, ds: float = 0.25) -> np.ndarray:
+    """Append a straight run along the final heading (past the goal line everything is free)."""
+    p = path[-1]
+    s = np.arange(ds, length + 1e-9, ds)
+    ext = np.stack([p[0] + s * np.cos(p[2]), p[1] + s * np.sin(p[2]), np.full_like(s, p[2])], -1)
+    return np.concatenate([path, ext])
 
 
 def _reconstruct(layers, i: int, cfg: LatticeConfig) -> np.ndarray:

@@ -40,10 +40,12 @@ from .corridor import (OBST, CorridorConfig, CorridorPlanner, PlannerInput, Plan
 class LatticeCorridorConfig:
     lattice: LatticeConfig = field(default_factory=LatticeConfig)
     n_routes: int = 6                 # routes tried per full plan
-    obs_beam: int = 100               # observed mode: smaller beam
+    obs_beam: int = 300               # observed mode: smaller beam than the teacher (800)
     obs_n_routes: int = 3
     validate_inflation: float = 0.12  # acceptance tolerance for the tracked rollout (planning uses 0.25)
     kappa_ladder: tuple = (0.8, 0.9, 0.95)   # fractions of kappa_max tried in order (0.95 = oracle)
+    last_resort_beam: int = 0                # >0: privileged final rung, 0.95 kappa_max with this beam (off:
+                                             # tested at 3000, rescued no L0 seed, ~5 s per failing scene)
     dt: float = 0.05                  # closed-loop validation step (= controller dt)
     deviation_replan: float = 0.5     # m off the plan -> full replan
     extend_short: float = 4.0         # observed: replan when the plan ends this far short of the horizon
@@ -100,10 +102,42 @@ class LatticeCorridorPlanner(CorridorPlanner):
                     heapq.heappush(heap, (self._last_cost, tick, r, list(self._last_chain), b))
                     tick += 1
 
-    def corridor_fn(self, G, chain):
-        S, tri = G["S"], G["tri"]
-        verts = np.unique(S[chain])
-        allowed = G["valid"] & np.isin(S, verts).any(1)
+    def corridor_mask(self, G, chain, doors) -> np.ndarray:
+        """Triangles in the route's homotopy class: flood fill from the start triangle, crossing
+        only edges without an obstacle endpoint or edges equivalent to one of the route's doors
+        (track-edge vertices collapse to one 'L' / 'R' vertex per side)."""
+        T, S, tri, valid = G["T"], G["S"], G["tri"], G["valid"]
+
+        def ident(v):
+            return int(v) if T[v] == OBST else -int(T[v])     # boundary vertices by type
+
+        allowed_ids = {frozenset((ident(a), ident(b))) for a, b in doors}
+        mask = np.zeros(len(S), bool)
+        stack = [chain[0]]
+        mask[chain[0]] = True
+        while stack:
+            t = stack.pop()
+            simp = S[t]
+            for k in range(3):
+                nb = int(tri.neighbors[t, k])
+                if nb < 0 or mask[nb] or not valid[nb]:
+                    continue
+                a, b = int(simp[(k + 1) % 3]), int(simp[(k + 2) % 3])
+                if T[a] == OBST or T[b] == OBST:
+                    if frozenset((ident(a), ident(b))) not in allowed_ids:
+                        continue
+                mask[nb] = True
+                stack.append(nb)
+        mask[chain] = True
+        return mask
+
+    def corridor_fn(self, G, chain, doors=None):
+        if doors is None:   # fallback: chain + vertex ring (not homotopy-safe)
+            S = G["S"]
+            allowed = G["valid"] & np.isin(S, np.unique(S[chain])).any(1)
+        else:
+            allowed = self.corridor_mask(G, chain, doors)
+        tri = G["tri"]
 
         def fn(cen):
             simp = tri.find_simplex(cen)
@@ -148,11 +182,14 @@ class LatticeCorridorPlanner(CorridorPlanner):
         start = np.zeros(3)
         n_routes = n_routes or self.lcfg.n_routes
         cause = "no route (A*)"
-        routes = list(self.routes(G, None, n_routes))
-        for kf in self.lcfg.kappa_ladder:
-            cfg = replace(base, kappa_frac=kf)
+        routes = _LazyList(self.routes(G, None, n_routes))
+        ladder = [(kf, base.beam) for kf in self.lcfg.kappa_ladder]
+        if self.mode == "privileged" and self.lcfg.last_resort_beam > base.beam:
+            ladder.append((self.lcfg.kappa_ladder[-1], self.lcfg.last_resort_beam))
+        for kf, bm in ladder:
+            cfg = replace(base, kappa_frac=kf, beam=bm)
             for doors, exit_edge, chain in routes:
-                fn = self.corridor_fn(G, chain)
+                fn = self.corridor_fn(G, chain, doors)
                 lat = lattice_search(world, start, G["goal"], cfg, fn, k0)
                 if lat is None:
                     cause = "lattice found no curvature-feasible path in any route corridor"
@@ -170,7 +207,8 @@ class LatticeCorridorPlanner(CorridorPlanner):
             self.fail_causes[cause] += 1
         return None, cause
 
-    def teacher_paths(self, inp: PlannerInput, K: int = 8, state: VehicleState | None = None):
+    def teacher_paths(self, inp: PlannerInput, K: int = 8, state: VehicleState | None = None,
+                      max_routes: int | None = None):
         """Multimodal labels: the lattice inside each of the top-K distinct routes."""
         G = self._build(inp)
         if G is None:
@@ -178,8 +216,8 @@ class LatticeCorridorPlanner(CorridorPlanner):
         world = self.world(G)
         state = state or VehicleState(0, 0, 0, self.scfg.target_speed, 0)
         out, sigs = [], set()
-        for doors, exit_edge, chain in self.routes(G, None, 3 * K):
-            lat = lattice_search(world, np.zeros(3), G["goal"], self.lcfg.lattice, self.corridor_fn(G, chain))
+        for doors, exit_edge, chain in self.routes(G, None, max_routes or 2 * K):
+            lat = lattice_search(world, np.zeros(3), G["goal"], self.lcfg.lattice, self.corridor_fn(G, chain, doors))
             if lat is None or not self.validate(G, world, lat, state):
                 continue
             sig = side_signature_local(lat, G["V"][:G["nC"]])
@@ -281,3 +319,25 @@ def side_signature_local(path: np.ndarray, centres: np.ndarray, near: float = 3.
         v = c - P[i]
         sig.append((j, 1 if t[0] * v[1] - t[1] * v[0] > 0 else -1))
     return tuple(sig)
+
+
+class _LazyList:
+    """Iterate a generator more than once, computing items only when first needed."""
+    def __init__(self, gen):
+        self.gen, self.items, self.done = gen, [], False
+
+    def __iter__(self):
+        i = 0
+        while True:
+            if i < len(self.items):
+                yield self.items[i]
+            elif self.done:
+                return
+            else:
+                try:
+                    self.items.append(next(self.gen))
+                except StopIteration:
+                    self.done = True
+                    return
+                yield self.items[i]
+            i += 1
