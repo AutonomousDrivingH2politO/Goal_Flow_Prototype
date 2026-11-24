@@ -21,6 +21,26 @@ from ..sim.scene import generate_scene
 from .sim_dataset import observation_from_shard, targets_from_shard
 
 
+class MemmapSplit:
+    """A split repacked by scripts/prepare_training.py (mm_<split>/<array>.npy). Dict-like; arrays
+    are memory-mapped on first access in each process and the object pickles as its path only."""
+
+    def __init__(self, path):
+        self.path = Path(path)
+        self._a: dict = {}
+
+    def __getstate__(self):
+        return {"path": self.path, "_a": {}}
+
+    def __getitem__(self, k):
+        if k not in self._a:
+            self._a[k] = np.load(self.path / f"{k}.npy", mmap_mode="r")
+        return self._a[k]
+
+    def __contains__(self, k):
+        return (self.path / f"{k}.npy").exists()
+
+
 def load_shards(pattern_or_paths) -> list[dict]:
     paths = sorted(glob.glob(pattern_or_paths)) if isinstance(pattern_or_paths, str) else list(pattern_or_paths)
     return [dict(np.load(p)) for p in paths]
@@ -29,7 +49,7 @@ def load_shards(pattern_or_paths) -> list[dict]:
 class SimFrames(Dataset):
     def __init__(self, shards: list[dict], vocab: np.ndarray | None = None, aux: bool = False,
                  cfg: SimConfig | None = None, raster: RasterConfig | None = None, aux_res: int = 64,
-                 driven_only: bool = False):
+                 driven_only: bool = False, scene_index=None):
         self.shards = shards
         self.index = [(k, j) for k, a in enumerate(shards) for j in range(len(a["seed"]))]
         self.vocab = vocab
@@ -39,15 +59,18 @@ class SimFrames(Dataset):
         self.aux_res = aux_res
         self.driven_only = driven_only
         self._scenes: dict[int, object] = {}
+        self.scene_index = scene_index
 
     def __len__(self) -> int:
         return len(self.index)
 
     def all_targets(self) -> np.ndarray:
         """(K, 16, 3) every stored mode (for the vocabulary and the normaliser)."""
-        return np.concatenate([a["targets"] for a in self.shards])
+        return np.concatenate([np.asarray(a["targets"]) for a in self.shards])
 
     def scene(self, seed: int):
+        if self.scene_index is not None and seed in self.scene_index:
+            return self.scene_index.get(seed)
         s = self._scenes.get(seed)
         if s is None:
             s = generate_scene(int(seed), self.cfg.scene, self.cfg.vehicle)

@@ -176,23 +176,34 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
     return res
 
 
-def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: Logger) -> list[dict]:
+BEST_METRIC = {"A": "goal_err", "B": "ADE_driven", "joint": "ADE_driven", "reg": "ADE_driven"}
+
+
+def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: Logger,
+                steps: int | None = None, best_path: Path | None = None, vocab=None) -> list[dict]:
+    steps = steps or args.steps
+    budget_h = getattr(args, f"hours_{stage}", None)
+    total = [steps]                      # mutable: a time budget can shrink it after warmup
     params = stage_params(model, stage)
     for p in model.parameters():
         p.requires_grad_(False)
     for p in params:
         p.requires_grad_(True)
     opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=args.wd)
-    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: cosine(s, args.steps))
+    sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: cosine(s, total[0]))
     use_amp = dev.type == "cuda"
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     model.train()
     if stage == "B":            # frozen perception: keep BatchNorm statistics fixed
         model.bev.eval()
     hist = []
     it = infinite(train_dl)
     t0 = time.time()
-    for step in range(args.steps):
+    best = float("inf")
+    t_eval = time.time()
+    step = 0
+    t_meas = None
+    while step < total[0]:
         b = to(next(it), dev)
         with torch.autocast(device_type="cuda", enabled=use_amp):
             loss, parts = losses(model, b, stage, args)
@@ -203,17 +214,35 @@ def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: L
         scaler.step(opt)
         scaler.update()
         sched.step()
-        if step % args.log_every == 0 or step == args.steps - 1:
-            row = dict(loss=float(loss), lr=sched.get_last_lr()[0], **{k: float(v) for k, v in parts.items()})
+        if budget_h and step == 10:
+            t_meas = time.time()
+        if budget_h and step == 60 and t_meas is not None:
+            sps = (time.time() - t_meas) / 50
+            fit = int(budget_h * 3600 / max(sps, 1e-3))
+            total[0] = max(100, min(steps, fit))
+            print(f"[{stage}] {sps:.2f} s/step -> {total[0]} steps fit the {budget_h:.1f} h budget", flush=True)
+        if step % args.log_every == 0 or step == total[0] - 1:
+            row = dict(loss=float(loss.detach()), lr=sched.get_last_lr()[0], **{k: float(v) for k, v in parts.items()})
             log.log(stage, step, **row)
             hist.append(dict(step=step, **row))
-            print(f"[{stage}] step {step:5d} loss {float(loss):.4f} " +
+            el = time.time() - t0
+            print(f"[{stage}] step {step:6d}/{total[0]} loss {float(loss.detach()):.4f} " +
                   " ".join(f"{k} {float(v):.4f}" for k, v in parts.items()) +
-                  f"  ({time.time() - t0:.0f}s)", flush=True)
-        if val_dl is not None and (step + 1) % args.eval_every == 0:
-            ev = evaluate(model, val_dl, stage, args, dev)
+                  f"  ({el:.0f}s, {el / (step + 1):.2f}s/step)", flush=True)
+        due = (step + 1) % args.eval_every == 0 or (args.eval_minutes and time.time() - t_eval > 60 * args.eval_minutes)
+        if val_dl is not None and (due or step == total[0] - 1):
+            t_eval = time.time()
+            ev = evaluate(model, val_dl, stage, args, dev, max_batches=args.val_batches)
             log.log(f"{stage}_val", step, **ev)
             print(f"[{stage}] val @ {step + 1}: " + " ".join(f"{k} {v:.3f}" for k, v in ev.items()), flush=True)
+            m = ev.get(BEST_METRIC[stage], float("inf"))
+            if best_path is not None and m < best:
+                best = m
+                save(model, best_path, args, vocab)
+                print(f"[{stage}] new best {BEST_METRIC[stage]} {m:.3f} -> {best_path.name}", flush=True)
+            if stage == "B":
+                model.bev.eval()
+        step += 1
     return hist
 
 
@@ -232,8 +261,21 @@ def load(path: str | Path, device="cpu") -> GoalFlow:
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--train", required=True, help="glob of training shards")
-    ap.add_argument("--val", default=None, help="glob of validation shards")
+    ap.add_argument("--train", required=True, help="glob of training shards, or mm:<dir> (memmap split)")
+    ap.add_argument("--val", default=None, help="glob of validation shards, or mm:<dir>")
+    ap.add_argument("--scene-index", default=None, help="comma-separated scenes_<split>.npz files")
+    ap.add_argument("--steps-A", type=int, default=None)
+    ap.add_argument("--steps-B", type=int, default=None)
+    ap.add_argument("--steps-reg", type=int, default=None)
+    ap.add_argument("--steps-joint", type=int, default=None)
+    ap.add_argument("--val-frames", type=int, default=4000, help="fixed random validation subset")
+    ap.add_argument("--val-batches", type=int, default=1000)
+    ap.add_argument("--resume", action="store_true", help="skip stages whose checkpoint exists")
+    ap.add_argument("--hours-A", type=float, default=None, help="wall-clock budget for stage A")
+    ap.add_argument("--hours-B", type=float, default=None)
+    ap.add_argument("--hours-reg", type=float, default=None)
+    ap.add_argument("--hours-joint", type=float, default=None)
+    ap.add_argument("--eval-minutes", type=float, default=None, help="also evaluate every N minutes")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--stages", default="A,B,reg")
     ap.add_argument("--steps", type=int, default=300)
@@ -264,45 +306,90 @@ def main(argv=None):
     args.out.mkdir(parents=True, exist_ok=True)
     print(f"device {dev}", flush=True)
 
-    tr_shards = load_shards(args.train)
-    va_shards = load_shards(args.val) if args.val else []
-    base = SimFrames(tr_shards)
-    targets = base.all_targets()
-    vocab = kmeans_vocabulary(targets[:, -1, :], args.vocab_n, seed=args.seed)
-    norm = Normalizer.fit(targets[:, :, :2])
-    print(f"train frames {len(base)}, modes {len(targets)}, vocab {len(vocab)}, "
-          f"norm lo {norm.lo.tolist()} hi {norm.hi.tolist()}", flush=True)
-    np.save(args.out / "vocab.npy", vocab)
+    def source(spec):
+        if spec is None:
+            return []
+        if spec.startswith("mm:"):
+            from .data.sim_torch import MemmapSplit
+            return [MemmapSplit(spec[3:])]
+        return load_shards(spec)
 
-    train_ds = SimFrames(tr_shards, vocab=vocab, aux=args.aux)
-    val_ds = SimFrames(va_shards, vocab=vocab, aux=args.aux) if va_shards else None
+    tr_shards, va_shards = source(args.train), source(args.val)
+    si = None
+    if args.scene_index:
+        from .data.scene_index import SceneIndex
+        si = SceneIndex(args.scene_index.split(","))
+    base = SimFrames(tr_shards)
+    if (args.out / "vocab.npy").exists() and args.resume:
+        vocab = np.load(args.out / "vocab.npy")
+        nl = np.load(args.out / "norm.npy")
+        norm = Normalizer(tuple(nl[0]), tuple(nl[1]))
+    else:
+        targets = base.all_targets()
+        vocab = kmeans_vocabulary(targets[:, -1, :], args.vocab_n, seed=args.seed)
+        norm = Normalizer.fit(targets[:, :, :2])
+        np.save(args.out / "vocab.npy", vocab)
+        np.save(args.out / "norm.npy", np.stack([norm.lo.numpy(), norm.hi.numpy()]))
+        print(f"modes {len(targets)}", flush=True)
+    print(f"train frames {len(base)}, vocab {len(vocab)}, norm lo {norm.lo.tolist()} hi {norm.hi.tolist()}", flush=True)
+
+    train_ds = SimFrames(tr_shards, vocab=vocab, aux=args.aux, scene_index=si)
+    val_ds = SimFrames(va_shards, vocab=vocab, aux=args.aux, scene_index=si) if va_shards else None
     mk = dict(batch_size=args.bs, num_workers=args.workers, persistent_workers=args.workers > 0,
               multiprocessing_context="spawn" if args.workers > 0 else None)
     train_dl = DataLoader(train_ds, shuffle=True, drop_last=True, **mk)
-    val_dl = DataLoader(val_ds, shuffle=False, **mk) if val_ds else None
+    val_dl = None
+    if val_ds is not None:
+        from torch.utils.data import Subset
+        sub = np.random.default_rng(1234).choice(len(val_ds), min(args.val_frames, len(val_ds)), replace=False)
+        val_dl = DataLoader(Subset(val_ds, sorted(sub.tolist())), shuffle=False, **mk)
 
     cfg = ModelConfig(D=args.D, sigma=args.sigma, t_dist=args.t_dist, aux_head=args.aux)
     model = GoalFlow(cfg, vocab, norm).to(dev)
+    reg_model = None
     n_par = sum(p.numel() for n, p in model.named_parameters() if not n.startswith("reg."))
     print(f"GoalFlow parameters: {n_par / 1e6:.2f} M", flush=True)
     log = Logger(args.out)
     summary = dict(params_M=n_par / 1e6, device=str(dev), frames=len(base), vocab=len(vocab), stages={})
     stages = args.stages.split(",")
     for st in stages:
+        steps = getattr(args, f"steps_{st}", None) or args.steps
+        ck = args.out / ("regression.pt" if st == "reg" else f"goalflow_{st}.pt")
+        best = args.out / ("regression_best.pt" if st == "reg" else f"goalflow_{st}_best.pt")
         if st == "reg":
+            if args.resume and ck.exists():
+                reg_model = load(best if best.exists() else ck, dev)
+                print("resume: regression loaded", flush=True)
+                continue
             reg_model = GoalFlow(ModelConfig(D=args.D, regression=True), vocab, norm).to(dev)
-            hist = train_stage(reg_model, "reg", train_dl, val_dl, args, dev, log)
-            save(reg_model, args.out / "regression.pt", args, vocab)
+            hist = train_stage(reg_model, "reg", train_dl, val_dl, args, dev, log, steps, best, vocab)
+            save(reg_model, ck, args, vocab)
+            reg_model = load(best if best.exists() else ck, dev)
         else:
-            hist = train_stage(model, st, train_dl, val_dl, args, dev, log)
-            save(model, args.out / f"goalflow_{st}.pt", args, vocab)
-        ev = evaluate(model if st != "reg" else reg_model, val_dl or train_dl, st, args, dev)
-        summary["stages"][st] = dict(first=hist[0], last=hist[-1], val=ev)
+            if args.resume and ck.exists():
+                model.load_state_dict(torch.load(best if best.exists() else ck, map_location=dev,
+                                                 weights_only=False)["state"])
+                print(f"resume: stage {st} loaded", flush=True)
+                continue
+            hist = train_stage(model, st, train_dl, val_dl, args, dev, log, steps, best, vocab)
+            save(model, ck, args, vocab)
+            if best.exists():          # continue from the best checkpoint of this stage
+                model.load_state_dict(torch.load(best, map_location=dev, weights_only=False)["state"])
+        summary["stages"][st] = dict(first=hist[0], last=hist[-1])
+    # final report, in the agreed order: goal multimodality, curvature feasibility, ADE
+    if val_dl is not None:
+        report = {}
+        if any(s in stages for s in ("A", "joint")):
+            report["goal"] = evaluate(model, val_dl, "A", args, dev, max_batches=args.val_batches)
+        if any(s in stages for s in ("B", "joint")):
+            report["trajectory"] = evaluate(model, val_dl, "B", args, dev, max_batches=args.val_batches)
+        if reg_model is not None:
+            report["regression"] = evaluate(reg_model, val_dl, "reg", args, dev, max_batches=args.val_batches)
+        summary["final_val"] = report
     (args.out / "summary.json").write_text(json.dumps(summary, indent=1, default=float))
     if args.plots and any(s in stages for s in ("B", "joint")):
         from .viz import plot_samples
-        plot_samples(model, val_ds or train_ds, args.out / "samples", n=args.plots, device=dev,
-                     reg_model=reg_model if "reg" in stages else None)
+        plot_samples(model, val_ds or train_ds, args.out / "samples", n=args.plots, device=dev, reg_model=reg_model)
     print(json.dumps(summary, indent=1, default=float))
 
 
