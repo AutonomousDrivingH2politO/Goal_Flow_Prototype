@@ -8,7 +8,8 @@ import torch
 
 
 @torch.no_grad()
-def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None, M: int = 64, seed: int = 0):
+def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None, M: int = 64, seed: int = 0,
+                 indices: list[int] | None = None, prefix: str = "sample"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -21,8 +22,11 @@ def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None,
     # prefer frames with several teacher modes, then fill with random frames
     multi = [i for i in range(len(ds)) if ds.shards[ds.index[i][0]]["targets_off"][ds.index[i][1] + 1]
              - ds.shards[ds.index[i][0]]["targets_off"][ds.index[i][1]] > 1]
-    pick = list(rng.choice(multi, min(len(multi), n // 2), replace=False)) if multi else []
-    pick += list(rng.choice(len(ds), n - len(pick), replace=False))
+    if indices is not None:
+        pick = list(indices)
+    else:
+        pick = list(rng.choice(multi, min(len(multi), n // 2), replace=False)) if multi else []
+        pick += list(rng.choice(len(ds), n - len(pick), replace=False))
     model.eval()
     for k, i in enumerate(pick):
         b = ds[int(i)]
@@ -31,6 +35,7 @@ def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None,
         r = model.plan(bev, ego, M=M, n_steps=1)
         S = r["samples"][0].cpu().numpy()
         traj = r["traj"][0].cpu().numpy()
+        traj_raw = r["traj_raw"][0].cpu().numpy() if "traj_raw" in r else None
         g = r["goal"][0].cpu().numpy()
         score = r["goal_score"][0].cpu().numpy()
         V = model.scorer.vocab.cpu().numpy()
@@ -45,19 +50,26 @@ def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None,
         for j in range(nm):
             m = b["modes"][j].numpy()
             ax.plot(m[:, 1], m[:, 0], "c--", lw=1.5, zorder=4, label="teacher modes" if j == 0 else None)
-        ax.plot(traj[:, 1], traj[:, 0], "r-", lw=2.5, zorder=5, label="GoalFlow selected")
+        ax.plot(traj[:, 1], traj[:, 0], "r-", lw=2.5, zorder=5, label="GoalFlow selected (executed)")
+        if traj_raw is not None:
+            ax.plot(traj_raw[:, 1], traj_raw[:, 0], "r--", lw=1.0, zorder=5, label="GoalFlow selected (raw)")
         ax.plot(g[1], g[0], "r*", ms=14, zorder=6, label="g*")
         if reg_model is not None:
-            p = reg_model.norm.inverse(reg_model.reg(*reg_model.perceive(bev, ego)[:2]))[0].cpu().numpy()
-            ax.plot(p[:, 1], p[:, 0], "m-", lw=2, zorder=5, label="regression")
+            from .models.rollout import RolloutConfig, rollout
+            pr = reg_model.norm.inverse(reg_model.reg(*reg_model.perceive(bev, ego)[:2]))
+            pe = rollout(pr, ego[:, 0], ego[:, 1], RolloutConfig())[0].cpu().numpy()
+            pr = pr[0].cpu().numpy()
+            ax.plot(pe[:, 1], pe[:, 0], "m-", lw=2, zorder=5, label="regression (executed)")
+            ax.plot(pr[:, 1], pr[:, 0], "m--", lw=1.0, zorder=5, label="regression (raw)")
         ax.plot(0, 0, "k^", ms=8)
         ax.set_xlim(8, -8)
         ax.set_ylim(-2, 18)
         ax.set_xlabel("y [m] (left is +)")
         ax.set_ylabel("x [m] (forward)")
-        ax.set_title(f"frame {int(b['idx'])} seed {int(b['seed'])}: {nm} teacher mode(s), {M} samples")
+        ax.set_title(f"frame {int(b['idx'])} seed {int(b['seed'])}: {nm} teacher mode(s), {M} samples (executed)",
+                     fontsize=10)
         ax.legend(loc="lower left", fontsize=7)
         plt.colorbar(sc, ax=ax, fraction=0.04, label="w1 log d_dis + w2 log d_dac")
         fig.tight_layout()
-        fig.savefig(out / f"sample_{k:02d}.png", dpi=110)
+        fig.savefig(out / f"{prefix}_{k:02d}_frame{int(b['idx']):05d}.png", dpi=110)
         plt.close(fig)
