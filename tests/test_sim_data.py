@@ -54,3 +54,23 @@ def test_shard_stores_raw_observations_and_is_reproducible():
         o_ref.scan_ranges = o_ref.scan_ranges.astype(np.float32)
         assert np.array_equal(rasterize(observation_from_shard(L, i)), rasterize(o_ref))
     assert (np.diff(L["targets_off"]) >= 1).all()          # every frame has at least the driven mode
+
+
+def test_edge_fill_rejects_bad_offsets_on_noisy_edges():
+    """Noisy edges must not produce fill points inside the track (L4-type noise, seeds 0-29)."""
+    from gfsem.sim.config import NOISE_LEVELS
+    from gfsem.sim.edges import observed_edges
+    from gfsem.sim.geometry import from_frame
+    from gfsem.sim.lidar import scan
+    from gfsem.sim.scene import generate_scene
+    worst = 0.0
+    for seed in range(30):
+        sc = generate_scene(seed)
+        for s in (0.0, sc.s_field[0] - 3.0, sc.s_field[0] + 8.0):
+            pose = sc.track.pose(s)
+            o = scan(sc, pose, NOISE_LEVELS["L4"], np.random.default_rng([seed, 99]), speed=3.0)
+            for side, e in zip((1, -1), observed_edges(o.edge_points, o.edge_side, sc.track.width)):
+                if len(e):
+                    _, d = sc.track.frenet(from_frame(e, pose))
+                    worst = max(worst, float(np.max(np.abs(side * d - sc.track.width / 2))))
+    assert worst < 1.6, worst      # 4 sigma of L4 edge noise; the old fill put points ~4 m inside

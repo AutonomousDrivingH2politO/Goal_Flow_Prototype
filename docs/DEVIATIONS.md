@@ -105,6 +105,22 @@ Hypothesis: with noise-free edges the goal-line endpoints coincide exactly with 
 giving degenerate geometry where the edges are cut and triangulated at the goal. Any noise
 breaks the tie. To fix before the L3 comparison, because it understates the baseline at L0.
 
+### A6b. Bug found and fixed: the 12 m edge fill put points inside the track (L1–L4)
+
+The opposite-edge fill offset each noisy edge point by the track width along a tangent from its
+two neighbours. With noisy edges that tangent swung wildly, and the 12 m lever turned it into fill
+points up to ~4 m inside the track (and behind the car). Both the observed planners' corridor and
+the BEV drivable channel were affected. Fix (`sim/edges.py`): fit a curve to the source edge in its
+chord frame (degree by length: line under 12 m, quadratic under 25 m, cubic above, one round of
+outlier rejection), offset the *fitted* curve, and reject fill points closer than width − 1 m
+to the source edge. Worst per-edge error at L4 is now 1.31 m (from observed points; median 0.69 m).
+Test: `tests/test_sim_data.py::test_edge_fill_rejects_bad_offsets_on_noisy_edges`.
+
+Effect: of the 18 seeds checked that succeeded at L3 but stalled at L4 in the evaluation, 16 now
+succeed at L4. **The L1–L4 observed numbers in `reports/lidar_demo/l0/summary.md` predate this fix**
+and will be regenerated together with the goal-stall fix (Part C, item 1). The L1 shards are
+unaffected (raw observations, rasterised at load time).
+
 ### A7. Why corridor-funnel is worse on the true scene (75.7%) than observed (81.6%)
 
 On the 58 scenes funnel-observed solves and funnel-privileged does not, the observed run sees 92%
@@ -178,8 +194,10 @@ Docs note: the flow-matching notes are in `docs/` as
 
 ### Queued for Phase L3
 
-1. Fix the observed-lattice L0 goal stall (A6), then rerun observed-lattice only (L0–L4) and update
-   `reports/lidar_demo/l0/summary.md`.
+1. Fix the observed-lattice L0 goal stall (A6), then rerun observed-lattice only (L0–L4, which also
+   picks up the edge-fill fix A6b) and update `reports/lidar_demo/l0/summary.md`. Remaining L4 stall
+   pattern to look at: fitted circles jitter at 45% dropout, so kept plans keep failing the 0.25 m
+   check and replans alternate between a path and a brake (seed 288 crawls for 15 s).
 2. Same real-time budget for every planner (fixed per-replan time cap; when the cap is hit,
    keep the previous plan or brake).
 3. Failed-search caching: after a replan fails, skip the full retry ladder until the observation
