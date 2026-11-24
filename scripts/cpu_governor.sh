@@ -27,13 +27,15 @@ echo "$(date +%T) generator PID ${GEN_PID:-none}"
 echo "$(date +%T) governor: keep >= ${MIN_IDLE}% idle, resume above ${RESUME_IDLE}%"
 while [ -n "$(gen_main)" ]; do
   # forget paused PIDs that no longer exist
-  keep=(); for p in "${PAUSED[@]}"; do kill -0 "$p" 2>/dev/null && keep+=("$p"); done; PAUSED=("${keep[@]}")
+  keep=(); for p in "${PAUSED[@]}"; do kill -0 "$p" 2>/dev/null && keep=("${keep[@]}" "$p"); done; PAUSED=("${keep[@]}")
   i=$(idle)
   if [ "$i" -lt "$MIN_IDLE" ]; then
     w=$(workers | tail -1)
-    if [ -n "$w" ]; then kill -STOP "$w" && PAUSED+=("$w") && echo "$(date +%T) idle ${i}% -> paused $w (${#PAUSED[@]} paused)"; fi
+    if [ -n "$w" ]; then kill -STOP "$w" && PAUSED=("${PAUSED[@]}" "$w") && echo "$(date +%T) idle ${i}% -> paused $w (${#PAUSED[@]} paused)"; fi
   elif [ "$i" -gt "$RESUME_IDLE" ] && [ ${#PAUSED[@]} -gt 0 ]; then
-    p=${PAUSED[-1]}; unset 'PAUSED[-1]'; kill -CONT "$p" && echo "$(date +%T) idle ${i}% -> resumed $p (${#PAUSED[@]} paused)"
+    last=$(( ${#PAUSED[@]} - 1 ))      # macOS bash 3.2: no negative array indices
+    p=${PAUSED[$last]}; unset "PAUSED[$last]"; PAUSED=("${PAUSED[@]}")
+    kill -CONT "$p" && echo "$(date +%T) idle ${i}% -> resumed $p (${#PAUSED[@]} paused)"
   fi
   sleep "$PERIOD"
 done

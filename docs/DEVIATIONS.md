@@ -180,6 +180,7 @@ is mostly a separate effect: 14 of its 18 collisions are on scenes the privilege
 | Shadow trajectory | goal masked; used if it "deviates significantly" from the main one | 16 shadow samples, threshold tuned on validation | Count and threshold not given in the paper |
 | Ablation M3 | Table 2: M3 = M2 + trajectory scorer (the text says "builds upon M1", a typo by the table) | M3 = M2 + scorer + shadow | Follows the table |
 | Training stages | perception first, then goal constructor; generator schedule not explicit | Stage A encoder + goal scorer, Stage B generator with A frozen, optional joint fine-tune | Our schedule |
+| Goal selection | single best goal g* (argmax of δ̂_final) | **planned for L3**: best goal per route for the top-K routes (K = 2–3), M/K samples toward each, critics choose across all | **Extension** (not in tonight's run): one g* that lands between two modes, or next to an obstacle, commits every sample to it |
 | Selection with critics | not in the paper | MPPI-style critics and softmax within the best homotopy cluster | **Extension** (team's idea) |
 | Safety filter | not in the paper | drop candidates whose swept box touches hit/unknown cells; brake if none survive | **Extension**; results reported with it on and off |
 | Executed-path horizon | — | the rollout is sampled at the candidate's own 16 timestamps (4 s); its speed command comes from a smoothed copy of the candidate, capped at 4.5 m/s, and the executed path is truncated at the smoothed candidate's arc length | Ours: a zigzag raw candidate implied much higher speeds than its net progress, so the executed path reached further than the candidate. Used for scoring, the shadow comparison and every ADE/FDE |
@@ -215,13 +216,20 @@ Docs note: the flow-matching notes are in `docs/` as
    is fair.
 6. Rerun observed corridor-lattice at L0–L4 after the edge-fill (A6b) and goal-stall (A6) fixes and
    **replace every pre-fix number** (summary, chart, README, DEVIATIONS).
-7. Same real-time budget for every planner (fixed per-replan time cap; when the cap is hit,
+7. **Per-route goal selection** (our extension; the paper uses only the single best goal):
+   * Group the vocabulary goals by route: by the homotopy class of a short teacher-style path to each
+     goal, or by which side of each obstacle the goal lies on.
+   * Take the best-scoring goal in each of the top-K routes (K = 2–3), generate M/K samples toward each,
+     roll them all out, and let the critics choose across all of them.
+   * Compare against single-g* selection on the g* collision rate, success at L0–L4, door flips per run,
+     and latency (one extra sample batch per extra route).
+8. Same real-time budget for every planner (fixed per-replan time cap; when the cap is hit,
    keep the previous plan or brake).
-8. Failed-search caching: after a replan fails, skip the full retry ladder until the observation
+9. Failed-search caching: after a replan fails, skip the full retry ladder until the observation
    changes materially (today a failing L4 replan can cost seconds).
-9. Numba (or vectorised) lattice expansion and collision checks.
-10. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
-11. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
+10. Numba (or vectorised) lattice expansion and collision checks.
+11. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
+12. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
 
 ### Curvature-feasibility metric (reference values)
 
