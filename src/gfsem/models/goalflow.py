@@ -6,6 +6,10 @@ Inference (PROMPT_LIDAR_DEMO.md section 3):
   3. score: f = -l1 Phi(endpoint dist to g*) + l2 Phi(progress) - l3 Phi(dist to previous path),
   4. shadow: 16 samples with the goal masked; if the best one differs from the chosen path by more
      than ``shadow_thresh`` metres (mean waypoint distance), output it instead.
+
+Before scoring, every candidate is rolled out through pure pursuit + the bicycle model with the
+10 deg steering limit (``models/rollout.py``), as in the teacher validation, and the rolled-out path
+is what gets scored and returned. The share of raw samples within kappa_max is reported.
 """
 from __future__ import annotations
 
@@ -20,6 +24,7 @@ from .encoders import AuxBEVHead, BEVEncoder, EgoEncoder
 from .flow import euler_sample, rf_training_pair
 from .flow_generator import FlowGenerator, RegressionHead
 from .goal_scorer import GoalScorer, select_goal
+from .rollout import RolloutConfig, kappa_feasible, rollout
 
 
 @dataclass
@@ -97,24 +102,39 @@ class GoalFlow(nn.Module):
     @torch.no_grad()
     def plan(self, bev, ego, M: int = 128, n_steps: int = 1, lambdas=(1.0, 0.5, 0.0), w=(1.0, 1.0),
              prev_path: torch.Tensor | None = None, shadow_M: int = 16, shadow_thresh: float = 1.5,
-             use_scorer: bool = True, use_dac: bool = True, use_goal: bool = True):
+             use_scorer: bool = True, use_dac: bool = True, use_goal: bool = True,
+             roll: RolloutConfig | None = RolloutConfig()):
         """Full GoalFlow (M3). Flags give the paper's ablations:
         M0: use_goal=False -> mean of goal-free samples; M1: use_dac=False, use_scorer=False (mean of
-        goal-conditioned samples); M2: use_scorer=False; M3: all on."""
+        goal-conditioned samples); M2: use_scorer=False; M3: all on.
+        ``roll``: roll candidates out through pure pursuit + bicycle before scoring (None = off)."""
         F_bev, F_ego, _ = self.perceive(bev, ego)
         dis, dac = self.scorer(F_bev, F_ego)
         vocab = self.scorer.vocab
+        B = bev.shape[0]
+        v0, st0 = ego[:, 0], ego[:, 1]
+
+        def drive(paths):           # (B, K, T, 2) -> rolled out, same shape
+            if roll is None:
+                return paths
+            K = paths.shape[1]
+            r = rollout(paths.reshape(B * K, self.cfg.T, 2), v0.repeat_interleave(K), st0.repeat_interleave(K), roll)
+            return r.view(B, K, self.cfg.T, 2)
+
         out = {}
         if not use_goal:
             S = self.sample(F_bev, F_ego, None, M, n_steps)
-            out.update(samples=S, traj=S.mean(1), goal=None)
+            out.update(samples_raw=S, kappa_ok_raw=kappa_feasible(S).float().mean(1),
+                       traj_raw=S.mean(1), traj=drive(S.mean(1, keepdim=True))[:, 0], goal=None)
             return out
         g, score = select_goal(dis, dac if use_dac else torch.zeros_like(dac), vocab, w[0], w[1] if use_dac else 0.0)
-        S = self.sample(F_bev, F_ego, g, M, n_steps)
-        out.update(samples=S, goal=g, goal_score=score, dis_logits=dis, dac_logits=dac)
+        S_raw = self.sample(F_bev, F_ego, g, M, n_steps)
+        out.update(samples_raw=S_raw, kappa_ok_raw=kappa_feasible(S_raw).float().mean(1), goal=g,
+                   goal_score=score, dis_logits=dis, dac_logits=dac)
         if not use_scorer:
-            out["traj"] = S.mean(1)
+            out.update(traj_raw=S_raw.mean(1), traj=drive(S_raw.mean(1, keepdim=True))[:, 0], samples=S_raw)
             return out
+        S = drive(S_raw)
         l1, l2, l3 = lambdas
         f_dis = (S[:, :, -1] - g[:, None, :2]).norm(dim=-1)
         f_pg = S[:, :, -1, 0]                                     # progress along ego x (track-aligned at t)
@@ -122,13 +142,15 @@ class GoalFlow(nn.Module):
         if l3 > 0 and prev_path is not None:
             f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
         best = f.argmax(1)
-        traj = S[torch.arange(S.shape[0]), best]
+        ar = torch.arange(B, device=bev.device)
+        traj = S[ar, best]
         # shadow: goal masked; its best sample by the goal-free term (progress), never the mean
         # (averaging the shadow samples would bring back mode averaging)
-        shadow = self.sample(F_bev, F_ego, None, shadow_M, n_steps)
-        sh_best = shadow[torch.arange(shadow.shape[0]), shadow[:, :, -1, 0].argmax(1)]
+        shadow = drive(self.sample(F_bev, F_ego, None, shadow_M, n_steps))
+        sh_best = shadow[ar, shadow[:, :, -1, 0].argmax(1)]
         dev = (sh_best - traj).norm(dim=-1).mean(-1)
         use_shadow = dev > shadow_thresh
         traj = torch.where(use_shadow[:, None, None], sh_best, traj)
-        out.update(traj=traj, scores=f, best=best, shadow=shadow, used_shadow=use_shadow)
+        out.update(samples=S, traj=traj, traj_raw=S_raw[ar, best], scores=f, best=best, shadow=shadow,
+                   used_shadow=use_shadow)
         return out

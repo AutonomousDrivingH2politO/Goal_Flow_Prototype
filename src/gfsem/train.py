@@ -110,6 +110,30 @@ def losses(model: GoalFlow, b: dict, stage: str, args) -> tuple[torch.Tensor, di
     return total, out
 
 
+def goal_mode_coverage(dis, dac, vocab, modes, n_modes, ks=(5, 10), radius=1.0, mass_radius=1.5,
+                       mass_min=0.10) -> dict[str, list]:
+    """Per frame with >= 2 teacher modes: do the top-k goals (final score) include a goal within
+    ``radius`` of every mode's endpoint? Does the distance score put >= ``mass_min`` of its softmax
+    mass within ``mass_radius`` of every mode? Returns lists of 0/1 per multi-mode frame."""
+    score = F.log_softmax(dis, -1) + F.logsigmoid(dac)
+    prob = torch.softmax(dis, -1)
+    out: dict[str, list] = {f"cover@{k}": [] for k in ks}
+    out["mass_on_every_mode"] = []
+    ends = modes[:, :, -1, :2]                                           # (B, 8, 2)
+    dist = torch.cdist(ends, vocab[None, :, :2].expand(ends.shape[0], -1, -1))   # (B, 8, N)
+    for i in range(dis.shape[0]):
+        m = int(n_modes[i])
+        if m < 2:
+            continue
+        d = dist[i, :m]                                                  # (m, N)
+        for k in ks:
+            top = score[i].topk(min(k, score.shape[1])).indices
+            out[f"cover@{k}"].append(float((d[:, top] <= radius).any(1).all()))
+        mass = torch.stack([prob[i][d[j] <= mass_radius].sum() for j in range(m)])
+        out["mass_on_every_mode"].append(float((mass >= mass_min).all()))
+    return out
+
+
 @torch.no_grad()
 def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 10) -> dict:
     model.eval()
@@ -130,8 +154,14 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
             acc.setdefault("ADE_driven", []).append(float(ade[:, 0].mean()))
             s_ade = (r["samples"][:, :, None] - modes[:, None]).norm(dim=-1).mean(-1)   # (B, M, 8)
             acc.setdefault("minADE_samples", []).append(float(s_ade.min(1).values[:, 0].mean()))
+            acc.setdefault("kappa_ok_raw", []).append(float(r["kappa_ok_raw"].mean()))
+            ade_raw = (r["traj_raw"][:, None] - modes).norm(dim=-1).mean(-1)
+            acc.setdefault("ADE_driven_raw", []).append(float(ade_raw[:, 0].mean()))
         if stage in ("A", "joint"):
             dis, dac = model.scorer(*model.perceive(b["bev"], b["ego"])[:2])
+            cov = goal_mode_coverage(dis, dac, model.scorer.vocab, modes, n)
+            for k_, v_ in cov.items():
+                acc.setdefault(k_, []).extend(v_)
             g = model.scorer.vocab[dis.argmax(-1)]
             acc.setdefault("goal_err", []).append(float((g[:, :2] - b["goal"][:, :2]).norm(dim=-1).mean()))
             acc.setdefault("dac_acc", []).append(float(((dac > 0).float() == b["dac"]).float().mean()))
@@ -141,7 +171,9 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
             acc.setdefault("ADE_driven", []).append(float(ade[:, 0].mean()))
             acc.setdefault("minADE_modes", []).append(float(ade.masked_fill(~mask, 1e9).min(1).values.mean()))
     model.train()
-    return {k: float(np.mean(v)) for k, v in acc.items()}
+    res = {k: float(np.mean(v)) if len(v) else float("nan") for k, v in acc.items()}
+    res["n_multimode_frames"] = float(len(acc.get("mass_on_every_mode", [])))
+    return res
 
 
 def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: Logger) -> list[dict]:

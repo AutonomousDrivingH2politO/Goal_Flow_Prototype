@@ -147,6 +147,10 @@ is mostly a separate effect: 14 of its 18 collisions are on scenes the privilege
   same function (`sim/edges.py::observed_edges`), so the learned planner and the corridor planners
   see the same road (`tests/test_sim_data.py`). The L1 shards store raw observations and are
   rasterised at load time, so the change needs no regeneration.
+* BEV goal channel (5): the goal segment is clipped to the raster and drawn 2 px thick. If no part
+  of it is inside, the far edge (rows 0–1, max x) is drawn inside the drivable corridor. Earlier it
+  was a 1 px row that vanished in renders, and a goal segment beside the raster on a curve drew
+  nothing. Test: channel 5 non-empty in every frame of a shard.
 * Localisation drift is a random walk of the odom-frame offset, updated at each replan. It affects
   the goal line, the track-relative ego status and anything a planner keeps in the odom frame.
 * Noise presets L0–L4 are listed in `src/gfsem/sim/config.py`. L0 is noise-free but still has
@@ -178,6 +182,8 @@ is mostly a separate effect: 14 of its 18 collisions are on scenes the privilege
 | Training stages | perception first, then goal constructor; generator schedule not explicit | Stage A encoder + goal scorer, Stage B generator with A frozen, optional joint fine-tune | Our schedule |
 | Selection with critics | not in the paper | MPPI-style critics and softmax within the best homotopy cluster | **Extension** (team's idea) |
 | Safety filter | not in the paper | drop candidates whose swept box touches hit/unknown cells; brake if none survive | **Extension**; results reported with it on and off |
+| Candidate feasibility | candidates scored as generated | every candidate rolled out through pure pursuit (2.5 m) + bicycle with the 10° limit before scoring; the rolled-out path is scored and returned; share of raw samples within κ_max logged (`kappa_ok_raw`) | **Deviation** (`models/rollout.py`): the paper's vehicle is not steering-limited like Juno; scoring raw samples would rank paths Juno cannot drive. Applies to M0–M3 (averaged trajectories are rolled out too), the scorer, the shadow comparison and, later, the critics |
+| Goal-score evaluation | DAC/EP and PDMS | before ADE: share of multi-mode frames whose top-k goals cover every teacher mode (cover@5, cover@10) and whose distance score puts ≥ 10% mass near every mode | Ours (the multimodality question this demo is about) |
 | Teacher | human driving logs | privileged corridor-lattice planner on the true scene | **Deviation**: student learns from our own planner; on clean input it can at best match it |
 
 Docs note: the flow-matching notes are in `docs/` as
@@ -198,10 +204,28 @@ Docs note: the flow-matching notes are in `docs/` as
    picks up the edge-fill fix A6b) and update `reports/lidar_demo/l0/summary.md`. Remaining L4 stall
    pattern to look at: fitted circles jitter at 45% dropout, so kept plans keep failing the 0.25 m
    check and replans alternate between a path and a brake (seed 288 crawls for 15 s).
-2. Same real-time budget for every planner (fixed per-replan time cap; when the cap is hit,
+2. **Obstacle tracking for the observed planners**: track fitted obstacles over time in the odom
+   frame (smoothed positions, short persistence through dropouts) instead of re-fitting every
+   scan from scratch.
+3. **Kept-plan validation at the 0.12 m acceptance margin with hysteresis** (not 0.25 m), so
+   jittering fits do not invalidate a good plan every scan (the seed 288 crawl).
+4. **Hold position instead of creeping** while no valid plan exists (no alternating brake/plan).
+5. GoalFlow's safety filter uses the same tracked obstacles and the same hysteresis, so the race
+   is fair.
+6. Rerun observed corridor-lattice at L0–L4 after the edge-fill (A6b) and goal-stall (A6) fixes and
+   **replace every pre-fix number** (summary, chart, README, DEVIATIONS).
+7. Same real-time budget for every planner (fixed per-replan time cap; when the cap is hit,
    keep the previous plan or brake).
-3. Failed-search caching: after a replan fails, skip the full retry ladder until the observation
+8. Failed-search caching: after a replan fails, skip the full retry ladder until the observation
    changes materially (today a failing L4 replan can cost seconds).
-4. Numba (or vectorised) lattice expansion and collision checks.
-5. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
-6. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
+9. Numba (or vectorised) lattice expansion and collision checks.
+10. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
+11. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
+
+### Phase L2 plan (decided 2026-11-24)
+
+* Full training starts when the L1 train split is complete: on the P16v if it is ready, otherwise
+  the Mac overnight.
+* Report order after training: (1) goal-score multimodality (cover@5 / cover@10 and mass on every
+  mode, over frames with ≥ 2 teacher modes), (2) curvature-feasible share of raw samples, (3) ADE /
+  FDE / minADE.

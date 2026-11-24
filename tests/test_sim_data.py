@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 
 import numpy as np
 
@@ -74,3 +75,39 @@ def test_edge_fill_rejects_bad_offsets_on_noisy_edges():
                     _, d = sc.track.frenet(from_frame(e, pose))
                     worst = max(worst, float(np.max(np.abs(side * d - sc.track.width / 2))))
     assert worst < 1.6, worst      # 4 sigma of L4 edge noise; the old fill put points ~4 m inside
+
+
+def test_goal_channel_row0_is_far_edge_and_clipping():
+    from gfsem.sim.raster import goal_channel
+    rc = RasterConfig()
+    drv = np.zeros((128, 128), np.float32)
+    drv[:, 40:90] = 1.0
+    # goal line across the track at x = 20 m -> rows around (22.4 - 20) / 0.2 = 12
+    g = goal_channel(np.array([[20.0, -6.0], [20.0, 6.0]]), drv, rc)
+    rows = np.nonzero(g.any(1))[0]
+    assert rows.min() >= 10 and rows.max() <= 13
+    # goal beyond the raster: far edge = row 0 (max x), 2 px, only inside the drivable corridor
+    g = goal_channel(np.array([[40.0, -6.0], [40.0, 6.0]]), drv, rc)
+    assert set(np.nonzero(g.any(1))[0]) == {0, 1}
+    assert g[0, 40:90].all() and not g[0, :40].any()
+    # segment that only partly enters the raster is clipped and drawn
+    g = goal_channel(np.array([[10.0, -30.0], [10.0, 0.0]]), drv, rc)
+    assert g.sum() > 0
+
+
+def test_goal_channel_nonempty_in_every_frame_of_a_shard():
+    import glob
+    import pytest
+    from gfsem.sim.raster import goal_channel
+    files = sorted(glob.glob(str(Path(__file__).resolve().parents[1] / "data/sim/val_*.npz")))
+    if not files:
+        pytest.skip("no shard on this machine")
+    L = dict(np.load(files[0]))
+    rc = RasterConfig()
+    empty = 0
+    for i in range(len(L["seed"])):
+        o = observation_from_shard(L, i)
+        from gfsem.sim.raster import drivable_mask
+        if goal_channel(o.goal_line.astype(np.float64), drivable_mask(o, rc), rc).sum() == 0:
+            empty += 1
+    assert empty == 0, f"{empty} of {len(L['seed'])} frames have an empty goal channel"

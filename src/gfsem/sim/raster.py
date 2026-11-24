@@ -96,17 +96,48 @@ def rasterize(obs: Observation, cfg: RasterConfig | None = None) -> np.ndarray:
     # 3: drivable polygon from the observed edges
     out[3] = drivable_mask(obs, cfg)
 
-    # 5: goal line
-    g = obs.goal_line.astype(np.float64)
-    if g[:, 0].min() < cfg.x_max:
-        pts = np.stack(world_to_cell(g, cfg), -1)[:, ::-1].astype(np.int32)  # (col,row) for cv2
-        img = np.zeros((n, n), np.uint8)
-        cv2.line(img, tuple(int(v) for v in pts[0]), tuple(int(v) for v in pts[1]), 1, 1)
-        out[5] = img.astype(np.float32)
-    else:
-        row = out[3][0] > 0
-        out[5][0] = np.where(row.any(), row, True).astype(np.float32)
+    # 5: goal line, clipped to the raster; if no part of it is inside, the far edge (rows 0-1,
+    # the max-x end) inside the drivable corridor. Always 2 px thick.
+    out[5] = goal_channel(obs.goal_line.astype(np.float64), out[3], cfg)
     return out
+
+
+def clip_segment(p0: np.ndarray, p1: np.ndarray, lo: np.ndarray, hi: np.ndarray):
+    """Liang-Barsky: clip segment p0-p1 to the box [lo, hi]; None if it misses the box."""
+    d = p1 - p0
+    t0, t1 = 0.0, 1.0
+    for k in range(2):
+        for p, q in ((-d[k], p0[k] - lo[k]), (d[k], hi[k] - p0[k])):
+            if abs(p) < 1e-12:
+                if q < 0:
+                    return None
+                continue
+            r = q / p
+            if p < 0:
+                t0 = max(t0, r)
+            else:
+                t1 = min(t1, r)
+            if t0 > t1:
+                return None
+    return p0 + t0 * d, p0 + t1 * d
+
+
+def goal_channel(goal: np.ndarray, drivable: np.ndarray, cfg: RasterConfig, thickness: int = 2) -> np.ndarray:
+    n = cfg.size
+    img = np.zeros((n, n), np.uint8)
+    eps = 1e-6
+    lo = np.array([cfg.x_min + eps, cfg.y_min + eps])
+    hi = np.array([cfg.x_max - eps, cfg.y_max - eps])
+    seg = clip_segment(goal[0], goal[1], lo, hi)
+    if seg is not None:
+        r, c = world_to_cell(np.stack(seg), cfg)
+        cv2.line(img, (int(c[0]), int(r[0])), (int(c[1]), int(r[1])), 1, thickness)
+    else:
+        far = drivable[:thickness] > 0
+        if not far.any():
+            far = np.ones((thickness, n), bool)
+        img[:thickness] = far
+    return img.astype(np.float32)
 
 
 def drivable_mask(obs: Observation, cfg: RasterConfig) -> np.ndarray:
