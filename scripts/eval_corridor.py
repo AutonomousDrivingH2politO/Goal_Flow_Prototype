@@ -13,6 +13,13 @@ Writes <out>/results.csv, <out>/plan_times.csv and <out>/summary.md.
 """
 from __future__ import annotations
 
+import os
+
+# One BLAS/OpenMP thread per process: workers are parallel already (set before numpy loads;
+# spawned workers inherit the environment).
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 import argparse
 import csv
 import multiprocessing as mp

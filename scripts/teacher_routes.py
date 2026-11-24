@@ -6,6 +6,13 @@ deduplicated by homotopy signature, evaluated at the spawn pose.
 """
 from __future__ import annotations
 
+import os
+
+# One BLAS/OpenMP thread per process: workers are parallel already (set before numpy loads;
+# spawned workers inherit the environment).
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 import argparse
 import json
 import multiprocessing as mp
