@@ -27,7 +27,7 @@ from torch.utils.data import DataLoader  # noqa: E402
 
 from .data.sim_torch import SimFrames, load_shards  # noqa: E402
 from .models.common import Normalizer, pick_device  # noqa: E402
-from .models.goal_scorer import goal_loss, kmeans_vocabulary  # noqa: E402
+from .models.goal_scorer import goal_loss, kmeans_vocabulary, select_goal  # noqa: E402
 from .models.goalflow import GoalFlow, ModelConfig  # noqa: E402
 from .models.rollout import RolloutConfig, kappa_feasible, rollout  # noqa: E402
 
@@ -111,6 +111,29 @@ def losses(model: GoalFlow, b: dict, stage: str, args) -> tuple[torch.Tensor, di
     return total, out
 
 
+def goal_collides(g: torch.Tensor, obstacles: torch.Tensor, n_obs: torch.Tensor) -> torch.Tensor:
+    """(B,) bool: does a Juno box at g* (x, y, theta; ego frame) overlap a true obstacle disc?"""
+    from .sim.config import VehicleConfig
+    veh = VehicleConfig.from_yaml()
+    x0, x1 = veh.body_x
+    h = veh.width / 2
+    c, s_ = torch.cos(g[:, 2])[:, None], torch.sin(g[:, 2])[:, None]
+    dx = obstacles[..., 0] - g[:, 0:1]
+    dy = obstacles[..., 1] - g[:, 1:2]
+    lx, ly = c * dx + s_ * dy, -s_ * dx + c * dy
+    qx, qy = lx.clamp(x0, x1), ly.clamp(-h, h)
+    d = torch.hypot(lx - qx, ly - qy) - obstacles[..., 2]
+    valid = torch.arange(obstacles.shape[1], device=g.device)[None] < n_obs[:, None]
+    return ((d < 0) & valid).any(1)
+
+
+def obstacles_near_path(path: torch.Tensor, obstacles: torch.Tensor, n_obs: torch.Tensor, dist: float = 2.0):
+    """(B,) bool: any true obstacle within ``dist`` metres (surface) of the driven teacher path."""
+    d = torch.cdist(obstacles[..., :2], path) - obstacles[..., 2:3]                    # (B, O, T)
+    valid = torch.arange(obstacles.shape[1], device=path.device)[None] < n_obs[:, None]
+    return ((d.min(-1).values < dist) & valid).any(1)
+
+
 def _traj_metrics(acc: dict, executed, raw, modes, mask):
     """ADE / FDE / minADE-over-teacher-modes for the executed path (after the pure-pursuit + bicycle
     rollout) and the raw path, against the driven teacher mode (mode 0)."""
@@ -168,11 +191,26 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
             acc.setdefault("minADE_samples_raw", []).append(float(s_raw.min(1).values[:, 0].mean()))
             acc.setdefault("kappa_ok_raw", []).append(float(r["kappa_ok_raw"].mean()))
             acc.setdefault("kappa_ok_raw_1.1", []).append(float(kappa_feasible(r["samples_raw"], tol=1.1).float().mean()))
+            g2 = r["goal"][:, None, :2]
+            acc.setdefault("endpoint_to_gstar", []).append(float((r["samples"][:, :, -1] - g2).norm(dim=-1).mean()))
+            acc.setdefault("endpoint_to_gstar_raw", []).append(float((r["samples_raw"][:, :, -1] - g2).norm(dim=-1).mean()))
         if stage in ("A", "joint"):
             dis, dac = model.scorer(*model.perceive(b["bev"], b["ego"])[:2])
             cov = goal_mode_coverage(dis, dac, model.scorer.vocab, modes, n)
             for k_, v_ in cov.items():
                 acc.setdefault(k_, []).extend(v_)
+            gs, _ = select_goal(dis, dac, model.scorer.vocab)
+            if "obstacles" in b:
+                col = goal_collides(gs, b["obstacles"], b["n_obstacles"])
+                acc.setdefault("gstar_collision", []).extend(col.float().tolist())
+                near = obstacles_near_path(modes[:, 0], b["obstacles"], b["n_obstacles"])
+                pred, tgt = (dac > 0).float(), b["dac"]
+                fr_acc = (pred == tgt).float().mean(-1)
+                acc.setdefault("dac_acc_near_obst", []).extend(fr_acc[near].tolist())
+                tp = ((pred == 1) & (tgt == 1)).float().sum(-1) / (tgt == 1).float().sum(-1).clamp_min(1)
+                tn = ((pred == 0) & (tgt == 0)).float().sum(-1) / (tgt == 0).float().sum(-1).clamp_min(1)
+                has_neg = (tgt == 0).any(-1)
+                acc.setdefault("dac_balanced_acc", []).extend((0.5 * (tp + tn))[has_neg].tolist())
             g = model.scorer.vocab[dis.argmax(-1)]
             acc.setdefault("goal_err", []).append(float((g[:, :2] - b["goal"][:, :2]).norm(dim=-1).mean()))
             acc.setdefault("dac_acc", []).append(float(((dac > 0).float() == b["dac"]).float().mean()))

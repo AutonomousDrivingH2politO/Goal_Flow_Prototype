@@ -23,6 +23,7 @@ class RolloutConfig:
     lookahead: float = 2.5
     dt: float = 0.05
     wp_dt: float = 0.25
+    v_max: float = 4.5          # speed cap for the rollout's speed command (1.5 x the 3 m/s target)
 
     @property
     def kappa_max(self) -> float:
@@ -58,7 +59,13 @@ def rollout(cands: torch.Tensor, v0: torch.Tensor, steer0: torch.Tensor,
     dev, dt = cands.device, cfg.dt
     P = torch.cat([torch.zeros(N, 1, 2, device=dev, dtype=cands.dtype), cands], 1)      # (N, T+1, 2)
     seg = P[:, 1:] - P[:, :-1]
-    v_ref = seg.norm(dim=-1) / cfg.wp_dt                                                 # (N, T)
+    # speed command from a smoothed copy of the candidate (a zigzag would imply a much higher speed
+    # than its net progress), capped at v_max
+    Ps = P.clone()
+    Ps[:, 1:-1] = (P[:, :-2] + P[:, 1:-1] + P[:, 2:]) / 3
+    seg_s = Ps[:, 1:] - Ps[:, :-1]
+    v_ref = (seg_s.norm(dim=-1) / cfg.wp_dt).clamp(max=cfg.v_max)                        # (N, T)
+    arc_max = seg_s.norm(dim=-1).sum(-1)                                                 # (N,)
     last_dir = seg[:, -1] / seg[:, -1].norm(dim=-1, keepdim=True).clamp_min(1e-6)
     x = torch.zeros(N, device=dev, dtype=cands.dtype)
     y = torch.zeros_like(x)
@@ -96,4 +103,26 @@ def rollout(cands: torch.Tensor, v0: torch.Tensor, steer0: torch.Tensor,
         x, y, yaw, v = x + vm * torch.cos(ym) * dt, y + vm * torch.sin(ym) * dt, yaw + yr * dt, v_new
         if (k + 1) % per == 0:
             out.append(torch.stack([x, y], -1))
-    return torch.stack(out, 1)
+    E = torch.stack(out, 1)                                                              # (N, T, 2)
+    return truncate_arc(E, arc_max)
+
+
+def truncate_arc(E: torch.Tensor, arc_max: torch.Tensor) -> torch.Tensor:
+    """Clip each path (N, T, 2, from the ego origin) at arc length ``arc_max`` (N,): waypoints beyond
+    it are moved back onto the path at that arc length, so an executed path never reaches further
+    than the (smoothed) candidate it follows."""
+    P = torch.cat([torch.zeros_like(E[:, :1]), E], 1)
+    seg = (P[:, 1:] - P[:, :-1]).norm(dim=-1)
+    cum = torch.cumsum(seg, 1)                                                           # (N, T)
+    over = cum > arc_max[:, None]
+    if not over.any():
+        return E
+    # point at arc_max along each path
+    j = torch.clamp((~over).sum(1), max=E.shape[1] - 1)                                  # first index over
+    ar = torch.arange(E.shape[0], device=E.device)
+    prev_cum = torch.where(j > 0, cum[ar, (j - 1).clamp(min=0)], torch.zeros_like(arc_max))
+    a = P[ar, j]
+    b = P[ar, j + 1]
+    f = ((arc_max - prev_cum) / seg[ar, j].clamp_min(1e-6)).clamp(0, 1)[:, None]
+    cut = a + f * (b - a)
+    return torch.where(over[..., None], cut[:, None, :], E)

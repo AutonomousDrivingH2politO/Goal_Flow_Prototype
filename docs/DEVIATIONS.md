@@ -167,7 +167,7 @@ is mostly a separate effect: 14 of its 18 collisions are on scenes the privilege
 | DAC target | binary; all 4 corners of the shadow vehicle inside the drivable polygon | full Juno polygon inside track polygon minus *true obstacle discs* | **Deviation**: full polygon (corners alone miss a bollard between them) and obstacles included (the paper's DAC ignores them) |
 | Scorer decoder | query = F_V + F_ego, key/value = F_bev, transformer decoder, two MLP heads | same, 3 decoder layers | Layer count not given in the paper |
 | Goal selection | δ̂_final = w1 log δ̂_dis + w2 log δ̂_dac | same | w1, w2 not given in the paper; to be tuned on validation |
-| Goal loss | L_goal = w4 L_dis + w5 L_dac, w4 = 1.0, w5 = 0.005; L_dis soft-target CE (Eq. 15), L_dac BCE (Eq. 16) | same, sweep w5 ∈ {0.005, 0.1, 1.0} | Same; the sweep is ours |
+| Goal loss | L_goal = w4 L_dis + w5 L_dac, w4 = 1.0, w5 = 0.005; L_dis soft-target CE (Eq. 15), L_dac BCE (Eq. 16) | **w5 = 0.1 for the main seed-0 run**; 0.005 (paper) kept as an ablation on the P16v; sweep w5 ∈ {0.005, 0.1, 1.0} | **Deviation**: with w5 = 0.005 the shared encoder gets almost no obstacle signal (L_dac is ~0.5 against L_dis ~5), and in an early render g* landed next to an obstacle between the two modes. Our DAC target includes obstacles (the paper's does not), which makes it the encoder's main obstacle signal |
 | Rectified flow | x0 ~ N(0, σ²I), σ = 0.1 best (Table 4); x_t = (1−t)x0 + tτ_norm; v = τ_norm − x0; τ_norm = H(τ_gt); L1 loss (Eq. 17) | same, σ = 0.1, L1, sweep σ ∈ {0.05, 0.1, 0.2} | Same. The intro notes use σ = 1 and MSE, which is the generic form |
 | Normalisation H | not specified | per-axis affine to ≈ [−1, 1] from 1st/99th percentiles, stored in the checkpoint | Our choice |
 | Trajectory | 2 Hz, 4 s → 8 waypoints (NAVSIM) | 4 Hz, 4 s → 16 waypoints (x, y), heading by finite differences | **Deviation** (finer for 3 m/s door manoeuvres) |
@@ -182,6 +182,7 @@ is mostly a separate effect: 14 of its 18 collisions are on scenes the privilege
 | Training stages | perception first, then goal constructor; generator schedule not explicit | Stage A encoder + goal scorer, Stage B generator with A frozen, optional joint fine-tune | Our schedule |
 | Selection with critics | not in the paper | MPPI-style critics and softmax within the best homotopy cluster | **Extension** (team's idea) |
 | Safety filter | not in the paper | drop candidates whose swept box touches hit/unknown cells; brake if none survive | **Extension**; results reported with it on and off |
+| Executed-path horizon | — | the rollout is sampled at the candidate's own 16 timestamps (4 s); its speed command comes from a smoothed copy of the candidate, capped at 4.5 m/s, and the executed path is truncated at the smoothed candidate's arc length | Ours: a zigzag raw candidate implied much higher speeds than its net progress, so the executed path reached further than the candidate. Used for scoring, the shadow comparison and every ADE/FDE |
 | Candidate feasibility | candidates scored as generated | every candidate rolled out through pure pursuit (2.5 m) + bicycle with the 10° limit before scoring; the rolled-out path is scored and returned; share of raw samples within κ_max logged (`kappa_ok_raw`) | **Deviation** (`models/rollout.py`): the paper's vehicle is not steering-limited like Juno; scoring raw samples would rank paths Juno cannot drive. Applies to M0–M3 (averaged trajectories are rolled out too), the scorer, the shadow comparison and, later, the critics |
 | Goal-score evaluation | DAC/EP and PDMS | before ADE: share of multi-mode frames whose top-k goals cover every teacher mode (cover@5, cover@10) and whose distance score puts ≥ 10% mass near every mode | Ours (the multimodality question this demo is about) |
 | Teacher | human driving logs | privileged corridor-lattice planner on the true scene | **Deviation**: student learns from our own planner; on clean input it can at best match it |
@@ -236,8 +237,11 @@ waypoint jitter: a 3 cm lateral wiggle at 0.75 m spacing already implies about �
   train split is complete (the P16v is not set up yet). Full training-state checkpoints at least every
   30 min, mid-stage resume, early stopping on the validation split only (the test split is never
   read). The 3-seed runs and ablations come later on the P16v.
+* Goal-scorer diagnostics: g* collision rate (Juno box at g* overlapping a true obstacle, from the
+  scene index), DAC accuracy on frames with an obstacle within 2 m of the driven path, balanced DAC
+  accuracy, and the mean distance of sample endpoints from g* (raw and executed).
+* Report order after training: cover@5 / cover@10, **g* collision rate**, mode-mass share, share of
+  raw samples within κ_max, ADE / FDE (raw and executed, GoalFlow and regression), training time and
+  checkpoint path.
 * Open-loop metrics are reported for both the raw path and the executed path (after the pure-pursuit +
   bicycle rollout), for GoalFlow and the regression baseline alike.
-* Report order after training: (1) goal-score multimodality (cover@5 / cover@10 and mass on every
-  mode, over frames with ≥ 2 teacher modes), (2) curvature-feasible share of raw samples, (3) ADE /
-  FDE / minADE.

@@ -60,6 +60,7 @@ class SimFrames(Dataset):
         self.driven_only = driven_only
         self._scenes: dict[int, object] = {}
         self.scene_index = scene_index
+        self.max_obs = 24
 
     def __len__(self) -> int:
         return len(self.index)
@@ -126,6 +127,17 @@ class SimFrames(Dataset):
                    modes=torch.from_numpy(np.pad(T[:, :, :2], ((0, 8 - min(len(T), 8)), (0, 0), (0, 0)))[:8]),
                    n_modes=torch.tensor(min(len(T), 8)), seed=torch.tensor(seed), idx=torch.tensor(i),
                    recovery=torch.tensor(bool(a["recovery"][j])))
+        sc = self.scene(seed)
+        obs = np.zeros((self.max_obs, 3), np.float32)        # true obstacles, ego frame: x, y, r
+        if sc.n:
+            from ..sim.geometry import to_frame
+            loc = to_frame(sc.centres, pose)
+            k = min(sc.n, self.max_obs)
+            obs[:k, :2] = loc[:k]
+            obs[:k, 2] = sc.radii[:k]
+        out["obstacles"] = torch.from_numpy(obs)
+        out["n_obstacles"] = torch.tensor(min(sc.n, self.max_obs))
+        out["pose"] = torch.from_numpy(pose.astype(np.float32))
         if self.vocab is not None:
             out["dac"] = torch.from_numpy(self.dac_targets(seed, pose, self.vocab))
         if self.aux:

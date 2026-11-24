@@ -47,3 +47,30 @@ def test_goalflow_plan_rolls_out_candidates():
     assert (discrete_curvature(r["samples"]).abs() <= RolloutConfig().kappa_max * 1.05).all()
     r0 = m.plan(bev, ego, M=8, use_goal=False)
     assert r0["traj"].shape == (2, T, 2)
+
+
+def test_rollout_speed_from_smoothed_path_and_arc_truncation():
+    cfg = RolloutConfig()
+    straight = arc_path(0.0)                                   # 12 m in 4 s
+    zig = straight.clone()
+    zig[:, 1] = torch.tensor([0.6 if i % 2 else -0.6 for i in range(T)])   # zigzag implies ~2x speed
+    r = rollout(torch.stack([straight, zig]), torch.full((2,), 3.0), torch.zeros(2), cfg)
+    reach = r[:, -1, 0]
+    assert abs(float(reach[0]) - 12.0) < 0.3
+    # raw zigzag segments sum to 22.6 m (implying ~5.6 m/s); the smoothed candidate is 13.4 m long
+    zig_arc = torch.cat([torch.zeros(1, 2), zig]).diff(dim=0).norm(dim=-1).sum()
+    assert float(zig_arc) > 22.0
+    assert float(reach[1]) < 13.5
+    arc = torch.cat([torch.zeros(2, 1, 2), r], 1).diff(dim=1).norm(dim=-1).sum(-1)
+    assert float(arc[1]) <= 13.5                                # never beyond the smoothed candidate
+
+
+def test_goal_collision_and_near_obstacle_helpers():
+    from gfsem.train import goal_collides, obstacles_near_path
+    g = torch.tensor([[10.0, 0.0, 0.0], [10.0, 3.0, 0.0]])
+    obs = torch.zeros(2, 4, 3)
+    obs[:, 0] = torch.tensor([10.5, 0.0, 0.225])
+    n = torch.tensor([1, 1])
+    assert goal_collides(g, obs, n).tolist() == [True, False]
+    path = torch.stack([arc_path(0.0), arc_path(0.0) + torch.tensor([0.0, 5.0])])
+    assert obstacles_near_path(path, obs, n).tolist() == [True, False]
