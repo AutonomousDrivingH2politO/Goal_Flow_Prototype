@@ -107,7 +107,10 @@ from the edge, which the two-sided rule (1.665 m) called a wall.
 * **Observed edges.** Where one road edge is not observed (outside the 120° FOV near the car, or
   hidden behind a bollard row), it is filled from the opposite observed edge offset by the nominal
   track width (12 m). Observed points always take precedence. This is a map prior. Without it the
-  observed planners braked on the inner edge of curves.
+  observed planners braked on the inner edge of curves. The BEV raster's drivable channel uses the
+  same function (`sim/edges.py::observed_edges`), so the learned planner and the corridor planners
+  see the same road (`tests/test_sim_data.py`). The L1 shards store raw observations and are
+  rasterised at load time, so the change needs no regeneration.
 * Localisation drift is a random walk of the odom-frame offset, updated at each replan. It affects
   the goal line, the track-relative ego status and anything a planner keeps in the odom frame.
 * Noise presets L0–L4 are listed in `src/gfsem/sim/config.py`. L0 is noise-free but still has

@@ -251,3 +251,25 @@ def build_shard(split: str, shard: int, out_dir: Path, dcfg: DatasetConfig | Non
                 bytes=f.stat().st_size, seconds=time.time() - t0,
                 homotopy=[int(x) for x in arr.get("scene_n_homotopy", [])],
                 seeds=[s["seed"] for s in scenes])
+
+
+def observation_from_shard(arr: dict, i: int, lidar=None) -> Observation:
+    """Rebuild frame ``i``'s Observation from a loaded shard (raw data; rasterise at load time).
+    Sensor geometry (mount, ray angles, blind zone) comes from ``LidarConfig``."""
+    from ..sim.config import LidarConfig
+    lc = lidar or LidarConfig()
+    p0, p1 = arr["points_off"][i], arr["points_off"][i + 1]
+    e0, e1 = arr["edge_off"][i], arr["edge_off"][i + 1]
+    ang = lc.ray_angles
+    return Observation(
+        points=arr["points"][p0:p1], labels=arr["labels"][p0:p1],
+        scan_ranges=arr["scan"][i].astype(np.float32),
+        edge_points=arr["edge"][e0:e1], edge_side=arr["edge_side"][e0:e1],
+        goal_line=arr["goal"][i], ego_state=arr["ego"][i],
+        sensor_xy=(lc.mount_x, lc.mount_y), ray_angle0=float(ang[0]), ray_step=float(ang[1] - ang[0]),
+        blind_zone=lc.blind_zone, pose_odom=arr["odom"][i])
+
+
+def targets_from_shard(arr: dict, i: int) -> tuple[np.ndarray, np.ndarray]:
+    t0, t1 = arr["targets_off"][i], arr["targets_off"][i + 1]
+    return arr["targets"][t0:t1], arr["sigs"][t0:t1]

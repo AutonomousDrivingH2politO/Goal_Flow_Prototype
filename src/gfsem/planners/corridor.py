@@ -28,6 +28,7 @@ from scipy.sparse.csgraph import connected_components
 from scipy.spatial import Delaunay, cKDTree
 
 from ..sim.config import BOLLARD, CONE, SceneConfig, VehicleConfig
+from ..sim.edges import observed_edges
 from ..sim.geometry import box_circle_clearance, boxes_hit_points, from_frame, to_frame
 from ..sim.lidar import Observation
 from ..sim.vehicle import VehicleState, resample_polyline, rollout_path
@@ -229,18 +230,6 @@ def cluster_obstacles(obs: Observation, cfg: CorridorConfig, scfg: SceneConfig):
     return np.array(C).reshape(-1, 2), np.array(R), np.array(K, np.int8)
 
 
-def _bin_edge(e: np.ndarray, bin_w: float) -> np.ndarray:
-    if len(e) == 0:
-        return e
-    e = e[np.argsort(e[:, 0])]
-    b = np.floor(e[:, 0] / bin_w).astype(int)
-    out = []
-    for v in np.unique(b):
-        m = b == v
-        out.append([np.median(e[m, 0]), np.median(e[m, 1])])
-    return np.array(out)
-
-
 def make_unknown_fn(obs: Observation):
     ang0, step = obs.ray_angle0, obs.ray_step
     n = len(obs.scan_ranges)
@@ -258,34 +247,9 @@ def make_unknown_fn(obs: Observation):
     return fn
 
 
-def _offset_edge(e: np.ndarray, d: float) -> np.ndarray:
-    """Offset a polyline by d to its left (negative = right)."""
-    if len(e) < 2:
-        return np.zeros((0, 2))
-    t = np.gradient(e, axis=0)
-    t /= np.maximum(np.linalg.norm(t, axis=1, keepdims=True), 1e-9)
-    return e + d * np.stack([-t[:, 1], t[:, 0]], -1)
-
-
-def complete_edges(left: np.ndarray, right: np.ndarray, width: float, gap: float = 2.0):
-    """Fill unobserved stretches of one edge from the other, offset by the nominal track width.
-    Observed points always win; synthetic ones only where no observed point is within ``gap``."""
-    def fill(own, synth):
-        if len(synth) == 0:
-            return own
-        if len(own):
-            d = np.min(np.hypot(synth[:, None, 0] - own[None, :, 0], synth[:, None, 1] - own[None, :, 1]), 1)
-            synth = synth[d > gap]
-        out = np.concatenate([own, synth]) if len(own) else synth
-        return out[np.argsort(out[:, 0])]
-    return fill(left, _offset_edge(right, width)), fill(right, _offset_edge(left, -width))
-
-
 def input_from_observation(obs: Observation, cfg: CorridorConfig, scfg: SceneConfig) -> PlannerInput:
     C, R, _ = cluster_obstacles(obs, cfg, scfg)
-    left = _bin_edge(obs.edge_points[obs.edge_side > 0].astype(float), cfg.edge_bin)
-    right = _bin_edge(obs.edge_points[obs.edge_side < 0].astype(float), cfg.edge_bin)
-    left, right = complete_edges(left, right, scfg.track_width)
+    left, right = observed_edges(obs.edge_points, obs.edge_side, scfg.track_width, cfg.edge_bin)
     return PlannerInput(C, R, left, right, obs.goal_line.astype(float), make_unknown_fn(obs),
                         np.asarray(obs.pose_odom, float))
 

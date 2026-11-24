@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 
 from .config import BOLLARD, CONE
+from .edges import observed_edges
 from .lidar import Observation
 
 CHANNELS = ("hits", "free", "unknown", "drivable", "class", "goal")
@@ -28,6 +29,8 @@ class RasterConfig:
     x_min: float = -3.2
     y_min: float = -12.8
     ray_sample: float = 0.1
+    track_width: float = 12.0     # nominal width for the edge fill (same as the observed planners)
+    edge_bin: float = 1.0
 
     @property
     def x_max(self) -> float:
@@ -107,13 +110,12 @@ def rasterize(obs: Observation, cfg: RasterConfig | None = None) -> np.ndarray:
 
 
 def drivable_mask(obs: Observation, cfg: RasterConfig) -> np.ndarray:
+    """Polygon between the observed edges, with the same binning and 12 m edge fill as the
+    observed corridor planners (``sim.edges.observed_edges``)."""
     n = cfg.size
-    left = obs.edge_points[obs.edge_side > 0]
-    right = obs.edge_points[obs.edge_side < 0]
+    left, right = observed_edges(obs.edge_points, obs.edge_side, cfg.track_width, cfg.edge_bin)
     if len(left) < 2 or len(right) < 2:
         return np.zeros((n, n), np.float32)
-    left = left[np.argsort(left[:, 0])]
-    right = right[np.argsort(right[:, 0])]
 
     def extend(e):
         # extrapolate back to the raster's rear edge along the first edge segment direction
