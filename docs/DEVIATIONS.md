@@ -105,7 +105,16 @@ Hypothesis: with noise-free edges the goal-line endpoints coincide exactly with 
 giving degenerate geometry where the edges are cut and triangulated at the goal. Any noise
 breaks the tie. To fix before the L3 comparison, because it understates the baseline at L0.
 
-### A7. Other simulator choices
+### A7. Why corridor-funnel is worse on the true scene (75.7%) than observed (81.6%)
+
+On the 58 scenes funnel-observed solves and funnel-privileged does not, the observed run sees 92%
+of the obstacles at spawn (those behind rows appear late) and plans only to its ~25 m edge
+horizon, so its curvature check blocks fewer doors. Its successes there keep a median clearance
+of 0.17 m (p10 0.04 m), below the 0.25 m the privileged run requires. Its higher collision rate
+is mostly a separate effect: 14 of its 18 collisions are on scenes the privileged run solves
+(noisy detections), only 4 on scenes it fails.
+
+### A8. Other simulator choices
 
 * Juno's overhangs are not in the data sheet. Assumed symmetric: 0.6375 m front and rear of the
   axles (`configs/vehicle.yaml`, TODO(Can)). The ego frame origin is the rear-axle centre.
@@ -158,3 +167,23 @@ breaks the tie. To fix before the L3 comparison, because it understates the base
 Docs note: the flow-matching notes are in `docs/` as
 `Flow Matching_ A visual introduction _ Peter’s Notes.pdf` (the prompt calls it
 `docs/flow_matching_intro.pdf`).
+
+## Part C. Future work and queued items
+
+### Future work (decided not to do now)
+
+* **Track-edge margin of 0.10 m** in the oracle and planners. It would remove the seed 58/170-type
+  cases (oracle paths 3–6 mm from the edge). Not done, so the current oracle and the L1 shards
+  stay valid (decision 2026-11-24).
+
+### Queued for Phase L3
+
+1. Fix the observed-lattice L0 goal stall (A6), then rerun observed-lattice only (L0–L4) and update
+   `reports/lidar_demo/l0/summary.md`.
+2. Same real-time budget for every planner (fixed per-replan time cap; when the cap is hit,
+   keep the previous plan or brake).
+3. Failed-search caching: after a replan fails, skip the full retry ladder until the observation
+   changes materially (today a failing L4 replan can cost seconds).
+4. Numba (or vectorised) lattice expansion and collision checks.
+5. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
+6. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
