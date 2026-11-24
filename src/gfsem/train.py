@@ -29,6 +29,7 @@ from .data.sim_torch import SimFrames, load_shards  # noqa: E402
 from .models.common import Normalizer, pick_device  # noqa: E402
 from .models.goal_scorer import goal_loss, kmeans_vocabulary  # noqa: E402
 from .models.goalflow import GoalFlow, ModelConfig  # noqa: E402
+from .models.rollout import RolloutConfig, kappa_feasible, rollout  # noqa: E402
 
 
 def cosine(step: int, total: int, warmup: int = 50) -> float:
@@ -110,6 +111,17 @@ def losses(model: GoalFlow, b: dict, stage: str, args) -> tuple[torch.Tensor, di
     return total, out
 
 
+def _traj_metrics(acc: dict, executed, raw, modes, mask):
+    """ADE / FDE / minADE-over-teacher-modes for the executed path (after the pure-pursuit + bicycle
+    rollout) and the raw path, against the driven teacher mode (mode 0)."""
+    for tag, tr in (("", executed), ("_raw", raw)):
+        d = (tr[:, None] - modes).norm(dim=-1)                       # (B, 8, T)
+        ade = d.mean(-1)
+        acc.setdefault(f"ADE_driven{tag}", []).append(float(ade[:, 0].mean()))
+        acc.setdefault(f"FDE_driven{tag}", []).append(float(d[:, 0, -1].mean()))
+        acc.setdefault(f"minADE_modes{tag}", []).append(float(ade.masked_fill(~mask, 1e9).min(1).values.mean()))
+
+
 def goal_mode_coverage(dis, dac, vocab, modes, n_modes, ks=(5, 10), radius=1.0, mass_radius=1.5,
                        mass_min=0.10) -> dict[str, list]:
     """Per frame with >= 2 teacher modes: do the top-k goals (final score) include a goal within
@@ -149,14 +161,13 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
         mask = torch.arange(8, device=dev)[None] < n[:, None]
         if stage in ("B", "joint"):
             r = model.plan(b["bev"], b["ego"], M=32, n_steps=1)
-            ade = (r["traj"][:, None] - modes).norm(dim=-1).mean(-1)            # (B, 8)
-            acc.setdefault("minADE_modes", []).append(float(ade.masked_fill(~mask, 1e9).min(1).values.mean()))
-            acc.setdefault("ADE_driven", []).append(float(ade[:, 0].mean()))
-            s_ade = (r["samples"][:, :, None] - modes[:, None]).norm(dim=-1).mean(-1)   # (B, M, 8)
+            _traj_metrics(acc, r["traj"], r["traj_raw"], modes, mask)
+            s_ade = (r["samples"][:, :, None] - modes[:, None]).norm(dim=-1).mean(-1)   # (B, M, 8) executed
             acc.setdefault("minADE_samples", []).append(float(s_ade.min(1).values[:, 0].mean()))
+            s_raw = (r["samples_raw"][:, :, None] - modes[:, None]).norm(dim=-1).mean(-1)
+            acc.setdefault("minADE_samples_raw", []).append(float(s_raw.min(1).values[:, 0].mean()))
             acc.setdefault("kappa_ok_raw", []).append(float(r["kappa_ok_raw"].mean()))
-            ade_raw = (r["traj_raw"][:, None] - modes).norm(dim=-1).mean(-1)
-            acc.setdefault("ADE_driven_raw", []).append(float(ade_raw[:, 0].mean()))
+            acc.setdefault("kappa_ok_raw_1.1", []).append(float(kappa_feasible(r["samples_raw"], tol=1.1).float().mean()))
         if stage in ("A", "joint"):
             dis, dac = model.scorer(*model.perceive(b["bev"], b["ego"])[:2])
             cov = goal_mode_coverage(dis, dac, model.scorer.vocab, modes, n)
@@ -166,10 +177,11 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
             acc.setdefault("goal_err", []).append(float((g[:, :2] - b["goal"][:, :2]).norm(dim=-1).mean()))
             acc.setdefault("dac_acc", []).append(float(((dac > 0).float() == b["dac"]).float().mean()))
         if stage == "reg":
-            p = model.norm.inverse(model.reg(*model.perceive(b["bev"], b["ego"])[:2]))
-            ade = (p[:, None] - modes).norm(dim=-1).mean(-1)
-            acc.setdefault("ADE_driven", []).append(float(ade[:, 0].mean()))
-            acc.setdefault("minADE_modes", []).append(float(ade.masked_fill(~mask, 1e9).min(1).values.mean()))
+            p_raw = model.norm.inverse(model.reg(*model.perceive(b["bev"], b["ego"])[:2]))
+            p_exec = rollout(p_raw, b["ego"][:, 0], b["ego"][:, 1], RolloutConfig())
+            _traj_metrics(acc, p_exec, p_raw, modes, mask)
+            acc.setdefault("kappa_ok_raw", []).append(float(kappa_feasible(p_raw).float().mean()))
+            acc.setdefault("kappa_ok_raw_1.1", []).append(float(kappa_feasible(p_raw, tol=1.1).float().mean()))
     model.train()
     res = {k: float(np.mean(v)) if len(v) else float("nan") for k, v in acc.items()}
     res["n_multimode_frames"] = float(len(acc.get("mass_on_every_mode", [])))
@@ -179,8 +191,19 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
 BEST_METRIC = {"A": "goal_err", "B": "ADE_driven", "joint": "ADE_driven", "reg": "ADE_driven"}
 
 
+def save_state(path: Path, model, opt, sched, step, total, best, bad, args, vocab):
+    """Full training state (atomic write), for mid-stage resume."""
+    tmp = path.with_suffix(".tmp")
+    torch.save(dict(state=model.state_dict(), opt=opt.state_dict(), sched=sched.state_dict(), step=step,
+                    total=total, best=best, bad=bad, cfg=asdict(model.cfg), vocab=vocab,
+                    norm_lo=model.norm.lo.cpu().numpy(), norm_hi=model.norm.hi.cpu().numpy(),
+                    args=vars(args), saved=time.time()), tmp)
+    os.replace(tmp, path)
+
+
 def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: Logger,
-                steps: int | None = None, best_path: Path | None = None, vocab=None) -> list[dict]:
+                steps: int | None = None, best_path: Path | None = None, vocab=None,
+                state_path: Path | None = None) -> list[dict]:
     steps = steps or args.steps
     budget_h = getattr(args, f"hours_{stage}", None)
     total = [steps]                      # mutable: a time budget can shrink it after warmup
@@ -200,9 +223,23 @@ def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: L
     it = infinite(train_dl)
     t0 = time.time()
     best = float("inf")
+    bad = 0                                  # evaluations without improvement (early stopping)
     t_eval = time.time()
+    t_ckpt = time.time()
     step = 0
     t_meas = None
+    if state_path is not None and state_path.exists():
+        st = torch.load(state_path, map_location=dev, weights_only=False)
+        model.load_state_dict(st["state"])
+        opt.load_state_dict(st["opt"])
+        total[0] = st["total"]
+        sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s_: cosine(s_, total[0]))
+        sched.load_state_dict(st["sched"])
+        step, best, bad = st["step"], st["best"], st["bad"]
+        budget_h = None                       # the step total was already fitted to the budget
+        print(f"[{stage}] resumed at step {step}/{total[0]} (best {BEST_METRIC[stage]} {best:.3f})", flush=True)
+        if stage == "B":
+            model.bev.eval()
     while step < total[0]:
         b = to(next(it), dev)
         with torch.autocast(device_type="cuda", enabled=use_amp):
@@ -229,20 +266,33 @@ def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: L
             print(f"[{stage}] step {step:6d}/{total[0]} loss {float(loss.detach()):.4f} " +
                   " ".join(f"{k} {float(v):.4f}" for k, v in parts.items()) +
                   f"  ({el:.0f}s, {el / (step + 1):.2f}s/step)", flush=True)
-        due = (step + 1) % args.eval_every == 0 or (args.eval_minutes and time.time() - t_eval > 60 * args.eval_minutes)
+        due = val_dl is not None and (step + 1) % args.eval_every == 0 or (args.eval_minutes and time.time() - t_eval > 60 * args.eval_minutes)
         if val_dl is not None and (due or step == total[0] - 1):
+            due = True
             t_eval = time.time()
             ev = evaluate(model, val_dl, stage, args, dev, max_batches=args.val_batches)
             log.log(f"{stage}_val", step, **ev)
             print(f"[{stage}] val @ {step + 1}: " + " ".join(f"{k} {v:.3f}" for k, v in ev.items()), flush=True)
             m = ev.get(BEST_METRIC[stage], float("inf"))
-            if best_path is not None and m < best:
-                best = m
-                save(model, best_path, args, vocab)
-                print(f"[{stage}] new best {BEST_METRIC[stage]} {m:.3f} -> {best_path.name}", flush=True)
+            if m < best:
+                best, bad = m, 0
+                if best_path is not None:
+                    save(model, best_path, args, vocab)
+                    print(f"[{stage}] new best {BEST_METRIC[stage]} {m:.3f} -> {best_path.name}", flush=True)
+            else:
+                bad += 1
             if stage == "B":
                 model.bev.eval()
+            if args.patience and bad >= args.patience:
+                print(f"[{stage}] early stop: no {BEST_METRIC[stage]} improvement in {bad} evaluations", flush=True)
+                step += 1
+                break
         step += 1
+        if state_path is not None and (time.time() - t_ckpt > 60 * args.ckpt_minutes or due):
+            save_state(state_path, model, opt, sched, step, total[0], best, bad, args, vocab)
+            t_ckpt = time.time()
+    if state_path is not None:
+        save_state(state_path, model, opt, sched, step, total[0], best, bad, args, vocab)
     return hist
 
 
@@ -276,6 +326,8 @@ def main(argv=None):
     ap.add_argument("--hours-reg", type=float, default=None)
     ap.add_argument("--hours-joint", type=float, default=None)
     ap.add_argument("--eval-minutes", type=float, default=None, help="also evaluate every N minutes")
+    ap.add_argument("--ckpt-minutes", type=float, default=30.0, help="full training-state checkpoint interval")
+    ap.add_argument("--patience", type=int, default=0, help="early stop after N evaluations without improvement")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--stages", default="A,B,reg")
     ap.add_argument("--steps", type=int, default=300)
@@ -352,7 +404,9 @@ def main(argv=None):
     log = Logger(args.out)
     summary = dict(params_M=n_par / 1e6, device=str(dev), frames=len(base), vocab=len(vocab), stages={})
     stages = args.stages.split(",")
+    t_all = time.time()
     for st in stages:
+        t_stage = time.time()
         steps = getattr(args, f"steps_{st}", None) or args.steps
         ck = args.out / ("regression.pt" if st == "reg" else f"goalflow_{st}.pt")
         best = args.out / ("regression_best.pt" if st == "reg" else f"goalflow_{st}_best.pt")
@@ -362,7 +416,8 @@ def main(argv=None):
                 print("resume: regression loaded", flush=True)
                 continue
             reg_model = GoalFlow(ModelConfig(D=args.D, regression=True), vocab, norm).to(dev)
-            hist = train_stage(reg_model, "reg", train_dl, val_dl, args, dev, log, steps, best, vocab)
+            hist = train_stage(reg_model, "reg", train_dl, val_dl, args, dev, log, steps, best, vocab,
+                               args.out / "state_reg.pt")
             save(reg_model, ck, args, vocab)
             reg_model = load(best if best.exists() else ck, dev)
         else:
@@ -371,11 +426,13 @@ def main(argv=None):
                                                  weights_only=False)["state"])
                 print(f"resume: stage {st} loaded", flush=True)
                 continue
-            hist = train_stage(model, st, train_dl, val_dl, args, dev, log, steps, best, vocab)
+            hist = train_stage(model, st, train_dl, val_dl, args, dev, log, steps, best, vocab,
+                               args.out / f"state_{st}.pt")
             save(model, ck, args, vocab)
             if best.exists():          # continue from the best checkpoint of this stage
                 model.load_state_dict(torch.load(best, map_location=dev, weights_only=False)["state"])
-        summary["stages"][st] = dict(first=hist[0], last=hist[-1])
+        summary["stages"][st] = dict(first=hist[0] if hist else None, last=hist[-1] if hist else None,
+                                     seconds=round(time.time() - t_stage))
     # final report, in the agreed order: goal multimodality, curvature feasibility, ADE
     if val_dl is not None:
         report = {}
@@ -386,6 +443,7 @@ def main(argv=None):
         if reg_model is not None:
             report["regression"] = evaluate(reg_model, val_dl, "reg", args, dev, max_batches=args.val_batches)
         summary["final_val"] = report
+    summary["train_seconds_this_run"] = round(time.time() - t_all)
     (args.out / "summary.json").write_text(json.dumps(summary, indent=1, default=float))
     if args.plots and any(s in stages for s in ("B", "joint")):
         from .viz import plot_samples

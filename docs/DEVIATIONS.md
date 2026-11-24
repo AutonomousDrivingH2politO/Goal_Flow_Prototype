@@ -222,10 +222,22 @@ Docs note: the flow-matching notes are in `docs/` as
 10. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
 11. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
 
+### Curvature-feasibility metric (reference values)
+
+`kappa_ok_raw` is the share of raw samples whose discrete curvature (16 waypoints, 0.25 s) stays within
+κ_max = tan 10° / 1.60 m at every interior point; `kappa_ok_raw_1.1` allows 1.1 × κ_max. Reference: the
+teacher's own driven trajectories (val_0001, 2,573 paths) pass 98.1% at 1.0 × and 100% at 1.1 × (the gap
+is discretisation where the teacher's steering saturates at 10°). The metric is very sensitive to
+waypoint jitter: a 3 cm lateral wiggle at 0.75 m spacing already implies about κ_max.
+
 ### Phase L2 plan (decided 2026-11-24)
 
-* Full training starts when the L1 train split is complete: on the P16v if it is ready, otherwise
-  the Mac overnight.
+* Full training (seed 0, Stage A, Stage B, regression) runs on the Mac (MPS) as soon as the L1
+  train split is complete (the P16v is not set up yet). Full training-state checkpoints at least every
+  30 min, mid-stage resume, early stopping on the validation split only (the test split is never
+  read). The 3-seed runs and ablations come later on the P16v.
+* Open-loop metrics are reported for both the raw path and the executed path (after the pure-pursuit +
+  bicycle rollout), for GoalFlow and the regression baseline alike.
 * Report order after training: (1) goal-score multimodality (cover@5 / cover@10 and mass on every
   mode, over frames with ≥ 2 teacher modes), (2) curvature-feasible share of raw samples, (3) ADE /
   FDE / minADE.
