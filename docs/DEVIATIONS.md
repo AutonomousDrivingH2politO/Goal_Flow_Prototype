@@ -22,7 +22,10 @@ feasible for Juno:
 * Measured on seeds 0–149 at L0, with the version that also reused plans and remembered blocked
   doors ("step 7"): 139/144 oracle-feasible scenes succeeded (96.5%), 0 collisions. Every failure
   braked at spawn with every door blocked by the curvature check (seeds 11, 58, 124, 134, 149).
-  Pure original design at the single 0.25 m margin: see the L0 results table (A6).
+  Pure original design at the single 0.25 m margin, seeds 0–499 at L0 (privileged, true
+  scene): **361/477 (75.7%)**, all failures braking with doors blocked by the curvature check.
+  The corridor-lattice teacher gets 474/477 (99.4%) on the same scenes
+  (`reports/lidar_demo/l0/summary.md`).
 
 **This also applies to the real AD-SEM stack.** Any planner that hands a corner-hugging polyline to
 pure pursuit on Juno with the 10° limit will, in tight door sequences, either cut corners into
@@ -94,7 +97,15 @@ sample) and require width + 0.25 m. That is clearance on the obstacle side only,
 oracle, which keeps 0 m from the edge. Found on seed 170: its only route passed a bollard 1.62 m
 from the edge, which the two-sided rule (1.665 m) called a wall.
 
-### A6. Other simulator choices
+### A6. Open issue: observed-lattice is worse at L0 than at L1/L2
+
+Observed corridor-lattice succeeds on 91.2% of feasible scenes at L0, but 97.1% at L1 and 98.1%
+at L2. 33 seeds fail only at L0, almost all stalling late (12–15 s), next to the goal line.
+Hypothesis: with noise-free edges the goal-line endpoints coincide exactly with edge points,
+giving degenerate geometry where the edges are cut and triangulated at the goal. Any noise
+breaks the tie. To fix before the L3 comparison, because it understates the baseline at L0.
+
+### A7. Other simulator choices
 
 * Juno's overhangs are not in the data sheet. Assumed symmetric: 0.6375 m front and rear of the
   axles (`configs/vehicle.yaml`, TODO(Can)). The ego frame origin is the rear-axle centre.
