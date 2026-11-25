@@ -9,7 +9,9 @@ pure-pursuit controller as the corridor baselines.
 Hit memory (safety filter only; ``memory_range`` > 0): observed LiDAR hits kept in a map of 0.2 m cells in the odom
 frame (believed, noisy, drifting pose ``obs.pose_odom``; never the true pose). A cell is used once it was hit in
 >= ``memory_min_scans`` scans, and only while it lies ahead of the rear bumper and within ``memory_range`` m of the
-car (position-based, no time limit); cells behind the bumper are dropped. Current-scan hits always count. Reason: a 0.40 m cone falls below the lowest beam within ~2.03 m of the
+car (position-based, no time limit); cells behind the bumper are dropped. With ``visibility_gate`` remembered cells
+are used only where the current scan cannot see (``unseen_mask``: within 2.1 m of the sensor, outside the FOV, or
+behind the first return along their ray); elsewhere the current scan wins. Current-scan hits always count. Reason: a 0.40 m cone falls below the lowest beam within ~2.03 m of the
 sensor, so a single scan loses it right where it matters; the corridor baseline (a) has implicit memory
 through its kept plan. The BEV input stays single-scan.
 """
@@ -33,12 +35,30 @@ class GFResult:
     info: dict = field(default_factory=dict)
 
 
+def unseen_mask(pts: np.ndarray, obs, near: float = 2.1) -> np.ndarray:
+    """(N,) bool: points (ego frame) the current scan cannot see: within ``near`` m of the sensor (blind zone and
+    below-beam zone of a 0.40 m cone), outside the horizontal FOV, or behind the first return along their ray
+    (occluded; a ray whose returns were all dropped counts as not seeing)."""
+    sx, sy = obs.sensor_xy
+    dx, dy = pts[:, 0] - sx, pts[:, 1] - sy
+    rng = np.hypot(dx, dy)
+    b = np.arctan2(dy, dx)
+    a0, st = obs.ray_angle0, obs.ray_step
+    n = len(obs.scan_ranges)
+    idx = np.round((b - a0) / st).astype(int)
+    out_fov = (idx < 0) | (idx >= n)
+    sr = np.asarray(obs.scan_ranges, float)[np.clip(idx, 0, n - 1)]
+    occluded = ~out_fov & (np.isnan(sr) | (rng > sr + 0.3))
+    return (rng < near) | out_fov | occluded
+
+
 class GoalFlowPlanner:
     name = "goalflow_l3"
 
     def __init__(self, ckpt: Path = Path("runs/l2_full_seed0/goalflow_B_best.pt"), device: str = "auto",
                  M: int = 128, goal_K: int = 3, speed: float = 3.0, seed: int = 0, memory_range: float = 4.0,
-                 memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1):
+                 memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1,
+                 visibility_gate: bool = True, memory_obs_range: float = 0.0):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
@@ -46,6 +66,8 @@ class GoalFlowPlanner:
         self.M, self.goal_K, self.speed, self.seed = M, goal_K, speed, seed
         self.memory_range, self.memory_min_scans, self.memory_cell = memory_range, memory_min_scans, memory_cell
         self.scan_dt = scan_dt
+        self.visibility_gate = visibility_gate
+        self.memory_obs_range = memory_obs_range      # > 0: only hits observed within this range of the sensor
         from ..sim.config import VehicleConfig
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
@@ -64,8 +86,12 @@ class GoalFlowPlanner:
         from ..sim.geometry import from_frame, to_frame
         pose = np.asarray(obs.pose_odom, float)
         cur = np.asarray(obs.points, float).reshape(-1, 2)
-        if len(cur):
-            W = from_frame(cur, pose)
+        store = cur
+        if self.memory_obs_range > 0 and len(cur):       # remember only near-field observations (small drift lever)
+            sx, sy = obs.sensor_xy
+            store = cur[np.hypot(cur[:, 0] - sx, cur[:, 1] - sy) <= self.memory_obs_range]
+        if len(store):
+            W = from_frame(store, pose)
             keys = set()
             for (x, y) in W:
                 k = (int(np.floor(x / self.memory_cell)), int(np.floor(y / self.memory_cell)))
@@ -87,6 +113,8 @@ class GoalFlowPlanner:
                 del self.cells[k]
             use = ~behind & (A[:, 0] >= self.memory_min_scans) & (np.hypot(loc[:, 0], loc[:, 1]) <= self.memory_range)
             rem = loc[use]
+            if self.visibility_gate and len(rem):          # the current scan wins wherever it can see
+                rem = rem[unseen_mask(rem, obs)]
         self.mem = [(self.k * self.scan_dt, from_frame(rem, pose))] if len(rem) else []
         P = np.concatenate([cur, rem]) if len(rem) else cur
         rc = self.rc

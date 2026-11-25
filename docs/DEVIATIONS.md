@@ -273,6 +273,9 @@ Docs note: the flow-matching notes are in `docs/` as
     which assumes front-face hits. When a cluster's front face is below the lowest beam or in the blind zone,
     use a two-point geometric solution or keep the tracked centre (the 287 / 451 cone grazes, 0.30-0.33 m
     offset). Config (a) stays as it is.
+16. **MPPI refinement around the chosen GoalFlow sample.** In tight gaps GoalFlow's best candidate clears the
+    true obstacles by ~0.01 m (seed 17), so the safety filter brakes; a local MPPI refinement of the chosen sample
+    could add margin. Not implemented.
 
 ### L2 findings on validation (2026-11-25)
 
@@ -364,7 +367,18 @@ cone vanished below the lowest beam, with the car crawling (1.1-1.2 m travelled)
 blocked candidates at L4. A cone-only memory was rejected: it would let a learned camera label gate which
 obstacles the filter keeps (team rule), drop ~1 in 5 cones at L4 (label flips), and forget bollards beside the
 car. Seed 17's L0 stall is mostly correct braking: the best candidate cleared the true obstacles by a median
-0.010 m, and only ~0.9 of 128 per stalled scan by more than 0.12 m (candidate quality in tight gaps). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
+0.010 m, and only ~0.9 of 128 per stalled scan by more than 0.12 m (candidate quality in tight gaps).
+
+Position-based memory without a time limit removed all collisions but stalled 18 of 39 feasible L4 scenes
+(seeds 0-39). Replay of L4 stall seeds 1, 4, 9: the blocking remembered cells lie where the current scan cannot
+see (~6 per stalled scan vs 0.1-0.6 visible), and most are not on real obstacles (median 0.51 / 0.14 / 0.96 m from
+the nearest true surface): cells stored 10-20 m ahead are displaced by accumulated heading drift when mapped back.
+
+**Pre-set rule (2026-11-25, before the smoke test):** two memory variants run the same 80-episode smoke test
+(seeds 0-39, L0 and L4): (i) visibility gate (remembered cells used only where the current scan cannot see), and
+(ii) near-observation memory (only hits observed within 4 m of the sensor are remembered; position-based
+retention and the 2-scan rule in both). The full run uses the variant with the fewest collisions + stalls over
+those 80 episodes (feasible scenes; ties: fewer collisions). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
 beam within ~2.03 m of the sensor, so a single scan loses it exactly when the car reaches it (the closed-loop
 smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
 kept plan. If no candidate survives the filter, the planner brakes.

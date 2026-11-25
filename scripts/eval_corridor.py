@@ -41,7 +41,8 @@ LABELS = {
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
-    "goalflow_l3": "GoalFlow, closed loop (NMS-K3 + safety, shadow off, 1 step, single-scan BEV)",
+    "goalflow_l3": "GoalFlow, closed loop (NMS-K3 + safety, shadow off, 1 step, single-scan BEV; memory: visibility gate)",
+    "goalflow_l3_nearobs": "GoalFlow, closed loop (as goalflow_l3; memory: only hits observed within 4 m)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -70,10 +71,13 @@ _GF = None
 
 def make_planner(name: str):
     global _GF
-    if name == "goalflow_l3":         # closed-loop GoalFlow, L3 configuration (one model per worker)
+    gf_variants = {"goalflow_l3": dict(),                                            # visibility gate (default)
+                   "goalflow_l3_nearobs": dict(visibility_gate=False, memory_obs_range=4.0)}
+    if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
         if _GF is None:
             from gfsem.planners.goalflow_planner import GoalFlowPlanner
-            _GF = GoalFlowPlanner()
+            _GF = GoalFlowPlanner(**gf_variants[name])
+            _GF.name = name
         return _GF
     from gfsem.planners.corridor import CorridorConfig, CorridorPlanner
     from gfsem.planners.corridor_lattice import LatticeCorridorPlanner, l3_config
