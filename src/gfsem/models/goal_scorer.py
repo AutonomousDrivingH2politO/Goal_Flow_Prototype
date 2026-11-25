@@ -47,17 +47,37 @@ def kmeans_vocabulary(endpoints: np.ndarray, n: int, iters: int = 30, seed: int 
     return C.astype(np.float32)
 
 
+class CrossAttnLayer(nn.Module):
+    """Pre-norm cross-attention + FFN, no self-attention among the queries (each goal is scored
+    independently given the BEV). Avoids the N x N attention map over the vocabulary."""
+
+    def __init__(self, D: int, heads: int):
+        super().__init__()
+        self.n1 = nn.LayerNorm(D)
+        self.att = nn.MultiheadAttention(D, heads, batch_first=True)
+        self.n2 = nn.LayerNorm(D)
+        self.ff = nn.Sequential(nn.Linear(D, 4 * D), nn.GELU(), nn.Linear(4 * D, D))
+
+    def forward(self, q, mem):
+        q = q + self.att(self.n1(q), mem, mem, need_weights=False)[0]
+        return q + self.ff(self.n2(q))
+
+
 class GoalScorer(nn.Module):
     """Queries = MLP(sinusoidal(vocab)) + F_ego; transformer decoder over F_bev; dis and dac heads."""
 
     def __init__(self, vocab: np.ndarray, D: int = 256, layers: int = 3, heads: int = 8,
-                 enc_dim: int = 32):
+                 enc_dim: int = 32, self_attn: bool = False):
         super().__init__()
         self.register_buffer("vocab", torch.as_tensor(vocab, dtype=torch.float32))   # (N, 3) ego frame
         self.enc_dim = enc_dim
         self.q_mlp = mlp(3 * enc_dim, D, D, layers=2)
-        dec = nn.TransformerDecoderLayer(D, heads, 4 * D, dropout=0.0, batch_first=True, norm_first=True)
-        self.decoder = nn.TransformerDecoder(dec, layers)
+        self.self_attn = self_attn
+        if self_attn:   # standard decoder (self-attention among all N goal queries): N x N memory
+            dec = nn.TransformerDecoderLayer(D, heads, 4 * D, dropout=0.0, batch_first=True, norm_first=True)
+            self.decoder = nn.TransformerDecoder(dec, layers)
+        else:
+            self.decoder = nn.ModuleList([CrossAttnLayer(D, heads) for _ in range(layers)])
         self.head_dis = mlp(D, D, 1, layers=2)
         self.head_dac = mlp(D, D, 1, layers=2)
 
@@ -72,7 +92,12 @@ class GoalScorer(nn.Module):
         B = F_bev.shape[0]
         P = self.vocab[None].expand(B, -1, -1) if points is None else points
         q = self.encode_points(P) + F_ego[:, None, :]
-        h = self.decoder(q, F_bev)
+        if self.self_attn:
+            h = self.decoder(q, F_bev)
+        else:
+            h = q
+            for layer in self.decoder:
+                h = layer(h, F_bev)
         return self.head_dis(h).squeeze(-1), self.head_dac(h).squeeze(-1)
 
 

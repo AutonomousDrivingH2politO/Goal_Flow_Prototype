@@ -33,6 +33,7 @@ class ModelConfig:
     T: int = 16
     heads: int = 8
     scorer_layers: int = 3
+    scorer_self_attn: bool = False   # True = standard decoder with N x N goal self-attention (ablation)
     gen_layers: int = 4
     env_queries: int = 16
     sigma: float = 0.1
@@ -54,7 +55,7 @@ class GoalFlow(nn.Module):
         self.norm = normalizer
         self.bev = BEVEncoder(6, cfg.D)
         self.ego = EgoEncoder(cfg.D)
-        self.scorer = GoalScorer(vocab, cfg.D, cfg.scorer_layers, cfg.heads)
+        self.scorer = GoalScorer(vocab, cfg.D, cfg.scorer_layers, cfg.heads, self_attn=cfg.scorer_self_attn)
         self.gen = FlowGenerator(cfg.T, cfg.D, cfg.heads, cfg.gen_layers, cfg.env_queries)
         self.aux = AuxBEVHead(cfg.D) if cfg.aux_head else None
         self.reg = RegressionHead(cfg.T, cfg.D, cfg.heads) if cfg.regression else None

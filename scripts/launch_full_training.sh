@@ -7,6 +7,8 @@ cd "$(dirname "$0")/.."
 OUT=${OUT:-runs/l2_full_seed0}
 SEED=${SEED:-0}
 export PYTHONPATH=src OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTORCH_ENABLE_MPS_FALLBACK=1
+# MPS memory cap: fail cleanly instead of paging for hours (16 GB unified memory)
+export PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.8 PYTORCH_MPS_LOW_WATERMARK_RATIO=0.7
 echo "$(date) waiting for 300 train shards and scenes_train.npz"
 while true; do
   n=$(ls data/sim/train_*.npz 2>/dev/null | wc -l | tr -d ' ')
@@ -23,6 +25,6 @@ nice -n 10 .venv/bin/python -m gfsem.train \
   --stages A,B,reg --steps 300000 --hours-A 3.0 --hours-B 3.5 --hours-reg 1.5 \
   --bs 64 --workers 5 --threads 2 --eval-every 1000000 --eval-minutes 30 \
   --val-frames 4000 --val-batches 1000 --vocab-n 1024 --seed "$SEED" --log-every 50 \
-  --ckpt-minutes 30 --patience 4 --w5 0.1 \
+  --ckpt-minutes 30 --patience 4 --w5 0.1 --accum-A 2 \
   --plots 8 --resume --out "$OUT" > "$OUT/train.log" 2>&1
 echo "$(date) training finished with exit code $?"

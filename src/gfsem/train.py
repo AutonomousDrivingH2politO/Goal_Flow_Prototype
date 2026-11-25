@@ -280,10 +280,26 @@ def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: L
             model.bev.eval()
     while step < total[0]:
         b = to(next(it), dev)
-        with torch.autocast(device_type="cuda", enabled=use_amp):
-            loss, parts = losses(model, b, stage, args)
+        accum = getattr(args, f"accum_{stage}", None) or 1
         opt.zero_grad(set_to_none=True)
-        scaler.scale(loss).backward()
+        if accum > 1:   # gradient accumulation: same effective batch, 1/accum of the activation memory
+            n = b["bev"].shape[0]
+            loss_sum, parts_sum = 0.0, {}
+            for c in range(accum):
+                sl = slice(c * n // accum, (c + 1) * n // accum)
+                mb = {k: (v[sl] if torch.is_tensor(v) and v.dim() > 0 and v.shape[0] == n else v) for k, v in b.items()}
+                with torch.autocast(device_type="cuda", enabled=use_amp):
+                    l_c, p_c = losses(model, mb, stage, args)
+                scaler.scale(l_c / accum).backward()
+                loss_sum += float(l_c.detach()) / accum
+                for k, v in p_c.items():
+                    parts_sum[k] = parts_sum.get(k, 0.0) + float(v) / accum
+            loss = torch.tensor(loss_sum)
+            parts = parts_sum
+        else:
+            with torch.autocast(device_type="cuda", enabled=use_amp):
+                loss, parts = losses(model, b, stage, args)
+            scaler.scale(loss).backward()
         scaler.unscale_(opt)
         torch.nn.utils.clip_grad_norm_(params, 1.0)
         scaler.step(opt)
@@ -366,6 +382,10 @@ def main(argv=None):
     ap.add_argument("--eval-minutes", type=float, default=None, help="also evaluate every N minutes")
     ap.add_argument("--ckpt-minutes", type=float, default=30.0, help="full training-state checkpoint interval")
     ap.add_argument("--patience", type=int, default=0, help="early stop after N evaluations without improvement")
+    ap.add_argument("--accum-A", type=int, default=1, help="gradient accumulation micro-batches in stage A")
+    ap.add_argument("--accum-B", type=int, default=1)
+    ap.add_argument("--accum-reg", type=int, default=1)
+    ap.add_argument("--accum-joint", type=int, default=1)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--stages", default="A,B,reg")
     ap.add_argument("--steps", type=int, default=300)
