@@ -39,6 +39,7 @@ def main():
     ap.add_argument("--bs", type=int, default=64)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--max-batches", type=int, default=None, help="for quick checks; default: every frame")
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l2_full"))
     a = ap.parse_args()
     dev = pick_device("auto")
@@ -52,7 +53,7 @@ def main():
     dl = DataLoader(ds, batch_size=a.bs, shuffle=False, num_workers=a.workers,
                     multiprocessing_context="spawn" if a.workers else None)
     args = argparse.Namespace(T=0.5, w5=0.1, w_aux=1.0)
-    n_batches = len(dl)
+    n_batches = min(len(dl), a.max_batches or len(dl))
     print(f"{a.split}: {len(ds)} frames, {n_batches} batches, device {dev}", flush=True)
     rep, t0 = {}, time.time()
     for name, model, stage in (("goal", gf, "A"), ("trajectory", gf, "B"), ("regression", rg, "reg")):
