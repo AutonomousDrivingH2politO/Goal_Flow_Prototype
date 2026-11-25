@@ -192,7 +192,8 @@ class GoalFlow(nn.Module):
              use_scorer: bool = True, use_dac: bool = True, use_goal: bool = True,
              roll: RolloutConfig | None = RolloutConfig(), goal_K: int = 1, goal_sep: float = 1.5,
              goal_floor: float = 3.0, l4: float = 1.0, safety: bool = False,
-             route_goals: torch.Tensor | None = None, safety_slack: float = 0.1):
+             route_goals: torch.Tensor | None = None, safety_slack: float = 0.1,
+             safety_hits: torch.Tensor | None = None):
         """Full GoalFlow (M3). Flags give the paper's ablations:
         M0: use_goal=False -> mean of goal-free samples; M1: use_dac=False, use_scorer=False (mean of
         goal-conditioned samples); M2: use_scorer=False; M3: all on.
@@ -254,7 +255,8 @@ class GoalFlow(nn.Module):
         if l3 > 0 and prev_path is not None:
             f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
         if safety:                                                # observed hits only (no privileged input)
-            safe = ~observed_collision(S, bev[:, 0], cell_slack=safety_slack)
+            hits = bev[:, 0] if safety_hits is None else safety_hits     # (B, H, W); default: this scan only
+            safe = ~observed_collision(S, hits, cell_slack=safety_slack)
             any_safe = safe.any(1, keepdim=True)
             f = torch.where(safe | ~any_safe, f, torch.full_like(f, -1e9))
             out.update(safe=safe, no_safe=~any_safe[:, 0])

@@ -354,6 +354,15 @@ at L3-L4. Stall ablation of (b) at L4 (success / collision / exit / stalled %, s
   baselines are frozen as pre-registered: (a) at L2-L4, (b) at L0-L1, (c) reported as the same-information
   baseline. Next: the closed-loop GoalFlow planner.
 
+### Closed-loop GoalFlow: hit memory in the safety filter (2026-11-25)
+
+GoalFlow's safety filter checks candidates against the current scan's observed hits plus the hits of the last
+1.5 s, stored in the odom frame with the believed (noisy, drifting) pose and mapped into the current ego frame;
+never the true pose. The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
+beam within ~2.03 m of the sensor, so a single scan loses it exactly when the car reaches it (the closed-loop
+smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
+kept plan. If no candidate survives the filter, the planner brakes.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

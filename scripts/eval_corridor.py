@@ -41,6 +41,7 @@ LABELS = {
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
+    "goalflow_l3": "GoalFlow, closed loop (NMS-K3 + safety, shadow off, 1 step, single-scan BEV)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -64,7 +65,16 @@ def _scene(seed: int):
     return generate_scene(seed)
 
 
+_GF = None
+
+
 def make_planner(name: str):
+    global _GF
+    if name == "goalflow_l3":         # closed-loop GoalFlow, L3 configuration (one model per worker)
+        if _GF is None:
+            from gfsem.planners.goalflow_planner import GoalFlowPlanner
+            _GF = GoalFlowPlanner()
+        return _GF
     from gfsem.planners.corridor import CorridorConfig, CorridorPlanner
     from gfsem.planners.corridor_lattice import LatticeCorridorPlanner, l3_config
     from gfsem.sim.closed_loop import CorridorObserved, CorridorPrivileged
@@ -101,22 +111,30 @@ def run_one(job: tuple[str, int, str]) -> dict:
     name, seed, level = job
     scene = _scene(seed)
     P = make_planner(name)
-    r = run_episode(scene, P, level)
+    gf = name.startswith("goalflow")
+    r = run_episode(scene, P, level, record=gf)
     row = r.row()
-    stats = getattr(P.p, "stats", [])
+    inner = getattr(P, "p", P)
+    stats = getattr(inner, "stats", [])
+    if gf:
+        from gfsem.planners.goalflow_planner import collision_cause
+        from gfsem.sim.config import SimConfig
+        cfg = SimConfig()
+        row["collision_cause"] = (collision_cause(inner, scene, r.trajectory[-1, :3], cfg.vehicle, cfg.lidar)
+                                  if r.outcome == "collision" else "")
     row["layout"] = scene.layout
-    row["fail_cause"] = ";".join(f"{k}" for k in getattr(P.p, "fail_causes", {}) or [])
+    row["fail_cause"] = ";".join(f"{k}" for k in getattr(inner, "fail_causes", {}) or [])
     row["triggers"] = dict(Counter(t for t, _ in stats))
     row["plan_times"] = stats
-    row["plan_expansions"] = list(getattr(P.p, "expansions", []))
-    ev = getattr(P.p, "events", {}) or {}
+    row["plan_expansions"] = list(getattr(inner, "expansions", []))
+    ev = getattr(inner, "events", {}) or {}
     row["guard_refusals"] = int(ev.get("guard_refusal", 0))       # goal-cut guard: brake instead of a bad line
     row["no_edges_brakes"] = int(ev.get("no_edges", 0))
     row["cache_skipped_scans"] = int(ev.get("cache_hit", 0))      # replans skipped by the failed-search cache
     row["hold_scans"] = int(ev.get("hold", 0))                    # plans found but held (waiting for confirmation)
     row["held_scans"] = int(ev.get("held_scans", 0))              # scans spent braked / held since a brake
     row["events"] = " ".join(f"{k}:{v}" for k, v in sorted(ev.items()))
-    row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(P.p, "kappa_log", []))
+    row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(inner, "kappa_log", []))
     return row
 
 
