@@ -378,7 +378,11 @@ the nearest true surface): cells stored 10-20 m ahead are displaced by accumulat
 (seeds 0-39, L0 and L4): (i) visibility gate (remembered cells used only where the current scan cannot see), and
 (ii) near-observation memory (only hits observed within 4 m of the sensor are remembered; position-based
 retention and the 2-scan rule in both). The full run uses the variant with the fewest collisions + stalls over
-those 80 episodes (feasible scenes; ties: fewer collisions). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
+those 80 episodes (feasible scenes; ties: fewer collisions).
+**Result:** near-observation memory: L0 37 / 0 / 2 / 0, L4 35 / 0 / 4 / 0 (success / collision / stalled / exit,
+feasible scenes), 6 collisions + stalls, "no safe candidate" brakes 3.0% of replans; visibility gate: L0
+38 / 0 / 1 / 0, L4 19 / 0 / 20 / 0, 21 collisions + stalls, 7.6%. **The full run uses the near-observation memory**
+(`eval_corridor.py --planners goalflow_l3_nearobs`). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
 beam within ~2.03 m of the sensor, so a single scan loses it exactly when the car reaches it (the closed-loop
 smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
 kept plan. If no candidate survives the filter, the planner brakes.
