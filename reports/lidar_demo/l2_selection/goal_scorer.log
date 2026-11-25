@@ -1,5 +1,5 @@
 val: 66063 frames, 517 batches, vocab 1024 y in [-6.56, 6.57] x in [0.00, 12.00]
-/Users/canozaydin/Projects/H2Polit0/Goal_Flow_Prototype/scripts/eval_goal_scorer.py:130: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:219.)
+scripts/eval_goal_scorer.py:130: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at <local path>:219.)
   Et = torch.as_tensor(E3, dtype=torch.float32, device=dev)
   batch 1/517  0.1 min  eta 75.2 min
   batch 21/517  1.0 min  eta 24.2 min

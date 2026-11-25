@@ -297,6 +297,35 @@ on every rate, so the filter uses cell_slack = 0 (changed after seeing these num
 
 
 
+### L2 selection decisions (2026-11-25; `reports/lidar_demo/l2_selection/REPORT.md`)
+
+* **GoalFlow configuration for L3: NMS-K3 goals + safety filter, shadow path off, 1 Euler step, M = 128.**
+  All 11,331 validation frames, open loop: collisions M3 0.79% -> NMS-K3 + safety 0.59% (paired 41 vs 18
+  frames, exact McNemar p = 0.004); main path only 0.36% (vs M3's main path 0.66%: 37 vs 3, p = 2e-8).
+  M3 + safety = M3 (collapsed samples leave no safe alternative). The shadow switch fires in 305 frames (near
+  g*), collides there in 23 frames vs 8 for the main path, and bypasses the safety filter, so it is off.
+* **Route-based goal selection (item 7): parked.** Route goals from single-scan observed corridors displace
+  g* (g* collision 2.8% vs 0.2% for NMS-K). Likely cause: corridors of reconverging routes share the region
+  past the obstacles, so few goals are exclusive to one route; about half the slots fell back to the best goal
+  anywhere in the corridor, replacing the scorer's best goal with a worse one.
+* **Euler steps: keep n = 1.** Raw samples within kappa_max: 63% / 91% / 95% for n = 1 / 2 / 4 (1.1x: 72% /
+  94% / 97%); Mac throughput (batch 32, MPS) 22.7 / 38.6 / 71.0 ms per frame. Executed paths are drivable for
+  every n (rollout before scoring); ADE and collisions do not change.
+* **Honest gap:** the observed corridor planner (cold, single scan) collides in 0.07% of frames (braking in
+  3.8%) against 0.36-0.59% for GoalFlow, so "collisions <= either baseline" is not met open loop. GoalFlow
+  beats regression (3.17%). The closed-loop L3 comparison, with identical tracked perception for both, decides.
+
+### Real-stack note: near-field visibility of the EMX (2026-11-25)
+
+With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
+-12 deg): the 1.5 m blind zone applies to every obstacle and reaches ~0.86 m past the front bumper; in addition,
+a 0.40 m cone is invisible within 0.70 / tan 19 deg = 2.03 m of the sensor, because its top is below the
+lowest beam (-19 deg absolute). Obstacles near the car therefore need persistence (tracking), not just the
+current scan; in simulation this caused the 287 / 451 cone grazes. This bears on the EMX mounting decision and
+on the AD-SEM costmap's obstacle persistence (no changes to AD-SEM from here).
+
+### Curvature-feasibility metric (reference values)
+
 `kappa_ok_raw` is the share of raw samples whose discrete curvature (16 waypoints, 0.25 s) stays within
 κ_max = tan 10° / 1.60 m at every interior point; `kappa_ok_raw_1.1` allows 1.1 × κ_max. Reference: the
 teacher's own driven trajectories (val_0001, 2,573 paths) pass 98.1% at 1.0 × and 100% at 1.1 × (the gap

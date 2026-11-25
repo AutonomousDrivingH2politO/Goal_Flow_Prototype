@@ -16,3 +16,6 @@ reports/videos/
 docs/*.pdf
 reports/lidar_demo/viewer/
 reports/lidar_demo/*/plan_times.csv
+
+# evaluation run logs can contain local paths (warnings, tracebacks): keep them local
+reports/lidar_demo/**/*.log
