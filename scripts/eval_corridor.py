@@ -99,6 +99,10 @@ def run_one(job: tuple[str, int, str]) -> dict:
     row["triggers"] = dict(Counter(t for t, _ in stats))
     row["plan_times"] = stats
     row["plan_expansions"] = list(getattr(P.p, "expansions", []))
+    ev = getattr(P.p, "events", {}) or {}
+    row["guard_refusals"] = int(ev.get("guard_refusal", 0))       # goal-cut guard: brake instead of a bad line
+    row["no_edges_brakes"] = int(ev.get("no_edges", 0))
+    row["events"] = " ".join(f"{k}:{v}" for k, v in sorted(ev.items()))
     row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(P.p, "kappa_log", []))
     return row
 
@@ -163,6 +167,17 @@ def summarise(rows: list[dict], out: Path, seeds: list[int], levels: list[str], 
             L.append(f"| {LABELS[name]} | {lvl} | {len(allt) / len(rs):.0f} | {np.mean(allt):.1f} "
                      f"| {np.percentile(allt, 95):.1f} | {np.max(allt):.0f} | {len(nk) / len(rs):.1f} "
                      f"| {np.mean(nk) if nk else 0:.1f} | {np.percentile(nk, 95) if nk else 0:.1f} | {tr} /run |")
+    # goal-cut guard refusals (observed configs): brakes because no observed edge reaches past the car's front
+    L.append("\n## Goal-cut guard refusals and no-edge brakes (observed configs)\n")
+    L.append("| planner | noise | episodes with a refusal | refusal brakes / run | no-edge brakes / run |")
+    L.append("|---|---|---|---|---|")
+    for name in LABELS:
+        for lvl in levels:
+            rs = by.get((name, lvl))
+            if not rs or "guard_refusals" not in rs[0]:
+                continue
+            L.append(f"| {LABELS[name]} | {lvl} | {sum(r['guard_refusals'] > 0 for r in rs)} / {len(rs)} "
+                     f"| {np.mean([r['guard_refusals'] for r in rs]):.2f} | {np.mean([r['no_edges_brakes'] for r in rs]):.2f} |")
     # teacher failures
     for name in ("teacher", "funnel_priv"):
         rs = by.get((name, "L0"), [])

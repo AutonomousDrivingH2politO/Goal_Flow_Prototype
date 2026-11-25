@@ -411,6 +411,10 @@ class LatticeCorridorPlanner(CorridorPlanner):
         G = self._build(inp)
         if G is None:
             self.plan_w = None
+            if getattr(self, "guard_refused", False):
+                self.events["guard_refusal"] += 1
+                return self._result(None, "brake", t0, reason="goal-cut guard refusal")
+            self.events["no_edges"] += 1
             return self._result(None, "brake", t0, reason="no edges")
         world = self.world(G)
 

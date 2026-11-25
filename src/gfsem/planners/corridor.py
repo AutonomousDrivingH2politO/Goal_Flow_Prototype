@@ -373,6 +373,7 @@ class CorridorPlanner:
     # -- graph construction
     def _build(self, inp: PlannerInput):
         cfg, veh = self.cfg, self.veh
+        self.guard_refused = False
         if len(inp.left) < 2 or len(inp.right) < 2:
             return None
         left = _extend_back(inp.left[np.argsort(inp.left[:, 0])], cfg.back_x)
@@ -399,6 +400,7 @@ class CorridorPlanner:
                 left, gL = _guard_cut(left, inp.left[np.argsort(inp.left[:, 0])], cfg.back_x, x_min, gL)
                 right, gR = _guard_cut(right, inp.right[np.argsort(inp.right[:, 0])], cfg.back_x, x_min, gR)
                 if left is None or right is None:
+                    self.guard_refused = True        # logged by the planner (events["guard_refusal"])
                     return None
         else:
             # frontier: shorter side's end (1 m back), closest point on the other side
