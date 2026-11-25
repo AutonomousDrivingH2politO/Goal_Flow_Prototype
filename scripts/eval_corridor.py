@@ -38,7 +38,9 @@ LABELS = {
     "teacher": "corridor-lattice, privileged (teacher)",
     "observed": "corridor-lattice, observed, pre-L3 (50e9ad9)",
     "observed_stubfix": "corridor-lattice, observed, pre-L3 + goal-line stub fix (a)",
-    "observed_l3": "corridor-lattice, observed, stub fix + L3 (b; baseline to beat)",
+    "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
+    "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
+    "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
     "funnel_priv": "corridor-funnel (original design), privileged",
     "funnel_obs": "corridor-funnel (original design), observed",
 }
@@ -71,6 +73,12 @@ def make_planner(name: str):
     if name == "observed_l3":         # config (b): stub fix + approved L3 set, no time budget
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config()), name)
+    if name == "observed_l3_noedge":  # config (c): (b) without edge memory (fair vs single-scan GoalFlow BEV)
+        return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
+                                                       lcfg=l3_config(edge_memory=False)), name)
+    if name == "observed_l3_notrack": # config (d): (b) without obstacle tracking
+        return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
+                                                       lcfg=l3_config(tracking=False)), name)
     if name == "funnel_priv":
         return CorridorPrivileged(CorridorPlanner(mode="privileged"), name)
     if name == "funnel_obs":

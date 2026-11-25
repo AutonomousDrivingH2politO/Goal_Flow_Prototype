@@ -166,13 +166,16 @@ def _cut(e: np.ndarray, s_cut: float) -> np.ndarray:
 
 def _guard_cut(cut: np.ndarray, full: np.ndarray, x_back: float, x_min: float, g_end: np.ndarray):
     """If an edge cut at the goal line ends before x = x_min (ego frame), re-cut the full edge where it
-    first reaches x_min instead (or keep it whole if it never does). Returns (edge, goal endpoint)."""
+    first reaches x_min instead. Returns (edge, goal endpoint), or (None, None) if the edge never reaches
+    x_min."""
     if cut[-1, 0] >= x_min:
         return cut, g_end
     e = _extend_back(full, x_back)
     ahead = np.nonzero(e[:, 0] >= x_min)[0]
     if not len(ahead):
-        return e, e[-1].copy()
+        # no observed edge reaches past the car's front: no goal line may end behind the front (poses past
+        # an oblique line would skip the track-exit test), so the caller refuses to build (brake)
+        return None, None
     s = _arclen(e)
     i = int(ahead[0])
     if i == 0:
@@ -395,6 +398,8 @@ class CorridorPlanner:
                 x_min = veh.body_x[1] + cfg.goal_cut_guard
                 left, gL = _guard_cut(left, inp.left[np.argsort(inp.left[:, 0])], cfg.back_x, x_min, gL)
                 right, gR = _guard_cut(right, inp.right[np.argsort(inp.right[:, 0])], cfg.back_x, x_min, gR)
+                if left is None or right is None:
+                    return None
         else:
             # frontier: shorter side's end (1 m back), closest point on the other side
             if sL[-1] - 1.0 <= sR[-1] - 1.0:
