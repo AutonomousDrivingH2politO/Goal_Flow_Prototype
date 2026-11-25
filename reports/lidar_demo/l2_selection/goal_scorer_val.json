@@ -185,5 +185,6 @@
  "l_mix_all_frames": 5.821385043514014,
  "H_mix_all_frames": 5.533931334791782,
  "l_mix_distinct_multi": 6.6535676118770715,
- "H_mix_distinct_multi": 6.101195951531592
+ "H_mix_distinct_multi": 6.101195951531592,
+ "caveat_cover": "cover@k counts a goal within 1.0 m of a route endpoint; with the 1.5 m distinct-route rule one goal halfway between two routes can cover both (no one-to-one matching in this run)"
 }

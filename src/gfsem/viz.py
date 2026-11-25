@@ -66,7 +66,7 @@ def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None,
         nm = int(b["n_modes"])
         for j in range(nm):
             m = b["modes"][j].numpy()
-            ax.plot(m[:, 1], m[:, 0], "c--", lw=1.5, zorder=4, label="teacher modes" if j == 0 else None)
+            ax.plot(m[:, 1], m[:, 0], "c--", lw=1.6, zorder=7, label="teacher modes (drawn on top)" if j == 0 else None)
         ax.plot(traj[:, 1], traj[:, 0], "r-", lw=2.5, zorder=5, label="GoalFlow selected (executed)")
         if traj_raw is not None:
             ax.plot(traj_raw[:, 1], traj_raw[:, 0], "r--", lw=1.0, zorder=5, label="GoalFlow selected (raw)")
@@ -83,8 +83,11 @@ def plot_samples(model, ds, out: Path, n: int = 6, device="cpu", reg_model=None,
         ax.set_ylim(-2, 18)
         ax.set_xlabel("y [m] (left is +)")
         ax.set_ylabel("x [m] (forward)")
-        ax.set_title(f"frame {int(b['idx'])} seed {int(b['seed'])}: {nm} teacher mode(s), {M} samples (executed)",
-                     fontsize=10)
+        ends = S[:, -1]
+        near = [int((np.hypot(*(ends - b["modes"][j].numpy()[-1]).T) <= 1.0).sum()) for j in range(nm)]
+        ax.set_title(f"frame {int(b['idx'])} seed {int(b['seed'])}: {nm} teacher mode(s), {len(S)} samples (executed)\n"
+                     f"sample endpoint std y = {ends[:, 1].std():.2f} m; samples within 1 m of each mode: "
+                     f"{', '.join(map(str, near))}", fontsize=9)
         h, _ = ax.get_legend_handles_labels()
         ax.legend(handles=h[:1] + [sample_handle] + h[1:] + bg_handles, loc="upper center", bbox_to_anchor=(0.5, -0.09), ncol=2, fontsize=6.5,
                   frameon=False)

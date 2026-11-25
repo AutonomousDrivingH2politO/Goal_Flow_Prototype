@@ -16,7 +16,10 @@ Reported:
     goal already taken)
   * rank of the best goal near each route (within 1.0 m) in the plain and suppressed orders
   * l_dis against each route's soft target (T = 0.5 m), next to its floor (the target's entropy), and
-    against the mixture target (mean of the distinct routes' soft targets)
+    against the mixture target (mean of the distinct routes' soft targets), and (added 2026-11-25 after the
+    first run, for later runs) against the mixture over all stored modes, which is what training drew
+  Caveat: cover@k uses a 1.0 m radius per route endpoint with 1.5 m distinct-route separation, so one goal
+  halfway between two routes can cover both; the selection evaluation adds a one-to-one version.
 Validation only.
 """
 from __future__ import annotations
@@ -95,7 +98,7 @@ def main():
     # per-route records
     R = {k: [] for k in ("frame", "j", "driven", "distinct", "n_modes", "n_distinct", "nn_xy", "nn_metric",
                          "rank_plain", "rank_supp", "l_dis", "H", "end_y")}
-    Fr = {k: [] for k in {"n_modes", "n_distinct", "l_mix", "H_mix"}
+    Fr = {k: [] for k in {"n_modes", "n_distinct", "l_mix", "H_mix", "l_mix_allmodes", "H_mix_allmodes"}
           | {f"cover{s}@{k}_{w}" for s in ("", "_supp") for k in KS for w in ("all", "distinct")}}
     t0 = time.time()
     with torch.no_grad():
@@ -139,6 +142,9 @@ def main():
                 l_dis = -(tgt * logp[i][None]).sum(-1)
                 H = -(tgt * tgt.clamp_min(1e-30).log()).sum(-1)
                 mix = tgt[torch.as_tensor(dm, device=dev)].mean(0)
+                mix_all = tgt.mean(0)                    # uniform over all stored modes (= training's draw)
+                Fr["l_mix_allmodes"].append(float(-(mix_all * logp[i]).sum()))
+                Fr["H_mix_allmodes"].append(float(-(mix_all * mix_all.clamp_min(1e-30).log()).sum()))
                 R["frame"] += [int(idx[i])] * m
                 R["j"] += list(range(m))
                 R["driven"] += [j == 0 for j in range(m)]
@@ -213,6 +219,13 @@ def main():
     out["H_mix_all_frames"] = float(Fr["H_mix"].mean())
     out["l_mix_distinct_multi"] = float(Fr["l_mix"][fd].mean())
     out["H_mix_distinct_multi"] = float(Fr["H_mix"][fd].mean())
+    out["l_mix_allmodes_all_frames"] = float(Fr["l_mix_allmodes"].mean())
+    out["H_mix_allmodes_all_frames"] = float(Fr["H_mix_allmodes"].mean())
+    out["l_mix_allmodes_multi"] = float(Fr["l_mix_allmodes"][fm].mean())
+    out["H_mix_allmodes_multi"] = float(Fr["H_mix_allmodes"][fm].mean())
+    out["caveat_cover"] = ("cover@k counts a goal within 1.0 m of a route endpoint; with the 1.5 m distinct-route "
+                           "rule one goal halfway between two routes can cover both (no one-to-one matching here; "
+                           "eval_selection.py adds a one-to-one version)")
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "goal_scorer_val.json").write_text(json.dumps(out, indent=1))
     np.savez_compressed(a.out / "goal_scorer_val_routes.npz", **R)
