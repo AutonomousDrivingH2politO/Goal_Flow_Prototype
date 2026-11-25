@@ -1,0 +1,3 @@
+First 12 frames of data/sim/val_0000.npz (stored order) with >= 2 teacher modes: [6, 7, 40, 41, 43, 45, 46, 47, 95, 96, 97, 98]
+GoalFlow: runs/l2_full_seed0/goalflow_B_best.pt
+Regression: runs/l2_full_seed0/regression_best.pt
