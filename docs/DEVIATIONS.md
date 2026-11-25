@@ -97,13 +97,39 @@ sample) and require width + 0.25 m. That is clearance on the obstacle side only,
 oracle, which keeps 0 m from the edge. Found on seed 170: its only route passed a bollard 1.62 m
 from the edge, which the two-sided rule (1.665 m) called a wall.
 
-### A6. Open issue: observed-lattice is worse at L0 than at L1/L2
+### A6. Observed-lattice is worse at L0 than at L1/L2: two edge-test artefacts (analysed 2026-11-25)
 
-Observed corridor-lattice succeeds on 91.2% of feasible scenes at L0, but 97.1% at L1 and 98.1%
-at L2. 33 seeds fail only at L0, almost all stalling late (12–15 s), next to the goal line.
-Hypothesis: with noise-free edges the goal-line endpoints coincide exactly with edge points,
-giving degenerate geometry where the edges are cut and triangulated at the goal. Any noise
-breaks the tie. To fix before the L3 comparison, because it understates the baseline at L0.
+Observed corridor-lattice succeeded on 91.2% of feasible scenes at L0 but 97.1% at L1 and 98.1% at L2
+(3513584); 33 seeds failed only at L0. Full analysis: `reports/lidar_demo/l0/a6/README.md` (original
+planner, worktree at bb0a9c1 = 50e9ad9 planner code, no L3 additions). With the edge-fill fix (A6b) 9 of the
+33 already succeed at L0. The rest:
+
+* **Goal-line edge stub (10 seeds; first brake 0.1-1.6 m before the goal).** On a curved track the goal
+  line is oblique in the ego frame; after the observed edges are cut at it, one side keeps a 2-point stub
+  (~0.15 m) at the line's end. The track-exit test in `CollisionWorld.clearance` (corner behind the inward
+  normal of the nearest edge point) then puts all four corners "outside": the car's own pose is a track
+  exit and every replan is rejected.
+* **Fill edge inside the true edge beside the car (7 seeds; 3.7-20 m before the goal).** The forward
+  LiDAR sees no edge beside the car; the 12 m fill lies 0.21-1.94 m inside the true edge there, and the
+  car's corners (truly 0.15-0.2 m inside the track) fail the 0.12 m check against it.
+* **Plan fails, own pose OK (11 seeds; 5 near the goal, 6 mid-course; incl. collisions 287 and 451).**
+  The lattice finds no curvature-feasible path. Still open.
+* One other own-pose failure (397) and 4 seeds that never brake (106 exits).
+
+**Why only at L0:** the same own-pose failures occur at L1/L2 (8 and 6 of these seeds), but noisy edges
+change from scan to scan, so a later scan passes; at L0 the faulty geometry repeats in every scan and the
+brake is permanent.
+
+**Rejected hypothesis:** smaller fitted radii at L1/L2 making tight gaps look wider. The planner fits only
+circle centres (radius from the camera class); class flips are 4.9% / 8.2% at L1 / L2, and the narrowest
+route gap looks 2-3 mm *narrower* than the truth, not wider.
+
+**Approved fixes (2026-11-25):** (1) fix the goal-line stub at its source, where the edges are cut at the
+goal line (`corridor.py`), observed mode only; the privileged teacher must keep 474/477 feasible successes,
+0 collisions, 23/23 correct brakes on seeds 0-499 at L0. (2) Edge memory beside the car, in the L3 config
+only (start relief is not used as a stand-in). Note for the L3 report: the corridor baseline then has edge
+memory while GoalFlow's BEV stays single-scan. After both, the A6 table is rerun and the 11 plan-failure
+seeds are classified (collisions 287 and 451 first).
 
 ### A6b. Bug found and fixed: the 12 m edge fill put points inside the track (L1–L4)
 
@@ -118,7 +144,7 @@ Test: `tests/test_sim_data.py::test_edge_fill_rejects_bad_offsets_on_noisy_edges
 
 Effect: of the 18 seeds checked that succeeded at L3 but stalled at L4 in the evaluation, 16 now
 succeed at L4. **The L1–L4 observed numbers in `reports/lidar_demo/l0/summary.md` predate this fix**
-and will be regenerated together with the goal-stall fix (Part C, item 1). The L1 shards are
+and will be regenerated together with the A6 fixes (Part C, item 1). The L1 shards are
 unaffected (raw observations, rasterised at load time).
 
 ### A7. Why corridor-funnel is worse on the true scene (75.7%) than observed (81.6%)
