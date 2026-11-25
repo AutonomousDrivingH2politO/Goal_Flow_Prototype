@@ -145,9 +145,14 @@ and test a terminal-feasibility condition (e.g. a short continuation check past 
 
 ### What the pre-L3 planner does after a failed replan (the 287 / 451 grazes in config a)
 
-1. The kept plan fails the 0.12 m check: as the car closes in, the near-field blind zone removes most of a
-   bollard's hits (61 -> 2-3 in one scan), and the fixed-radius circle fitted to the remaining rim points lies
-   0.30-0.33 m off the true bollard, intruding into the plan. Warm start and full replan fail.
+1. The kept plan fails the 0.12 m check: as the car closes in, a bollard loses most of its hits in one scan
+   (61 -> 2-3), and the fixed-radius circle fitted to the remaining flank hits lies 0.30-0.33 m off the true
+   bollard, intruding into the plan. Warm start and full replan fail. Measured geometry at the drop scan
+   (sensor at the front axle, x = 1.60 m): centre range 2.09 / 2.13 m, front face 1.84 / 1.88 m, i.e. outside
+   the 1.5 m blind zone; the front-face rays return nothing and only flank hits at ~2.04 m remain. So the 1.5 m
+   blind zone alone does not explain the drop; the cut-off sits near 2.0 m and its cause in the LiDAR model is
+   still being traced. `fit_circle_fixed_r` places the centre r behind the hits along the sensor ray, which
+   assumes front-face hits, hence the 0.3 m offset with flank-only hits.
 2. The planner returns a brake and forgets its plan; the controller commands speed 0 for that 0.1 s scan
    while pure pursuit keeps steering along the old path (v 3.0 -> 2.85 m/s).
 3. Next scan: no kept plan, so a full plan from scratch against the displaced circle succeeds, with a sharp
