@@ -285,6 +285,10 @@ Docs note: the flow-matching notes are in `docs/` as
     (a)'s route is mostly missing from the 3 goals, try the second chance first (one extra model call on ~3% of
     replans, targets route choice, e.g. seed 28); if it is mostly present but its candidates clear by only a few cm,
     MPPI refinement first (targets precision in tight gaps, e.g. seed 17).
+    **Plan (decided 2026-11-25):** this diagnosis first, before the full run. If it points to the second chance or
+    to MPPI, implement that one and rerun the same 80-episode smoke test (seeds 0-39, L0 and L4) under a rule fixed
+    here before the run: fewest stalls + collisions on feasible scenes, ties to fewer collisions; goalflow_l3 is kept
+    unless the new variant wins. The full run then uses the winner, on Can's go.
 
 ### L2 findings on validation (2026-11-25)
 
