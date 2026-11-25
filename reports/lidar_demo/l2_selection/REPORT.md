@@ -27,6 +27,17 @@ Collision = Juno's footprint along the selected executed path overlaps a true ob
   it bypasses the safety filter. It lowers ADE (the main path crawls toward the near g*: ADE 3.3 m vs 0.45 m
   in those frames), but ADE against the driven route is not the criterion here. The near-g* frames are a
   closed-loop stall risk and are examined next (below).
+- **Why "off" holds for the L3 configuration** (shadow sweep on NMS-K3 + safety):
+
+  | Shadow threshold | Fires (all frames) | Collisions (all frames) | Executed ADE (subset) |
+  |---|---|---|---|
+  | off | 0 | 0.36% | 0.213 m |
+  | 2.0 m | 47 | 0.40% | 0.202 m |
+  | 1.5 m (as trained) | 103 | 0.59% | 0.200 m |
+
+  For single-g* M3 a 2 m threshold was worth it (ADE 0.288 m with the shadow off, from the near-g* crawl), but
+  NMS-K3 already removes most of that crawl (ADE 0.213 m off), so the shadow's small ADE gain no longer pays
+  for its collisions.
 - **Multiple goals give real alternatives at no cost.** With NMS-K3 the candidate set covers every teacher
   route in 83% of multi-route frames (single g*: 33%); by homotopy, the best candidate per goal covers every
   route in 69% (single g*: 27%). ADE and on-route rates are unchanged. The chosen path stays on the g* route
@@ -77,5 +88,6 @@ colliding candidates in 20 of the 21 frames that have one; the miss is a fully o
 
 ## Next
 
-The 305 near-g* frames: what the teacher did there, and whether the main path stops short where the teacher
-continues (a closed-loop stall risk once the shadow is off).
+The near-g* stall risk, on the L3 configuration (NMS-K3 + safety, main path), not M3: of the 305 frames where
+M3's g* is a near goal, how many still have a near selected goal under NMS-K3, and for those: the teacher's
+speed and progress over the 4 s, the main path's progress, and whether the main path is safe.
