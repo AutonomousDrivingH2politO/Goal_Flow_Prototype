@@ -246,6 +246,10 @@ waypoint jitter: a 3 cm lateral wiggle at 0.75 m spacing already implies about Î
   train split is complete (the P16v is not set up yet). Full training-state checkpoints at least every
   30 min, mid-stage resume, early stopping on the validation split only (the test split is never
   read). The 3-seed runs and ablations come later on the P16v.
+* Model selection / early stopping: stage A on validation L_goal; stage B and regression on validation
+  ADE of the executed path against the driven teacher mode. (Stage A first used goal error; it was
+  switched mid-run on 2026-11-25 at step 8,422 because goal error stopped improving while L_goal,
+  DAC accuracy and the g* collision rate kept improving: it penalises choosing the other valid mode.)
 * Goal-scorer diagnostics: g* collision rate (Juno box at g* overlapping a true obstacle, from the
   scene index), DAC accuracy on frames with an obstacle within 2 m of the driven path, balanced DAC
   accuracy, and the mean distance of sample endpoints from g* (raw and executed).

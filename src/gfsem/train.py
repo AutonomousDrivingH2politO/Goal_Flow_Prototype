@@ -226,14 +226,18 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
     return res
 
 
-BEST_METRIC = {"A": "goal_err", "B": "ADE_driven", "joint": "ADE_driven", "reg": "ADE_driven"}
+# Stage A is selected on its validation objective (L_goal). goal_err (argmax goal vs the *driven*
+# endpoint) was tried first and dropped: it jumps whenever the scorer prefers the other, equally
+# valid teacher mode, so it stopped improving while L_goal, DAC accuracy and the g* collision rate
+# all kept improving (2026-11-25 run, steps 2126-8422).
+BEST_METRIC = {"A": "l_goal", "B": "ADE_driven", "joint": "ADE_driven", "reg": "ADE_driven"}
 
 
-def save_state(path: Path, model, opt, sched, step, total, best, bad, args, vocab):
+def save_state(path: Path, model, opt, sched, step, total, best, bad, args, vocab, metric=None):
     """Full training state (atomic write), for mid-stage resume."""
     tmp = path.with_suffix(".tmp")
     torch.save(dict(state=model.state_dict(), opt=opt.state_dict(), sched=sched.state_dict(), step=step,
-                    total=total, best=best, bad=bad, cfg=asdict(model.cfg), vocab=vocab,
+                    total=total, best=best, bad=bad, metric=metric, cfg=asdict(model.cfg), vocab=vocab,
                     norm_lo=model.norm.lo.cpu().numpy(), norm_hi=model.norm.hi.cpu().numpy(),
                     args=vars(args), saved=time.time()), tmp)
     os.replace(tmp, path)
@@ -274,6 +278,9 @@ def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: L
         sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s_: cosine(s_, total[0]))
         sched.load_state_dict(st["sched"])
         step, best, bad = st["step"], st["best"], st["bad"]
+        if st.get("metric", "goal_err" if stage == "A" else BEST_METRIC[stage]) != BEST_METRIC[stage]:
+            print(f"[{stage}] selection metric changed to {BEST_METRIC[stage]}: best and patience reset", flush=True)
+            best, bad = float("inf"), 0
         budget_h = None                       # the step total was already fitted to the budget
         print(f"[{stage}] resumed at step {step}/{total[0]} (best {BEST_METRIC[stage]} {best:.3f})", flush=True)
         if stage == "B":
@@ -343,10 +350,10 @@ def train_stage(model: GoalFlow, stage: str, train_dl, val_dl, args, dev, log: L
                 break
         step += 1
         if state_path is not None and (time.time() - t_ckpt > 60 * args.ckpt_minutes or due):
-            save_state(state_path, model, opt, sched, step, total[0], best, bad, args, vocab)
+            save_state(state_path, model, opt, sched, step, total[0], best, bad, args, vocab, BEST_METRIC[stage])
             t_ckpt = time.time()
     if state_path is not None:
-        save_state(state_path, model, opt, sched, step, total[0], best, bad, args, vocab)
+        save_state(state_path, model, opt, sched, step, total[0], best, bad, args, vocab, BEST_METRIC[stage])
     return hist
 
 
