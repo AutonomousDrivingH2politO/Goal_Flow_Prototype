@@ -1,0 +1,49 @@
+{
+ "frames": 1600,
+ "rule": "largest slack with driven false alarm <= 1.0%",
+ "slacks": {
+  "0": {
+   "false_alarm_driven": 0.0025,
+   "false_alarm_all_routes": 0.008356545961002786,
+   "recall_true_collisions": 0.9294377067254685,
+   "false_alarm_free_candidates": 0.01058693703014001,
+   "driven": 4,
+   "driven_n": 1600,
+   "routes": 15,
+   "routes_n": 1795,
+   "col": 1814,
+   "col_flag": 1686,
+   "free": 202986,
+   "free_flag": 2149
+  },
+  "0.05": {
+   "false_alarm_driven": 0.00875,
+   "false_alarm_all_routes": 0.015598885793871866,
+   "recall_true_collisions": 0.9294377067254685,
+   "false_alarm_free_candidates": 0.023607539436217274,
+   "driven": 14,
+   "driven_n": 1600,
+   "routes": 28,
+   "routes_n": 1795,
+   "col": 1814,
+   "col_flag": 1686,
+   "free": 202986,
+   "free_flag": 4792
+  },
+  "0.1": {
+   "false_alarm_driven": 0.023125,
+   "false_alarm_all_routes": 0.03064066852367688,
+   "recall_true_collisions": 0.9294377067254685,
+   "false_alarm_free_candidates": 0.038480486338959334,
+   "driven": 37,
+   "driven_n": 1600,
+   "routes": 55,
+   "routes_n": 1795,
+   "col": 1814,
+   "col_flag": 1686,
+   "free": 202986,
+   "free_flag": 7811
+  }
+ },
+ "chosen_cell_slack": 0.05
+}

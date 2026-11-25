@@ -183,7 +183,7 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
         modes, n = b["modes"], b["n_modes"]
         mask = torch.arange(8, device=dev)[None] < n[:, None]
         if stage in ("B", "joint"):
-            r = model.plan(b["bev"], b["ego"], M=32, n_steps=1)
+            r = model.plan(b["bev"], b["ego"], M=SAMPLES_M, n_steps=1)
             _traj_metrics(acc, r["traj"], r["traj_raw"], modes, mask)
             s_ade = (r["samples"][:, :, None] - modes[:, None]).norm(dim=-1).mean(-1)   # (B, M, 8) executed
             acc.setdefault("minADE_samples", []).append(float(s_ade.min(1).values[:, 0].mean()))
@@ -230,6 +230,7 @@ def evaluate(model: GoalFlow, loader, stage: str, args, dev, max_batches: int = 
 # endpoint) was tried first and dropped: it jumps whenever the scorer prefers the other, equally
 # valid teacher mode, so it stopped improving while L_goal, DAC accuracy and the g* collision rate
 # all kept improving (2026-11-25 run, steps 2126-8422).
+SAMPLES_M = 128      # one sample count everywhere: validation, evaluation scripts, renders
 BEST_METRIC = {"A": "l_goal", "B": "ADE_driven", "joint": "ADE_driven", "reg": "ADE_driven"}
 
 

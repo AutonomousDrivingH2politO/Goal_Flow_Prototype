@@ -244,8 +244,25 @@ waypoint jitter: a 3 cm lateral wiggle at 0.75 m spacing already implies about Î
 
 * Full training (seed 0, Stage A, Stage B, regression) runs on the Mac (MPS) as soon as the L1
   train split is complete (the P16v is not set up yet). Full training-state checkpoints at least every
-  30 min, mid-stage resume, early stopping on the validation split only (the test split is never
-  read). The 3-seed runs and ablations come later on the P16v.
+  30 min, mid-stage resume, early stopping on the validation split only. The 3-seed runs and
+  ablations come later on the P16v.
+* **Correction (2026-11-25): the L1 test split is spent.** It was read once after training
+  (`reports/lidar_demo/l2_full/test_report.json`, frozen seed-0 checkpoints), and a decision then
+  used that result: giving per-route goal selection priority for L3, because test cover@k (0.32 /
+  0.34) confirmed the validation finding. Its numbers can no longer count as held-out. The split is
+  frozen (kept, never re-read for any choice), and **before L4 a fresh test set is generated with
+  new, disjoint scene seeds**; every final number in L4 comes from that set, read once at the end.
+  Until then all comparisons (selection variants, thresholds, the shadow trigger) use validation only.
+* **Training-target mode (checked 2026-11-25).** `SimFrames` is built with `driven_only=False`
+  (`train.py:453`), so each time a frame is loaded one teacher mode is drawn uniformly
+  (`sim_torch.py:122`), and both the goal target (Stage A, `train.py:95`) and the trajectory target
+  (Stage B and regression, `train.py:104`, `108`) come from that same mode. Stage A therefore sees a
+  single-mode distance target per step and the mixture only across epochs. The validation loader drew
+  modes the same way, and with persistent workers the draw changed between evaluations, so the
+  Stage A selection metric (validation `L_goal`) was measured against a different mode on the ~11%
+  multi-mode frames at each evaluation (noise in early stopping). Stage B and regression select on
+  `ADE_driven` (mode 0), which is unaffected. Planned fix: a mixture distance target over all
+  modes (deterministic on validation) and random-mode sampling for Stage B, behind config flags.
 * Model selection / early stopping: stage A on validation L_goal; stage B and regression on validation
   ADE of the executed path against the driven teacher mode. (Stage A first used goal error; it was
   switched mid-run on 2026-11-25 at step 8,422 because goal error stopped improving while L_goal,

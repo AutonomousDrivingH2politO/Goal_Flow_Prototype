@@ -42,7 +42,7 @@ def main():
     print(f"rule: first {a.n} frames of {a.shard} with >= 2 teacher modes -> {multi}", flush=True)
     ds = SimFrames(shards)
     a.out.mkdir(parents=True, exist_ok=True)
-    plot_samples(model, ds, a.out, device=dev, reg_model=reg, M=64, indices=multi, prefix="val0000")
+    plot_samples(model, ds, a.out, device=dev, reg_model=reg, M=128, indices=multi, prefix="val0000")
     (a.out / "RULE.txt").write_text(f"First {a.n} frames of {a.shard} (stored order) with >= 2 teacher modes: "
                                     f"{multi}\nGoalFlow: {gf}\nRegression: {rg}\n")
     print(f"wrote {len(multi)} images to {a.out}", flush=True)

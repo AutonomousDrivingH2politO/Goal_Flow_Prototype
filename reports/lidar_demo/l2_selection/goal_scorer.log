@@ -1,0 +1,219 @@
+val: 66063 frames, 517 batches, vocab 1024 y in [-6.56, 6.57] x in [0.00, 12.00]
+/Users/canozaydin/Projects/H2Polit0/Goal_Flow_Prototype/scripts/eval_goal_scorer.py:130: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:219.)
+  Et = torch.as_tensor(E3, dtype=torch.float32, device=dev)
+  batch 1/517  0.1 min  eta 75.2 min
+  batch 21/517  1.0 min  eta 24.2 min
+  batch 41/517  2.2 min  eta 25.0 min
+  batch 61/517  3.0 min  eta 22.7 min
+  batch 81/517  3.9 min  eta 21.2 min
+  batch 101/517  4.8 min  eta 19.8 min
+  batch 121/517  5.7 min  eta 18.7 min
+  batch 141/517  6.6 min  eta 17.6 min
+  batch 161/517  7.5 min  eta 16.5 min
+  batch 181/517  8.3 min  eta 15.5 min
+  batch 201/517  9.2 min  eta 14.5 min
+  batch 221/517  10.1 min  eta 13.6 min
+  batch 241/517  11.0 min  eta 12.6 min
+  batch 261/517  11.9 min  eta 11.7 min
+  batch 281/517  12.8 min  eta 10.8 min
+  batch 301/517  13.7 min  eta 9.8 min
+  batch 321/517  14.6 min  eta 8.9 min
+  batch 341/517  15.5 min  eta 8.0 min
+  batch 361/517  16.4 min  eta 7.1 min
+  batch 381/517  17.2 min  eta 6.1 min
+  batch 401/517  18.0 min  eta 5.2 min
+  batch 421/517  18.9 min  eta 4.3 min
+  batch 441/517  19.7 min  eta 3.4 min
+  batch 461/517  20.6 min  eta 2.5 min
+  batch 481/517  21.9 min  eta 1.6 min
+  batch 501/517  22.7 min  eta 0.7 min
+  batch 517/517  23.9 min  eta 0.0 min
+{
+ "frames": 66063,
+ "rule": "distinct routes: endpoints >= 1.5 m apart (greedy, driven first)",
+ "vocab": {
+  "n": 1024,
+  "y_min": -6.5596489906311035,
+  "y_max": 6.565476417541504,
+  "x_min": 0.0,
+  "x_max": 11.999982833862305
+ },
+ "routes": {
+  "all_routes": {
+   "driven": {
+    "routes": 66063,
+    "nn_xy_median": 0.01461584959179163,
+    "nn_xy_p95": 0.04538652300834656,
+    "nn_xy_share_gt_0.5": 1.5137066133841939e-05,
+    "nn_metric_median": 0.04243273660540581,
+    "outside_vocab_y_bounds": 0.0,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 1.0,
+    "rank_plain_p90": 3.0,
+    "rank_plain_share_le_5": 0.9128559102674719,
+    "rank_plain_share_le_10": 0.9216505456912342,
+    "rank_supp_median": 1.0,
+    "rank_supp_p90": 2.0,
+    "rank_supp_share_le_2": 0.9751600744743654,
+    "rank_supp_share_le_5": 0.9988193088415603,
+    "l_dis": 5.774057125979544,
+    "l_dis_floor_entropy": 5.4946089408566685,
+    "l_dis_gap": 0.27944818512287584
+   },
+   "non_driven": {
+    "routes": 8898,
+    "nn_xy_median": 0.01953125,
+    "nn_xy_p95": 0.06188663840293884,
+    "nn_xy_share_gt_0.5": 0.0,
+    "nn_metric_median": 0.05911228805780411,
+    "outside_vocab_y_bounds": 0.0005619240278714318,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 33.0,
+    "rank_plain_p90": 295.0,
+    "rank_plain_share_le_5": 0.44864014385255113,
+    "rank_plain_share_le_10": 0.4601033940211283,
+    "rank_supp_median": 2.0,
+    "rank_supp_p90": 4.0,
+    "rank_supp_share_le_2": 0.7578107439874129,
+    "rank_supp_share_le_5": 0.9652730950775456,
+    "l_dis": 6.729045052398695,
+    "l_dis_floor_entropy": 5.468507275015457,
+    "l_dis_gap": 1.260537777383238
+   },
+   "non_driven_in_multi_frames": {
+    "routes": 8898,
+    "nn_xy_median": 0.01953125,
+    "nn_xy_p95": 0.06188663840293884,
+    "nn_xy_share_gt_0.5": 0.0,
+    "nn_metric_median": 0.05911228805780411,
+    "outside_vocab_y_bounds": 0.0005619240278714318,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 33.0,
+    "rank_plain_p90": 295.0,
+    "rank_plain_share_le_5": 0.44864014385255113,
+    "rank_plain_share_le_10": 0.4601033940211283,
+    "rank_supp_median": 2.0,
+    "rank_supp_p90": 4.0,
+    "rank_supp_share_le_2": 0.7578107439874129,
+    "rank_supp_share_le_5": 0.9652730950775456,
+    "l_dis": 6.729045052398695,
+    "l_dis_floor_entropy": 5.468507275015457,
+    "l_dis_gap": 1.260537777383238
+   }
+  },
+  "distinct_routes": {
+   "driven": {
+    "routes": 66063,
+    "nn_xy_median": 0.01461584959179163,
+    "nn_xy_p95": 0.04538652300834656,
+    "nn_xy_share_gt_0.5": 1.5137066133841939e-05,
+    "nn_metric_median": 0.04243273660540581,
+    "outside_vocab_y_bounds": 0.0,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 1.0,
+    "rank_plain_p90": 3.0,
+    "rank_plain_share_le_5": 0.9128559102674719,
+    "rank_plain_share_le_10": 0.9216505456912342,
+    "rank_supp_median": 1.0,
+    "rank_supp_p90": 2.0,
+    "rank_supp_share_le_2": 0.9751600744743654,
+    "rank_supp_share_le_5": 0.9988193088415603,
+    "l_dis": 5.774057125979544,
+    "l_dis_floor_entropy": 5.4946089408566685,
+    "l_dis_gap": 0.27944818512287584
+   },
+   "non_driven": {
+    "routes": 5132,
+    "nn_xy_median": 0.02139541320502758,
+    "nn_xy_p95": 0.06770893856883047,
+    "nn_xy_share_gt_0.5": 0.0,
+    "nn_metric_median": 0.06442352384328842,
+    "outside_vocab_y_bounds": 0.0009742790335151987,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 151.0,
+    "rank_plain_p90": 358.90000000000055,
+    "rank_plain_share_le_5": 0.13016367887763056,
+    "rank_plain_share_le_10": 0.14049103663289167,
+    "rank_supp_median": 2.0,
+    "rank_supp_p90": 5.0,
+    "rank_supp_share_le_2": 0.6112626656274357,
+    "rank_supp_share_le_5": 0.9425175370226033,
+    "l_dis": 7.28455953986405,
+    "l_dis_floor_entropy": 5.37827865801467,
+    "l_dis_gap": 1.9062808818493797
+   },
+   "driven_in_distinct_multi_frames": {
+    "routes": 4864,
+    "nn_xy_median": 0.016105880960822105,
+    "nn_xy_p95": 0.04314593970775604,
+    "nn_xy_share_gt_0.5": 0.0,
+    "nn_metric_median": 0.04894517362117767,
+    "outside_vocab_y_bounds": 0.0,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 1.0,
+    "rank_plain_p90": 30.0,
+    "rank_plain_share_le_5": 0.852796052631579,
+    "rank_plain_share_le_10": 0.8657483552631579,
+    "rank_supp_median": 1.0,
+    "rank_supp_p90": 2.0,
+    "rank_supp_share_le_2": 0.9588815789473685,
+    "rank_supp_share_le_5": 0.9991776315789473,
+    "l_dis": 6.010758359181254,
+    "l_dis_floor_entropy": 5.5671179634764005,
+    "l_dis_gap": 0.4436403957048529
+   },
+   "non_driven_in_distinct_multi_frames": {
+    "routes": 5132,
+    "nn_xy_median": 0.02139541320502758,
+    "nn_xy_p95": 0.06770893856883047,
+    "nn_xy_share_gt_0.5": 0.0,
+    "nn_metric_median": 0.06442352384328842,
+    "outside_vocab_y_bounds": 0.0009742790335151987,
+    "no_goal_within_1m": 0.0,
+    "rank_plain_median": 151.0,
+    "rank_plain_p90": 358.90000000000055,
+    "rank_plain_share_le_5": 0.13016367887763056,
+    "rank_plain_share_le_10": 0.14049103663289167,
+    "rank_supp_median": 2.0,
+    "rank_supp_p90": 5.0,
+    "rank_supp_share_le_2": 0.6112626656274357,
+    "rank_supp_share_le_5": 0.9425175370226033,
+    "l_dis": 7.28455953986405,
+    "l_dis_floor_entropy": 5.37827865801467,
+    "l_dis_gap": 1.9062808818493797
+   }
+  }
+ },
+ "frames_multi_all": 7777,
+ "frames_multi_distinct": 4864,
+ "cover": {
+  "all": {
+   "cover@1": 0.3213321332133213,
+   "cover@2": 0.32956152758132956,
+   "cover@3": 0.335990741931336,
+   "cover@5": 0.3476919120483477,
+   "cover@10": 0.3645364536453645,
+   "supp_cover@1": 0.3213321332133213,
+   "supp_cover@2": 0.714028545711714,
+   "supp_cover@3": 0.8359264497878359,
+   "supp_cover@5": 0.9603960396039604,
+   "supp_cover@10": 0.9922849427799922
+  },
+  "distinct": {
+   "cover@1": 0.005139802631578948,
+   "cover@2": 0.008429276315789474,
+   "cover@3": 0.011513157894736841,
+   "cover@5": 0.019736842105263157,
+   "cover@10": 0.03700657894736842,
+   "supp_cover@1": 0.005139802631578948,
+   "supp_cover@2": 0.5709292763157895,
+   "supp_cover@3": 0.7481496710526315,
+   "supp_cover@5": 0.9393503289473685,
+   "supp_cover@10": 0.9886924342105263
+  }
+ },
+ "l_mix_all_frames": 5.821385043514014,
+ "H_mix_all_frames": 5.533931334791782,
+ "l_mix_distinct_multi": 6.6535676118770715,
+ "H_mix_distinct_multi": 6.101195951531592
+}
