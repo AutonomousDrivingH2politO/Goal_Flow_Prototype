@@ -337,6 +337,12 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l2_selection"))
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
+    import hashlib
+    import subprocess
+    head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    diff = subprocess.run(["git", "diff", "HEAD"], capture_output=True, text=True).stdout
+    code_state = {"git_head": head, "git_diff_sha256": hashlib.sha256(diff.encode()).hexdigest(),
+                  "uncommitted_changes": bool(diff.strip())}          # captured at launch
     split = "val"                                   # validation only, by design
     dev = pick_device("auto")
     root = Path("data/sim")
@@ -512,13 +518,8 @@ def main():
     sub = in_subset[:Fn]
     groups = {"subset4000": sub, "multi_all_routes": nm_all > 1, "multi_distinct_routes": nd_all > 1,
               "subset_near_obstacle": sub & near}
-    import hashlib
-    import subprocess
-    head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
-    diff = subprocess.run(["git", "diff", "HEAD"], capture_output=True, text=True).stdout
     out = {"preregistered": "metrics, variants and rules fixed 2026-11-25 before any result (see docstring)",
-           "code": {"git_head": head, "git_diff_sha256": hashlib.sha256(diff.encode()).hexdigest(),
-                    "uncommitted_changes": bool(diff.strip())},
+           "code_at_launch": code_state,
            "route_source_and_cold_baseline_planner": {"class": "LatticeCorridorPlanner", "mode": "observed",
                                                       "input": "single scan, input_from_observation (no tracking)",
                                                       **PLANNER_CFG},
