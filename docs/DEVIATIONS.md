@@ -258,8 +258,9 @@ Docs note: the flow-matching notes are in `docs/` as
 11. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
 12. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
 13. **Safety filter on fitted/tracked obstacle circles.** The open-loop filter checks the raw hits channel.
-    On 1,600 validation frames it misses 128 of 1,814 truly colliding candidates (7.1%), but all 128 are
-    one obstacle in one frame (val frame 22919, noise L1): a bollard 11.8 m ahead fully occluded by a nearer
+    On 1,600 validation frames it flags the colliding candidates in 20 of the 21 frames that have one
+    (95%; per candidate 1,686 of 1,814, 92.9%). All 128 missed candidates are one obstacle in one frame
+    (val frame 22919, noise L1), clipped at the end of the horizon (first contact at 3.75 s): a bollard 11.8 m ahead fully occluded by a nearer
     bollard at the same bearing (no hit cell on it; nearest hit 1.79 m from the collision point). No miss
     was "seen but clipped on an unobserved side" (`reports/lidar_demo/l2_selection/safety_misses.json`).
     Occluded obstacles need memory: feed the filter the same fitted/tracked circles as the observed planner
