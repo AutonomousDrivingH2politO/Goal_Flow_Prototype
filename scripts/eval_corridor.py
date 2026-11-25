@@ -36,7 +36,9 @@ import numpy as np  # noqa: E402
 PRIVILEGED = {"teacher", "funnel_priv"}
 LABELS = {
     "teacher": "corridor-lattice, privileged (teacher)",
-    "observed": "corridor-lattice, observed (baseline to beat)",
+    "observed": "corridor-lattice, observed, pre-L3 (50e9ad9)",
+    "observed_stubfix": "corridor-lattice, observed, pre-L3 + goal-line stub fix (a)",
+    "observed_l3": "corridor-lattice, observed, stub fix + L3 (b; baseline to beat)",
     "funnel_priv": "corridor-funnel (original design), privileged",
     "funnel_obs": "corridor-funnel (original design), observed",
 }
@@ -57,13 +59,18 @@ def _scene(seed: int):
 
 
 def make_planner(name: str):
-    from gfsem.planners.corridor import CorridorPlanner
-    from gfsem.planners.corridor_lattice import LatticeCorridorPlanner
+    from gfsem.planners.corridor import CorridorConfig, CorridorPlanner
+    from gfsem.planners.corridor_lattice import LatticeCorridorPlanner, l3_config
     from gfsem.sim.closed_loop import CorridorObserved, CorridorPrivileged
     if name == "teacher":
         return CorridorPrivileged(LatticeCorridorPlanner(mode="privileged"), name)
-    if name == "observed":
+    if name == "observed":            # pre-L3 planner (reproduces 50e9ad9)
         return CorridorObserved(LatticeCorridorPlanner(mode="observed"), name)
+    if name == "observed_stubfix":    # config (a): pre-L3 + goal-line stub fix (A6)
+        return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name)
+    if name == "observed_l3":         # config (b): stub fix + approved L3 set, no time budget
+        return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
+                                                       lcfg=l3_config()), name)
     if name == "funnel_priv":
         return CorridorPrivileged(CorridorPlanner(mode="privileged"), name)
     if name == "funnel_obs":
@@ -83,6 +90,7 @@ def run_one(job: tuple[str, int, str]) -> dict:
     row["fail_cause"] = ";".join(f"{k}" for k in getattr(P.p, "fail_causes", {}) or [])
     row["triggers"] = dict(Counter(t for t, _ in stats))
     row["plan_times"] = stats
+    row["plan_expansions"] = list(getattr(P.p, "expansions", []))
     row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(P.p, "kappa_log", []))
     return row
 
@@ -172,7 +180,10 @@ def main():
     ap.add_argument("--planners", default="teacher,observed,funnel_priv,funnel_obs")
     ap.add_argument("--workers", type=int, default=max(1, mp.cpu_count() - 1))
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l0"))
+    ap.add_argument("--l3", action="store_true", help="run 'observed' as config (b): stub fix + approved L3 set")
     a = ap.parse_args()
+    if a.l3:
+        a.planners = ",".join("observed_l3" if p == "observed" else p for p in a.planners.split(","))
     seeds = parse_seeds(a.seeds)
     levels = a.levels.split(",")
     jobs = []
@@ -190,7 +201,7 @@ def main():
                 print(f"{i + 1}/{len(jobs)} episodes, {time.time() - t0:.0f}s", flush=True)
     elapsed = time.time() - t0
     rows.sort(key=lambda r: (r["planner"], r["noise"], r["seed"]))
-    keys = [k for k in rows[0] if k not in ("plan_times", "triggers")] + ["triggers"]
+    keys = [k for k in rows[0] if k not in ("plan_times", "plan_expansions", "triggers")] + ["triggers"]
     with open(a.out / "results.csv", "w", newline="") as f:
         w = csv.DictWriter(f, keys, extrasaction="ignore")
         w.writeheader()
@@ -198,10 +209,11 @@ def main():
             w.writerow({**r, "triggers": " ".join(f"{k}:{v}" for k, v in r["triggers"].items())})
     with open(a.out / "plan_times.csv", "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["planner", "noise", "seed", "trigger", "ms"])
+        w.writerow(["planner", "noise", "seed", "trigger", "ms", "expansions"])
         for r in rows:
-            for t, m in r["plan_times"]:
-                w.writerow([r["planner"], r["noise"], r["seed"], t, f"{m:.2f}"])
+            ex = r.get("plan_expansions") or [""] * len(r["plan_times"])
+            for (t, m), e in zip(r["plan_times"], ex):
+                w.writerow([r["planner"], r["noise"], r["seed"], t, f"{m:.2f}", e])
     summarise(rows, a.out, seeds, levels, elapsed)
     print((a.out / "summary.md").read_text())
 

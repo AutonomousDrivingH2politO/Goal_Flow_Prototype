@@ -46,7 +46,7 @@ import numpy as np
 
 from ..sim.config import SceneConfig, VehicleConfig
 from ..sim.geometry import poses_from_frame, poses_to_frame
-from ..sim.lattice import CollisionWorld, LatticeConfig, lattice_search
+from ..sim.lattice import EXPANSIONS, CollisionWorld, LatticeConfig, lattice_search
 from ..sim.lidar import Observation
 from ..sim.vehicle import VehicleState, rollout_path
 from ..sim.edges import observed_edges
@@ -73,16 +73,29 @@ class LatticeCorridorConfig:
     # retries inside the same route when the tracked path fails validation: stronger clearance
     # preference (cost shaping only; the margin stays 0.25 m). (w_clear, clear_pref)
     shaping: tuple = ((5.0, 1.5), (20.0, 2.0))
-    # observed-mode additions (see module docstring)
-    tracking: bool = True
+    # observed-mode L3 additions (see module docstring). Every default reproduces the pre-L3 planner
+    # (50e9ad9); ``l3_config()`` turns the approved set on.
+    tracking: bool = False            # obstacle tracking (tracking.py)
+    edge_memory: bool = False         # remembered edge points beside the car (tracking.py)
     tracking_cfg: TrackingConfig = field(default_factory=TrackingConfig)
-    start_relief_m: float = 2.0       # 0 disables
-    keep_inflation: float = 0.06      # soft threshold for a kept plan (hard = footprint overlap)
+    start_relief_m: float = 0.0       # 0 = off (not part of the approved L3 set)
+    keep_hysteresis: bool = False     # kept plan: hard / soft check with persistence (off = original 0.12 m check)
+    keep_inflation: float = 0.06      # soft threshold for a kept plan when keep_hysteresis (hard = overlap)
     keep_soft_scans: int = 2
-    hold_confirm: int = 2             # 1 disables hold
-    budget_s: float = 0.25            # per-replan time cap; 0 disables
-    fail_cache_scans: int = 10        # 0 disables
+    fallback: bool = False            # keep driving a kept plan with no hard violation when replanning fails
+    hold_confirm: int = 1             # >1: after a brake, require this many consecutive successful plans
+    budget_s: float = 0.0             # wall-clock per-replan cap; 0 = off
+    fail_cache_scans: int = 0         # >0: skip searching after a failed replan while nothing changed
     fail_cache_move: float = 0.3
+
+
+def l3_config(**kw) -> LatticeCorridorConfig:
+    """The approved L3 observed set (2026-11-25): tracking, edge memory, kept-plan hysteresis with
+    fallback, hold, failed-search cache; no time budget (set after the Orin calibration), no start relief."""
+    base = dict(tracking=True, edge_memory=True, keep_hysteresis=True, fallback=True, hold_confirm=2,
+                fail_cache_scans=10, budget_s=0.0, start_relief_m=0.0)
+    base.update(kw)
+    return LatticeCorridorConfig(**base)
 
 
 class LatticeCorridorPlanner(CorridorPlanner):
@@ -97,6 +110,7 @@ class LatticeCorridorPlanner(CorridorPlanner):
         self.plan_w: np.ndarray | None = None     # kept plan (K,3), odom frame
         self.no_route = False                     # privileged: static world, remember failure
         self.stats: list[tuple[str, float]] = []  # (trigger, ms) per call
+        self.expansions: list[int] = []           # lattice successor evaluations per call
         self.fail_causes: Counter = Counter()
         self.kappa_log: list[float] = []          # curvature level each full plan needed
         tc = self.lcfg.tracking_cfg
@@ -298,7 +312,7 @@ class LatticeCorridorPlanner(CorridorPlanner):
 
     # ---------------------------------------------------------------- main
     def plan_observation(self, obs: Observation, speed: float, steer: float) -> PlanResult:
-        if self.mode == "observed" and self.lcfg.tracking:
+        if self.mode == "observed" and (self.lcfg.tracking or self.lcfg.edge_memory):
             inp = self.tracked_input(obs)
         else:
             inp = input_from_observation(obs, self.cfg, self.scfg)
@@ -308,14 +322,19 @@ class LatticeCorridorPlanner(CorridorPlanner):
         """Planner input from tracked obstacles and edges with memory (same structure as the raw one)."""
         pose = np.asarray(obs.pose_odom, float)
         C, R, _ = cluster_obstacles(obs, self.cfg, self.scfg)
-        C, R = self.tracker.update(C, R, pose)
-        ep, es = self.edge_mem.update(obs.edge_points, obs.edge_side, pose)
+        if self.lcfg.tracking:
+            C, R = self.tracker.update(C, R, pose)
+        if self.lcfg.edge_memory:
+            ep, es = self.edge_mem.update(obs.edge_points, obs.edge_side, pose)
+        else:
+            ep, es = obs.edge_points, obs.edge_side
         left, right = observed_edges(ep, es, self.scfg.track_width, self.cfg.edge_bin)
         return PlannerInput(C, R, left, right, obs.goal_line.astype(float), make_unknown_fn(obs), pose)
 
     def _result(self, path, trigger, t0, **info):
         ms = 1000 * (time.perf_counter() - t0)
         self.stats.append((trigger, ms))
+        self.expansions.append(EXPANSIONS[0] - self._exp0)
         if path is None:
             return PlanResult(np.zeros((0, 3)), True, info={"trigger": trigger, **info})
         return PlanResult(path, False, [], path[-1, :2],
@@ -323,6 +342,7 @@ class LatticeCorridorPlanner(CorridorPlanner):
 
     def plan(self, inp: PlannerInput, speed: float, steer: float) -> PlanResult:
         t0 = time.perf_counter()
+        self._exp0 = EXPANSIONS[0]
         if self.mode == "observed":
             return self._plan_observed(inp, speed, steer, t0)
         return self._plan_core(inp, speed, steer, t0)
@@ -345,8 +365,8 @@ class LatticeCorridorPlanner(CorridorPlanner):
         kept_before = self.plan_w
         res = self._plan_core(inp, speed, steer, t0)
         if res.brake:
-            fallback = res.info.get("fallback")
-            if fallback is not None:                 # kept plan still has no hard violation
+            fallback = res.info.pop("fallback", None)
+            if fallback is not None and L.fallback:  # kept plan still has no hard violation
                 self.events["fallback"] += 1
                 self.plan_w = kept_before
                 self.stats[-1] = ("keep_fallback", self.stats[-1][1])
@@ -394,7 +414,15 @@ class LatticeCorridorPlanner(CorridorPlanner):
         world = self.world(G)
 
         fallback = None
-        if rest is not None:   # observed: event-triggered
+        if rest is not None and not self.lcfg.keep_hysteresis:   # observed, original (pre-L3) check
+            side = self._goal_side(G, rest)
+            before = side < 0
+            clr = world.clearance(rest[before], self.lcfg.validate_inflation) if before.any() else np.zeros(0)
+            bad = np.nonzero(clr < 0)[0]
+            short = side[-1] < -self.lcfg.extend_short
+            if len(bad) == 0 and not short:
+                return self._result(rest, "keep", t0)
+        elif rest is not None:   # observed, L3: hard / soft check with persistence
             side = self._goal_side(G, rest)
             before = side < 0
             P = rest[before]

@@ -26,7 +26,16 @@ import numpy as np  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from gfsem.planners.corridor import CorridorConfig, input_from_observation  # noqa: E402
-from gfsem.planners.corridor_lattice import LatticeCorridorPlanner  # noqa: E402
+from gfsem.planners.corridor import CorridorConfig  # noqa: E402
+from gfsem.planners.corridor_lattice import LatticeCorridorPlanner, l3_config  # noqa: E402
+
+USE_L3 = False      # set by --l3: observed planner = stub fix + approved L3 set (default: pre-L3 planner)
+
+
+def make_observed() -> LatticeCorridorPlanner:
+    if USE_L3:
+        return LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0), lcfg=l3_config())
+    return LatticeCorridorPlanner(mode="observed")
 from gfsem.sim.closed_loop import CorridorObserved, run_episode  # noqa: E402
 from gfsem.sim.config import BOLLARD, NOISE_LEVELS, LidarConfig, SceneConfig, SimConfig  # noqa: E402
 from gfsem.sim.geometry import footprint_corners, from_frame, to_frame  # noqa: E402
@@ -160,7 +169,7 @@ def sheet(label: str, seed: int, s_pose: float, out: Path):
     ext = [rc.y_max, rc.y_min, rc.x_min, rc.x_max]
     for c, lvl in enumerate(LEVELS):
         obs = scan(sc, pose, NOISE_LEVELS[lvl], np.random.default_rng([seed, 99]), speed=3.0)
-        pl = LatticeCorridorPlanner(mode="observed")
+        pl = make_observed()
         res = pl.plan_observation(obs, 3.0, 0.0)
         nfit = draw_scene_ego(axes[0, c], sc, pose, obs, None if res.brake else res.path)
         status = "BRAKE: " + str(res.info.get("reason", ""))[:28] if res.brake else "plan ok"
@@ -190,7 +199,7 @@ def stall_seeds_verified(results: Path, k: int = 2, max_try: int = 12):
     cfg = SimConfig()
     out = []
     for s in stall_seeds(results, k=max_try):
-        ep = run_episode(generate_scene(s), CorridorObserved(LatticeCorridorPlanner(mode="observed")), "L4", cfg)
+        ep = run_episode(generate_scene(s), CorridorObserved(make_observed()), "L4", cfg)
         print(f"  seed {s}: L4 now {ep.outcome}", flush=True)
         if ep.outcome in ("stopped", "timeout"):
             out.append(s)
@@ -247,7 +256,7 @@ def stall_media(seed: int, out: Path):
     from matplotlib.animation import FuncAnimation, PillowWriter
     cfg = SimConfig()
     sc = generate_scene(seed)
-    pl = LatticeCorridorPlanner(mode="observed")
+    pl = make_observed()
     ep = run_episode(sc, CorridorObserved(pl), "L4", cfg, record=True)
     traj = ep.trajectory
     for r in ep.records:
@@ -338,10 +347,13 @@ def outcome_chart(results: Path, out: Path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=Path.home() / "Documents/H2politO_L0_viewer/noise")
+    ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/noise"))
     ap.add_argument("--results", type=Path, default=Path("reports/lidar_demo/l0/results.csv"))
     ap.add_argument("--table-seed", type=int, default=3)
+    ap.add_argument("--l3", action="store_true", help="observed planner = stub fix + approved L3 set")
     a = ap.parse_args()
+    global USE_L3
+    USE_L3 = a.l3
     a.out.mkdir(parents=True, exist_ok=True)
     sc = generate_scene(a.table_seed)
     s_pose = sc.s_field[0] - 3.0

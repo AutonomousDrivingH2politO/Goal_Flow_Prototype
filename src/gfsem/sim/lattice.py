@@ -106,6 +106,9 @@ class CollisionWorld:
         return self.clearance(poses, inflation) < 0
 
 
+EXPANSIONS = [0]        # running count of lattice successor evaluations (deterministic work measure)
+
+
 def lattice_search(world: CollisionWorld, start, goal: tuple[np.ndarray, np.ndarray], cfg: LatticeConfig,
                    allowed_fn=None, start_kappa: float = 0.0, deadline: float | None = None) -> np.ndarray | None:
     """Forward arcs from ``start`` until crossing the goal segment (gL, gR).
@@ -144,6 +147,7 @@ def lattice_search(world: CollisionWorld, start, goal: tuple[np.ndarray, np.ndar
             return None
         if deadline is not None and time.perf_counter() > deadline:
             return None
+        EXPANSIONS[0] += F * len(ks)
         par = np.repeat(np.arange(F), len(ks))
         ki = np.tile(np.arange(len(ks)), F)
         kk = ks[ki]

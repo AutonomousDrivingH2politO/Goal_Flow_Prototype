@@ -57,6 +57,9 @@ class CorridorConfig:
     cluster_tol: float = 0.35
     min_cluster_pts: int = 1
     edge_bin: float = 1.0
+    # observed mode only (A6): never cut an observed edge at the goal line short of the car's front + this
+    # margin; 0 disables (the original behaviour). See DEVIATIONS A6.
+    goal_cut_guard: float = 0.0
 
 
 @dataclass
@@ -159,6 +162,25 @@ def _cut(e: np.ndarray, s_cut: float) -> np.ndarray:
     keep[0] = True                      # never cut an edge down to a single point
     p = np.array([np.interp(s_cut, s, e[:, 0]), np.interp(s_cut, s, e[:, 1])])
     return np.concatenate([e[keep], p[None]])
+
+
+def _guard_cut(cut: np.ndarray, full: np.ndarray, x_back: float, x_min: float, g_end: np.ndarray):
+    """If an edge cut at the goal line ends before x = x_min (ego frame), re-cut the full edge where it
+    first reaches x_min instead (or keep it whole if it never does). Returns (edge, goal endpoint)."""
+    if cut[-1, 0] >= x_min:
+        return cut, g_end
+    e = _extend_back(full, x_back)
+    ahead = np.nonzero(e[:, 0] >= x_min)[0]
+    if not len(ahead):
+        return e, e[-1].copy()
+    s = _arclen(e)
+    i = int(ahead[0])
+    if i == 0:
+        return e[:2].copy(), e[1].copy()
+    f = (x_min - e[i - 1, 0]) / max(e[i, 0] - e[i - 1, 0], 1e-9)
+    s_cut = s[i - 1] + f * (s[i] - s[i - 1])
+    out = _cut(e, s_cut)
+    return out, out[-1].copy()
 
 
 def _extend_back(e: np.ndarray, x_back: float) -> np.ndarray:
@@ -366,6 +388,13 @@ class CorridorPlanner:
             right = _cut(right, sR[iR] + float(np.dot(gr - right[iR], right[min(iR + 1, len(right) - 1)] - right[iR])
                                                 / max(np.linalg.norm(right[min(iR + 1, len(right) - 1)] - right[iR]), 1e-6)))
             left[-1], right[-1] = gL, gR
+            if self.mode == "observed" and cfg.goal_cut_guard > 0:
+                # A6 goal-line stub: on a curve the oblique goal line can meet an edge beside or behind
+                # the car; cutting there leaves a 2-point stub that puts the car's own pose "outside".
+                # Keep each edge at least to the car's front + margin; its goal endpoint moves there.
+                x_min = veh.body_x[1] + cfg.goal_cut_guard
+                left, gL = _guard_cut(left, inp.left[np.argsort(inp.left[:, 0])], cfg.back_x, x_min, gL)
+                right, gR = _guard_cut(right, inp.right[np.argsort(inp.right[:, 0])], cfg.back_x, x_min, gR)
         else:
             # frontier: shorter side's end (1 m back), closest point on the other side
             if sL[-1] - 1.0 <= sR[-1] - 1.0:
