@@ -1,0 +1,3 @@
+the 4 seeds still failing under (b) (dead-end states); for 190 and 399 the blocking door and where it was first seen are marked; seeds [108, 190, 203, 399] at L0; configs (a) | (b) side by side.
+(a) pre-L3 + goal-line stub fix; (b) stub fix + L3 (no budget).
+Key scan = first brake, else the collision / last scan.

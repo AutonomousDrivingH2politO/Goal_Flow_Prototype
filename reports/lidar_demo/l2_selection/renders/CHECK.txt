@@ -1,0 +1,1 @@
+collision flags re-computed for 36 frames vs frames_*.npz (M3 collision, NMS-K3+safety collision_main, regression collision): 0 mismatches

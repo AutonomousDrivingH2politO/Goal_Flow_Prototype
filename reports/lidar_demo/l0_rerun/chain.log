@@ -9,3 +9,10 @@ start Wed Nov 25 16:05:22 CET 2026 head 95de174
 config a (observed_stubfix) start Wed Nov 25 16:05:22 CET 2026
 config a exit 0 end Wed Nov 25 16:31:35 CET 2026
 config b (observed_l3) start Wed Nov 25 16:31:35 CET 2026
+config b exit 0 end Wed Nov 25 17:00:36 CET 2026
+config c (observed_l3_noedge) start Wed Nov 25 17:00:36 CET 2026
+config c exit 0 end Wed Nov 25 17:29:38 CET 2026
+config d (observed_l3_notrack) start Wed Nov 25 17:29:38 CET 2026
+config d exit 0 end Wed Nov 25 17:53:45 CET 2026
+done Wed Nov 25 17:53:45 CET 2026
+pre_L4 (observed, 50e9ad9 planner) start Wed Nov 25 17:54:27 CET 2026

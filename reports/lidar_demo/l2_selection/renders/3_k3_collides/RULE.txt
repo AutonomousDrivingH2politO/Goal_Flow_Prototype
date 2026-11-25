@@ -1,0 +1,4 @@
+first 6 frames where NMS-K3 + safety's chosen path (main, shadow off) collides
+frames (val memmap index): [101, 2442, 4199, 5676, 7459, 8012]
+Left: M3 (single g*, shadow as trained). Right: NMS-K3 + safety, shadow off.
+Samples coloured by goal (grey dashed: flagged by the safety filter); stars: goals; red: chosen path; magenta: regression; cyan dashed: teacher routes; red circles: true obstacles. Each frame's evaluation batch is rerun with its seed.

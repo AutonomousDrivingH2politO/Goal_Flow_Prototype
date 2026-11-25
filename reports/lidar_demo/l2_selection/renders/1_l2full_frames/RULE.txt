@@ -1,0 +1,4 @@
+the 12 frames of reports/lidar_demo/l2_full/RULE.txt (val_0000 stored order, >= 2 routes)
+frames (val memmap index): [6, 7, 40, 41, 43, 45, 46, 47, 95, 96, 97, 98]
+Left: M3 (single g*, shadow as trained). Right: NMS-K3 + safety, shadow off.
+Samples coloured by goal (grey dashed: flagged by the safety filter); stars: goals; red: chosen path; magenta: regression; cyan dashed: teacher routes; red circles: true obstacles. Each frame's evaluation batch is rerun with its seed.
