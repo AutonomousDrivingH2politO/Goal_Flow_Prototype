@@ -40,7 +40,10 @@ from gfsem.train import load  # noqa: E402
 
 
 def main():
-    dev = pick_device("auto")
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--device", default="auto")
+    dev = pick_device(ap.parse_args().device)
     mm = MemmapSplit(Path("data/sim/mm_val"))
     si = SceneIndex([Path("data/sim/scenes_val.npz")])
     gf = load(Path("runs/l2_full_seed0/goalflow_B_best.pt"), dev).eval()
@@ -53,6 +56,7 @@ def main():
     h = veh.width / 2
     rows = []
     n_col = 0
+    fr_col = fr_flag_any = fr_flag_all = 0           # per-frame recall
     with torch.no_grad():
         for bi, b in enumerate(dl):
             b = {k: v.to(dev) for k, v in b.items()}
@@ -83,6 +87,10 @@ def main():
                 d = np.hypot(lx - qx, ly - qy) - O[None, None, :, 2]                 # (M, K, O)
                 col = (d < 0).any((1, 2))
                 n_col += int(col.sum())
+                if col.any():
+                    fr_col += 1
+                    fr_flag_any += int((col & flag[f]).any())
+                    fr_flag_all += int(not (col & ~flag[f]).any())
                 for m in np.flatnonzero(col & ~flag[f]):
                     k, o = np.argwhere(d[m] < 0)[0]                                 # first colliding pose
                     # nearest box point to the centre, in world (ego) coordinates
@@ -103,7 +111,9 @@ def main():
                         dmin = float("inf")
                     rows.append(dict(frame=int(pick[bi * 32 + f]), cand=int(m), obstacle=int(o), radius=float(rr),
                                      obst_x=float(cx_), obst_y=float(cy_), n_hit_cells=n_hits,
-                                     dist_collision_point_to_nearest_hit=dmin, depth=float(-d[m, k, o])))
+                                     dist_collision_point_to_nearest_hit=dmin, depth=float(-d[m, k, o]),
+                                     max_depth=float(-d[m, :, o].min()),
+                                     first_contact_t=float(k / (P.shape[1] - 1) * 4.0)))
             print(f"batch {bi + 1}/{len(dl)}  misses so far {len(rows)}", flush=True)
     unseen = [r for r in rows if r["n_hit_cells"] == 0]
     seen = [r for r in rows if r["n_hit_cells"] > 0]
@@ -113,6 +123,10 @@ def main():
         return None if not len(x) else {"median": float(np.median(x)), "p10": float(np.percentile(x, 10)),
                                         "p90": float(np.percentile(x, 90))}
     out = {"frames": len(pick), "true_collisions": n_col, "missed": len(rows),
+           "per_frame": {"frames_with_a_truly_colliding_candidate": fr_col,
+                         "share_where_filter_flags_some_colliding_candidate": fr_flag_any / max(fr_col, 1),
+                         "share_where_filter_flags_every_colliding_candidate": fr_flag_all / max(fr_col, 1)},
+           "missed_depth": stats(rows, "max_depth"), "missed_first_contact_s": stats(rows, "first_contact_t"),
            "unseen_this_scan": {"n": len(unseen), "dist_to_nearest_hit": stats(unseen, "dist_collision_point_to_nearest_hit"),
                                 "obstacle_range_x": stats(unseen, "obst_x")},
            "seen_but_clipped": {"n": len(seen), "hit_cells": stats(seen, "n_hit_cells"),

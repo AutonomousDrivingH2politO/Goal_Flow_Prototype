@@ -1,13 +1,28 @@
 {
  "frames": 1600,
- "true_collisions": 1814,
+ "true_collisions": 1807,
  "missed": 128,
+ "per_frame": {
+  "frames_with_a_truly_colliding_candidate": 21,
+  "share_where_filter_flags_some_colliding_candidate": 0.9523809523809523,
+  "share_where_filter_flags_every_colliding_candidate": 0.9523809523809523
+ },
+ "missed_depth": {
+  "median": 0.22499999403953552,
+  "p10": 0.17777281403541564,
+  "p90": 0.22499999403953552
+ },
+ "missed_first_contact_s": {
+  "median": 3.75,
+  "p10": 3.75,
+  "p90": 3.75
+ },
  "unseen_this_scan": {
   "n": 128,
   "dist_to_nearest_hit": {
-   "median": 1.7928802974753062,
-   "p10": 1.7913448116497277,
-   "p90": 1.7945069502306796
+   "median": 1.7926915777866812,
+   "p10": 1.7913079124573146,
+   "p90": 1.7946987583454947
   },
   "obstacle_range_x": {
    "median": 13.220067024230957,
@@ -31,8 +46,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7942231530948183,
-   "depth": 0.11200103163719177
+   "dist_collision_point_to_nearest_hit": 1.793943697970919,
+   "depth": 0.14418348670005798,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -42,8 +59,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7927740759830906,
-   "depth": 0.12992486357688904
+   "dist_collision_point_to_nearest_hit": 1.792783772538433,
+   "depth": 0.1451321542263031,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -53,8 +72,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7925016459469065,
-   "depth": 0.1420060098171234
+   "dist_collision_point_to_nearest_hit": 1.7931088806010953,
+   "depth": 0.1308039128780365,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -64,8 +85,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7936987699692792,
-   "depth": 0.13954433798789978
+   "dist_collision_point_to_nearest_hit": 1.7925971058847945,
+   "depth": 0.1422787606716156,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -75,8 +98,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7940767116513194,
-   "depth": 0.12425932288169861
+   "dist_collision_point_to_nearest_hit": 1.7926437366773904,
+   "depth": 0.11892732977867126,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -86,8 +111,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7925165734608115,
-   "depth": 0.1433480679988861
+   "dist_collision_point_to_nearest_hit": 1.7930842377998595,
+   "depth": 0.14134439826011658,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -97,8 +124,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7914272836081184,
-   "depth": 0.14938673377037048
+   "dist_collision_point_to_nearest_hit": 1.7917428626509393,
+   "depth": 0.1490066945552826,
+   "max_depth": 0.20257392525672913,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -108,8 +137,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7913470282815032,
-   "depth": 0.15504702925682068
+   "dist_collision_point_to_nearest_hit": 1.7908585457427542,
+   "depth": 0.136448472738266,
+   "max_depth": 0.15002402663230896,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -119,8 +150,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793692501260397,
-   "depth": 0.1526075303554535
+   "dist_collision_point_to_nearest_hit": 1.7912260527411066,
+   "depth": 0.15139588713645935,
+   "max_depth": 0.1786459982395172,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -130,8 +163,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7928865583404534,
-   "depth": 0.15030035376548767
+   "dist_collision_point_to_nearest_hit": 1.7932302636658002,
+   "depth": 0.1222282350063324,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -141,8 +176,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7923127317922618,
-   "depth": 0.14516648650169373
+   "dist_collision_point_to_nearest_hit": 1.7914982420328478,
+   "depth": 0.14408501982688904,
+   "max_depth": 0.1845073401927948,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -152,8 +189,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7929246572714148,
-   "depth": 0.1348467767238617
+   "dist_collision_point_to_nearest_hit": 1.7910657285222202,
+   "depth": 0.16744288802146912,
+   "max_depth": 0.16757670044898987,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -163,8 +202,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7925648753769778,
-   "depth": 0.12623080611228943
+   "dist_collision_point_to_nearest_hit": 1.793101471449151,
+   "depth": 0.12955626845359802,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -174,8 +215,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7908784482320876,
-   "depth": 0.13904938101768494
+   "dist_collision_point_to_nearest_hit": 1.7924881911113402,
+   "depth": 0.14526280760765076,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -185,8 +228,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7942108551475202,
-   "depth": 0.15178808569908142
+   "dist_collision_point_to_nearest_hit": 1.7923162887098398,
+   "depth": 0.1382335126399994,
+   "max_depth": 0.21589788794517517,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -196,8 +241,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7917304853780958,
-   "depth": 0.15256032347679138
+   "dist_collision_point_to_nearest_hit": 1.793268587535074,
+   "depth": 0.1471904218196869,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -207,8 +254,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7944938207578318,
-   "depth": 0.1371370255947113
+   "dist_collision_point_to_nearest_hit": 1.7934050296456583,
+   "depth": 0.11875185370445251,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -218,8 +267,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.791104693151514,
-   "depth": 0.1430722177028656
+   "dist_collision_point_to_nearest_hit": 1.7942599330144267,
+   "depth": 0.11908969283103943,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -229,8 +280,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7935608351156513,
-   "depth": 0.14292797446250916
+   "dist_collision_point_to_nearest_hit": 1.7944001831672474,
+   "depth": 0.15701469779014587,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -240,8 +293,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7935519454843643,
-   "depth": 0.13650116324424744
+   "dist_collision_point_to_nearest_hit": 1.792648032033285,
+   "depth": 0.13976392149925232,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -251,8 +306,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7935992590928,
-   "depth": 0.1554149091243744
+   "dist_collision_point_to_nearest_hit": 1.7938465696148094,
+   "depth": 0.13201555609703064,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -262,8 +319,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7931758948021093,
-   "depth": 0.12782034277915955
+   "dist_collision_point_to_nearest_hit": 1.7902495920176082,
+   "depth": 0.15226015448570251,
+   "max_depth": 0.15226015448570251,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -273,8 +332,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.794537585667325,
-   "depth": 0.12722906470298767
+   "dist_collision_point_to_nearest_hit": 1.793485425783571,
+   "depth": 0.1387227475643158,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -284,8 +345,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7910706244959664,
-   "depth": 0.15284761786460876
+   "dist_collision_point_to_nearest_hit": 1.7919064338436124,
+   "depth": 0.14848050475120544,
+   "max_depth": 0.20760294795036316,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -295,8 +358,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7925664295040393,
-   "depth": 0.14635500311851501
+   "dist_collision_point_to_nearest_hit": 1.7936203566559465,
+   "depth": 0.14451393485069275,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -306,8 +371,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7927324265135514,
-   "depth": 0.15200361609458923
+   "dist_collision_point_to_nearest_hit": 1.7945921448999749,
+   "depth": 0.1322515904903412,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -317,8 +384,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7935616534252794,
-   "depth": 0.14498338103294373
+   "dist_collision_point_to_nearest_hit": 1.7924140105137154,
+   "depth": 0.14178165793418884,
+   "max_depth": 0.22162017226219177,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -328,8 +397,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7935808651457834,
-   "depth": 0.13026627898216248
+   "dist_collision_point_to_nearest_hit": 1.7964356591173218,
+   "depth": 0.1044376790523529,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -339,8 +410,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793206148888367,
-   "depth": 0.10586223006248474
+   "dist_collision_point_to_nearest_hit": 1.796288823850485,
+   "depth": 0.1425081193447113,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -350,8 +423,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.792035229620825,
-   "depth": 0.15161141753196716
+   "dist_collision_point_to_nearest_hit": 1.7930671280592045,
+   "depth": 0.14664635062217712,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -361,8 +436,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7917390225366274,
-   "depth": 0.14983734488487244
+   "dist_collision_point_to_nearest_hit": 1.7956140855376885,
+   "depth": 0.14358457922935486,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -372,8 +449,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7918999781926652,
-   "depth": 0.14741310477256775
+   "dist_collision_point_to_nearest_hit": 1.7926939301164706,
+   "depth": 0.1420968472957611,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -383,8 +462,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793498901489752,
-   "depth": 0.13689455389976501
+   "dist_collision_point_to_nearest_hit": 1.7923750017619542,
+   "depth": 0.14954933524131775,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -394,8 +475,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.792567779169023,
-   "depth": 0.14387306571006775
+   "dist_collision_point_to_nearest_hit": 1.7926892254568916,
+   "depth": 0.13844475150108337,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -405,8 +488,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7940622809978815,
-   "depth": 0.15468010306358337
+   "dist_collision_point_to_nearest_hit": 1.7936431351256275,
+   "depth": 0.14182838797569275,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -416,8 +501,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.792874036610159,
-   "depth": 0.1568184792995453
+   "dist_collision_point_to_nearest_hit": 1.7922913496402184,
+   "depth": 0.1463356912136078,
+   "max_depth": 0.2201150357723236,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -427,8 +514,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7938823863408218,
-   "depth": 0.13715776801109314
+   "dist_collision_point_to_nearest_hit": 1.79129931207997,
+   "depth": 0.15131887793540955,
+   "max_depth": 0.17620810866355896,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -438,8 +527,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.79130106805877,
-   "depth": 0.15678724646568298
+   "dist_collision_point_to_nearest_hit": 1.7935149995361392,
+   "depth": 0.14147505164146423,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -449,8 +540,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7941762489292974,
-   "depth": 0.09596022963523865
+   "dist_collision_point_to_nearest_hit": 1.7915865223382883,
+   "depth": 0.1584089696407318,
+   "max_depth": 0.19350656867027283,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -460,8 +553,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7924183041135262,
-   "depth": 0.14845141768455505
+   "dist_collision_point_to_nearest_hit": 1.7927853270839362,
+   "depth": 0.13549718260765076,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -471,8 +566,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7973686743330912,
-   "depth": 0.1389823853969574
+   "dist_collision_point_to_nearest_hit": 1.794732542855039,
+   "depth": 0.1287742555141449,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -482,8 +579,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7939014026903328,
-   "depth": 0.15431389212608337
+   "dist_collision_point_to_nearest_hit": 1.7913569464156718,
+   "depth": 0.15257439017295837,
+   "max_depth": 0.17917737364768982,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -493,8 +592,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.790178829805554,
-   "depth": 0.164618581533432
+   "dist_collision_point_to_nearest_hit": 1.79325229117887,
+   "depth": 0.13815507292747498,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -504,8 +605,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793310024774073,
-   "depth": 0.12692102789878845
+   "dist_collision_point_to_nearest_hit": 1.7927784537088858,
+   "depth": 0.14177212119102478,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -515,8 +618,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7925934656706137,
-   "depth": 0.1474076211452484
+   "dist_collision_point_to_nearest_hit": 1.7934735493948024,
+   "depth": 0.1403709352016449,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -526,8 +631,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7922496502873624,
-   "depth": 0.1397291123867035
+   "dist_collision_point_to_nearest_hit": 1.792274874006146,
+   "depth": 0.15460333228111267,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -537,8 +644,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7911293793353564,
-   "depth": 0.1452241837978363
+   "dist_collision_point_to_nearest_hit": 1.7923312117540906,
+   "depth": 0.14297279715538025,
+   "max_depth": 0.2205474078655243,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -548,8 +657,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7916329958061188,
-   "depth": 0.15058860182762146
+   "dist_collision_point_to_nearest_hit": 1.7903381682849562,
+   "depth": 0.1588815152645111,
+   "max_depth": 0.1588815152645111,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -559,8 +670,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7931476873745935,
-   "depth": 0.12413200736045837
+   "dist_collision_point_to_nearest_hit": 1.7913115983333194,
+   "depth": 0.1512030065059662,
+   "max_depth": 0.17844340205192566,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -570,8 +683,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7934648655551575,
-   "depth": 0.12866434454917908
+   "dist_collision_point_to_nearest_hit": 1.7918970769049836,
+   "depth": 0.14640149474143982,
+   "max_depth": 0.20395562052726746,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -581,8 +696,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7951460861747859,
-   "depth": 0.13578256964683533
+   "dist_collision_point_to_nearest_hit": 1.7915354394980423,
+   "depth": 0.16468963027000427,
+   "max_depth": 0.19406601786613464,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -592,8 +709,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7918268895037017,
-   "depth": 0.15676316618919373
+   "dist_collision_point_to_nearest_hit": 1.7921470086243858,
+   "depth": 0.1404334008693695,
+   "max_depth": 0.20551761984825134,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -603,8 +722,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7918259499428855,
-   "depth": 0.1467340886592865
+   "dist_collision_point_to_nearest_hit": 1.7946757546409633,
+   "depth": 0.1251743733882904,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -614,8 +735,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7931392551424403,
-   "depth": 0.1431778371334076
+   "dist_collision_point_to_nearest_hit": 1.7915783959289178,
+   "depth": 0.1440940797328949,
+   "max_depth": 0.1914350688457489,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -625,8 +748,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7938053034069013,
-   "depth": 0.12973102927207947
+   "dist_collision_point_to_nearest_hit": 1.7920928943848065,
+   "depth": 0.14274582266807556,
+   "max_depth": 0.2114028036594391,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -636,8 +761,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7925647525004067,
-   "depth": 0.16691240668296814
+   "dist_collision_point_to_nearest_hit": 1.7977628336597573,
+   "depth": 0.16138827800750732,
+   "max_depth": 0.16138827800750732,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -647,8 +774,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7923680098829553,
-   "depth": 0.1573246419429779
+   "dist_collision_point_to_nearest_hit": 1.7951005199263832,
+   "depth": 0.15014562010765076,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -658,8 +787,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7929622261481026,
-   "depth": 0.12146767973899841
+   "dist_collision_point_to_nearest_hit": 1.7937649823726365,
+   "depth": 0.13955244421958923,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -669,8 +800,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.794259523703922,
-   "depth": 0.14368781447410583
+   "dist_collision_point_to_nearest_hit": 1.7917585067931852,
+   "depth": 0.1392568051815033,
+   "max_depth": 0.19609364867210388,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -680,8 +813,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7948267145194776,
-   "depth": 0.12906989455223083
+   "dist_collision_point_to_nearest_hit": 1.791752870107339,
+   "depth": 0.15359291434288025,
+   "max_depth": 0.205975741147995,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -691,8 +826,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.791880367394282,
-   "depth": 0.14883264899253845
+   "dist_collision_point_to_nearest_hit": 1.7916391618856065,
+   "depth": 0.15502390265464783,
+   "max_depth": 0.1964435875415802,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -702,8 +839,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7918227225140515,
-   "depth": 0.15189537405967712
+   "dist_collision_point_to_nearest_hit": 1.7930857118461403,
+   "depth": 0.15109238028526306,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -713,8 +852,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7949067799644212,
-   "depth": 0.13259872794151306
+   "dist_collision_point_to_nearest_hit": 1.792290940775218,
+   "depth": 0.13650140166282654,
+   "max_depth": 0.2098667323589325,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -724,8 +865,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7926693033463987,
-   "depth": 0.10314449667930603
+   "dist_collision_point_to_nearest_hit": 1.791786242689547,
+   "depth": 0.13690313696861267,
+   "max_depth": 0.19459381699562073,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -735,8 +878,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793247705800793,
-   "depth": 0.12596258521080017
+   "dist_collision_point_to_nearest_hit": 1.7960154966049362,
+   "depth": 0.11665424704551697,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -746,8 +891,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.794454731549203,
-   "depth": 0.1499517858028412
+   "dist_collision_point_to_nearest_hit": 1.7947094426258026,
+   "depth": 0.14086470007896423,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -757,8 +904,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7919483548575923,
-   "depth": 0.15262755751609802
+   "dist_collision_point_to_nearest_hit": 1.7917217044698701,
+   "depth": 0.13777145743370056,
+   "max_depth": 0.2037816345691681,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -768,8 +917,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7914282225291003,
-   "depth": 0.14978107810020447
+   "dist_collision_point_to_nearest_hit": 1.7922597479076057,
+   "depth": 0.12694677710533142,
+   "max_depth": 0.20972785353660583,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -779,8 +930,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7938275548302014,
-   "depth": 0.13297471404075623
+   "dist_collision_point_to_nearest_hit": 1.7932262920529547,
+   "depth": 0.15619048476219177,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -790,8 +943,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.795057208702494,
-   "depth": 0.10675963759422302
+   "dist_collision_point_to_nearest_hit": 1.7918504613398354,
+   "depth": 0.11727771162986755,
+   "max_depth": 0.19424298405647278,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -801,8 +956,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7927361905096106,
-   "depth": 0.1566670835018158
+   "dist_collision_point_to_nearest_hit": 1.791363600902631,
+   "depth": 0.1449941098690033,
+   "max_depth": 0.17386439442634583,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -812,8 +969,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7909052054247305,
-   "depth": 0.15421327948570251
+   "dist_collision_point_to_nearest_hit": 1.7910077971174805,
+   "depth": 0.1433175504207611,
+   "max_depth": 0.16891685128211975,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -823,8 +982,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7910083267930579,
-   "depth": 0.16091236472129822
+   "dist_collision_point_to_nearest_hit": 1.7936220368224824,
+   "depth": 0.12155422568321228,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -834,8 +995,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7932467640027074,
-   "depth": 0.1341763436794281
+   "dist_collision_point_to_nearest_hit": 1.7921604562028166,
+   "depth": 0.15191921591758728,
+   "max_depth": 0.21940878033638,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -845,8 +1008,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7922304370252555,
-   "depth": 0.13995584845542908
+   "dist_collision_point_to_nearest_hit": 1.7941459511197402,
+   "depth": 0.13260731101036072,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -856,8 +1021,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7933972080387433,
-   "depth": 0.13544759154319763
+   "dist_collision_point_to_nearest_hit": 1.7928814431735616,
+   "depth": 0.1480003297328949,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -867,8 +1034,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7931216114164497,
-   "depth": 0.15207943320274353
+   "dist_collision_point_to_nearest_hit": 1.7914779096509654,
+   "depth": 0.1546061933040619,
+   "max_depth": 0.1915569007396698,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -878,8 +1047,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7937767832206029,
-   "depth": 0.13957104086875916
+   "dist_collision_point_to_nearest_hit": 1.792951257808486,
+   "depth": 0.12390121817588806,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -889,8 +1060,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7931903867691807,
-   "depth": 0.12647399306297302
+   "dist_collision_point_to_nearest_hit": 1.7927643795673522,
+   "depth": 0.1382211148738861,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -900,8 +1073,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.792695280011203,
-   "depth": 0.1498490273952484
+   "dist_collision_point_to_nearest_hit": 1.7946941793682198,
+   "depth": 0.13570961356163025,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -911,8 +1086,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7919951822896882,
-   "depth": 0.14847072958946228
+   "dist_collision_point_to_nearest_hit": 1.7933449138520716,
+   "depth": 0.1496635377407074,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -922,8 +1099,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7910553238344447,
-   "depth": 0.1573852002620697
+   "dist_collision_point_to_nearest_hit": 1.7931516584908875,
+   "depth": 0.1441393792629242,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -933,8 +1112,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7924276682178322,
-   "depth": 0.1510678231716156
+   "dist_collision_point_to_nearest_hit": 1.793345936617585,
+   "depth": 0.15309461951255798,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -944,8 +1125,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7922702951966443,
-   "depth": 0.1363409459590912
+   "dist_collision_point_to_nearest_hit": 1.7910728266581315,
+   "depth": 0.15272793173789978,
+   "max_depth": 0.175449937582016,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -955,8 +1138,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7932361188634076,
-   "depth": 0.11544093489646912
+   "dist_collision_point_to_nearest_hit": 1.79327026665622,
+   "depth": 0.1129363477230072,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -966,8 +1151,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7944340169189592,
-   "depth": 0.14014610648155212
+   "dist_collision_point_to_nearest_hit": 1.7924530216711427,
+   "depth": 0.14947280287742615,
+   "max_depth": 0.21952930092811584,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -977,8 +1164,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7948663136488323,
-   "depth": 0.15205153822898865
+   "dist_collision_point_to_nearest_hit": 1.7948411158439939,
+   "depth": 0.08140215277671814,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -988,8 +1177,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7917998869106586,
-   "depth": 0.14389905333518982
+   "dist_collision_point_to_nearest_hit": 1.7928360638832237,
+   "depth": 0.1380527913570404,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -999,8 +1190,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7915971402897284,
-   "depth": 0.1380194127559662
+   "dist_collision_point_to_nearest_hit": 1.790339309623582,
+   "depth": 0.16942700743675232,
+   "max_depth": 0.16942700743675232,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1010,8 +1203,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7937849379805162,
-   "depth": 0.08140525221824646
+   "dist_collision_point_to_nearest_hit": 1.792316902016186,
+   "depth": 0.15532240271568298,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1021,8 +1216,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7921700616352645,
-   "depth": 0.14322075247764587
+   "dist_collision_point_to_nearest_hit": 1.7935865190479063,
+   "depth": 0.11317428946495056,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1032,8 +1229,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7918139798618362,
-   "depth": 0.1527932584285736
+   "dist_collision_point_to_nearest_hit": 1.7916395705983847,
+   "depth": 0.15406689047813416,
+   "max_depth": 0.18870028853416443,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1043,8 +1242,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7906466271046066,
-   "depth": 0.15674170851707458
+   "dist_collision_point_to_nearest_hit": 1.7921868614026943,
+   "depth": 0.15163597464561462,
+   "max_depth": 0.22092410922050476,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1054,8 +1255,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7915159622684007,
-   "depth": 0.1632748544216156
+   "dist_collision_point_to_nearest_hit": 1.792210324764715,
+   "depth": 0.1507605016231537,
+   "max_depth": 0.21920105814933777,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1065,8 +1268,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.792094978771538,
-   "depth": 0.1547456681728363
+   "dist_collision_point_to_nearest_hit": 1.792243886379933,
+   "depth": 0.15646228194236755,
+   "max_depth": 0.21319732069969177,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1076,8 +1281,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7930230862714882,
-   "depth": 0.14523658156394958
+   "dist_collision_point_to_nearest_hit": 1.791294618536167,
+   "depth": 0.16182789206504822,
+   "max_depth": 0.18568381667137146,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1087,8 +1294,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7919868461026276,
-   "depth": 0.11612209677696228
+   "dist_collision_point_to_nearest_hit": 1.7957264491058766,
+   "depth": 0.1508074700832367,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1098,8 +1307,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7942361099388842,
-   "depth": 0.13208803534507751
+   "dist_collision_point_to_nearest_hit": 1.7943574501416297,
+   "depth": 0.09806069731712341,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1109,8 +1320,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7922378362012474,
-   "depth": 0.14919361472129822
+   "dist_collision_point_to_nearest_hit": 1.7931299624104071,
+   "depth": 0.1352451741695404,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1120,8 +1333,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7924863098895034,
-   "depth": 0.14867457747459412
+   "dist_collision_point_to_nearest_hit": 1.7918201082333844,
+   "depth": 0.16297706961631775,
+   "max_depth": 0.2062225043773651,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1131,8 +1346,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7961219144485883,
-   "depth": 0.12368330359458923
+   "dist_collision_point_to_nearest_hit": 1.7937004503662777,
+   "depth": 0.1414831578731537,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1142,8 +1359,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7932524148147082,
-   "depth": 0.13607677817344666
+   "dist_collision_point_to_nearest_hit": 1.791389766831579,
+   "depth": 0.1452401578426361,
+   "max_depth": 0.1846594512462616,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1153,8 +1372,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7913396395089183,
-   "depth": 0.14647063612937927
+   "dist_collision_point_to_nearest_hit": 1.7951258062346447,
+   "depth": 0.14735755324363708,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1164,8 +1385,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7937919456050795,
-   "depth": 0.13943371176719666
+   "dist_collision_point_to_nearest_hit": 1.7904834903382636,
+   "depth": 0.1616898477077484,
+   "max_depth": 0.1616898477077484,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1175,8 +1398,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7932484430582896,
-   "depth": 0.13934573531150818
+   "dist_collision_point_to_nearest_hit": 1.7922602793017532,
+   "depth": 0.12722286581993103,
+   "max_depth": 0.20320263504981995,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1186,8 +1411,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7951563520391032,
-   "depth": 0.14435800909996033
+   "dist_collision_point_to_nearest_hit": 1.7912665795074094,
+   "depth": 0.1436804234981537,
+   "max_depth": 0.17385539412498474,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1197,8 +1424,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7934578615219325,
-   "depth": 0.14725527167320251
+   "dist_collision_point_to_nearest_hit": 1.7918100173305362,
+   "depth": 0.16095218062400818,
+   "max_depth": 0.1986922323703766,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1208,8 +1437,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.795444982501381,
-   "depth": 0.1049860417842865
+   "dist_collision_point_to_nearest_hit": 1.7918451502185102,
+   "depth": 0.16281017661094666,
+   "max_depth": 0.206211656332016,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1219,8 +1450,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7927509191746898,
-   "depth": 0.13093718886375427
+   "dist_collision_point_to_nearest_hit": 1.7934554874403923,
+   "depth": 0.14059647917747498,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1230,8 +1463,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7957287498090873,
-   "depth": 0.10418161749839783
+   "dist_collision_point_to_nearest_hit": 1.7922042749064933,
+   "depth": 0.13971075415611267,
+   "max_depth": 0.21912941336631775,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1241,8 +1476,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.791677633518371,
-   "depth": 0.15974649786949158
+   "dist_collision_point_to_nearest_hit": 1.791247845111803,
+   "depth": 0.1551283299922943,
+   "max_depth": 0.16694286465644836,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1252,8 +1489,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793299378614708,
-   "depth": 0.15033134818077087
+   "dist_collision_point_to_nearest_hit": 1.7917835462048868,
+   "depth": 0.13950666785240173,
+   "max_depth": 0.19886502623558044,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1263,8 +1502,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7918753825147207,
-   "depth": 0.15919670462608337
+   "dist_collision_point_to_nearest_hit": 1.795580526510499,
+   "depth": 0.13812527060508728,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1274,8 +1515,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7913335982278775,
-   "depth": 0.1597636640071869
+   "dist_collision_point_to_nearest_hit": 1.7944734345410742,
+   "depth": 0.12502607703208923,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1285,8 +1528,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7930956175168542,
-   "depth": 0.15212377905845642
+   "dist_collision_point_to_nearest_hit": 1.7935156132529408,
+   "depth": 0.15114006400108337,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1296,8 +1541,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7900871438839254,
-   "depth": 0.15608176589012146
+   "dist_collision_point_to_nearest_hit": 1.7926211164417483,
+   "depth": 0.14643391966819763,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1307,8 +1554,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7921720238384042,
-   "depth": 0.14882215857505798
+   "dist_collision_point_to_nearest_hit": 1.7952267231406294,
+   "depth": 0.1359470784664154,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1318,8 +1567,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7919717270311308,
-   "depth": 0.1630629003047943
+   "dist_collision_point_to_nearest_hit": 1.7930578363686023,
+   "depth": 0.1570042073726654,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1329,8 +1580,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7956761188479986,
-   "depth": 0.13554510474205017
+   "dist_collision_point_to_nearest_hit": 1.792156082590632,
+   "depth": 0.15121731162071228,
+   "max_depth": 0.20583948493003845,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1340,8 +1593,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7929307140933208,
-   "depth": 0.13602480292320251
+   "dist_collision_point_to_nearest_hit": 1.7941381210760663,
+   "depth": 0.1316145360469818,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1351,8 +1606,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7920976763949885,
-   "depth": 0.15878066420555115
+   "dist_collision_point_to_nearest_hit": 1.7917176601035776,
+   "depth": 0.12536582350730896,
+   "max_depth": 0.1902002990245819,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1362,8 +1619,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7922506724262182,
-   "depth": 0.15014490485191345
+   "dist_collision_point_to_nearest_hit": 1.7927077168133814,
+   "depth": 0.1473918855190277,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1373,8 +1632,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.793247705800793,
-   "depth": 0.1325269639492035
+   "dist_collision_point_to_nearest_hit": 1.7923710355986806,
+   "depth": 0.13979443907737732,
+   "max_depth": 0.22074732184410095,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1384,8 +1645,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7929980377380281,
-   "depth": 0.1397465169429779
+   "dist_collision_point_to_nearest_hit": 1.7936688222445174,
+   "depth": 0.142920583486557,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1395,8 +1658,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7967854805226444,
-   "depth": 0.1301330029964447
+   "dist_collision_point_to_nearest_hit": 1.793587994533505,
+   "depth": 0.1523643434047699,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1406,8 +1671,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7934428308748391,
-   "depth": 0.128621906042099
+   "dist_collision_point_to_nearest_hit": 1.7942375872608005,
+   "depth": 0.13260731101036072,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1417,8 +1684,10 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7933552324515085,
-   "depth": 0.14163455367088318
+   "dist_collision_point_to_nearest_hit": 1.791962124775774,
+   "depth": 0.14663967490196228,
+   "max_depth": 0.2001577913761139,
+   "first_contact_t": 3.75
   },
   {
    "frame": 22919,
@@ -1428,8 +1697,11 @@
    "obst_x": 13.220067024230957,
    "obst_y": -2.144007921218872,
    "n_hit_cells": 0,
-   "dist_collision_point_to_nearest_hit": 1.7924758816049677,
-   "depth": 0.15204796195030212
+   "dist_collision_point_to_nearest_hit": 1.79325229117887,
+   "depth": 0.14163550734519958,
+   "max_depth": 0.22499999403953552,
+   "first_contact_t": 3.75
   }
- ]
+ ],
+ "note": "run on CPU (--device cpu) to leave the MPS selection run undisturbed; CPU and MPS draw different sample noise for the same seed, so totals differ slightly from calibrate_safety.py (1,807 vs 1,814 colliding candidates); the 128 misses are the same frame. Per candidate: first contact at 3.75 s (end of the 4 s horizon), depth 0.11-0.14 m at first contact, 0.18-0.225 m by the last waypoint."
 }
