@@ -41,6 +41,10 @@ LABELS = {
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
+    "observed_l3_nocache": "(b) without the failed-search cache",
+    "observed_l3_nohold": "(b) without hold",
+    "observed_l3_nocache_nohold": "(b) without cache and hold",
+    "observed_l3_nohyst": "(b) without kept-plan hysteresis and fallback",
     "funnel_priv": "corridor-funnel (original design), privileged",
     "funnel_obs": "corridor-funnel (original design), observed",
 }
@@ -76,6 +80,12 @@ def make_planner(name: str):
     if name == "observed_l3_noedge":  # config (c): (b) without edge memory (fair vs single-scan GoalFlow BEV)
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config(edge_memory=False)), name)
+    abl = {"observed_l3_nocache": dict(fail_cache_scans=0), "observed_l3_nohold": dict(hold_confirm=1),
+           "observed_l3_nocache_nohold": dict(fail_cache_scans=0, hold_confirm=1),
+           "observed_l3_nohyst": dict(keep_hysteresis=False, fallback=False)}
+    if name in abl:                   # stall ablations of (b)
+        return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
+                                                       lcfg=l3_config(**abl[name])), name)
     if name == "observed_l3_notrack": # config (d): (b) without obstacle tracking
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config(tracking=False)), name)
@@ -102,6 +112,9 @@ def run_one(job: tuple[str, int, str]) -> dict:
     ev = getattr(P.p, "events", {}) or {}
     row["guard_refusals"] = int(ev.get("guard_refusal", 0))       # goal-cut guard: brake instead of a bad line
     row["no_edges_brakes"] = int(ev.get("no_edges", 0))
+    row["cache_skipped_scans"] = int(ev.get("cache_hit", 0))      # replans skipped by the failed-search cache
+    row["hold_scans"] = int(ev.get("hold", 0))                    # plans found but held (waiting for confirmation)
+    row["held_scans"] = int(ev.get("held_scans", 0))              # scans spent braked / held since a brake
     row["events"] = " ".join(f"{k}:{v}" for k, v in sorted(ev.items()))
     row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(P.p, "kappa_log", []))
     return row

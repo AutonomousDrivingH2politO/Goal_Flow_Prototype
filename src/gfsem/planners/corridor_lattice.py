@@ -352,6 +352,8 @@ class LatticeCorridorPlanner(CorridorPlanner):
         """Observed mode: budget, failed-search cache, kept-plan fallback and hold around the core."""
         L = self.lcfg
         self.scan += 1
+        if self.held:
+            self.events["held_scans"] += 1           # scans spent braked / waiting since the last brake
         self._deadline = t0 + L.budget_s if L.budget_s > 0 else None
         odom = inp.pose_odom if inp.pose_odom is not None else np.zeros(3)
         self._skip_search = False
