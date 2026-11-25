@@ -11,7 +11,9 @@ frame (believed, noisy, drifting pose ``obs.pose_odom``; never the true pose). A
 >= ``memory_min_scans`` scans, and only while it lies ahead of the rear bumper and within ``memory_range`` m of the
 car (position-based, no time limit); cells behind the bumper are dropped. With ``visibility_gate`` remembered cells
 are used only where the current scan cannot see (``unseen_mask``: within 2.1 m of the sensor, outside the FOV, or
-behind the first return along their ray); elsewhere the current scan wins. Current-scan hits always count. Reason: a 0.40 m cone falls below the lowest beam within ~2.03 m of the
+behind the first return along their ray); elsewhere the current scan wins. With ``memory_obs_range`` > 0 only hits
+observed within that range of the sensor are remembered. Defaults = the variant picked by the pre-set rule
+(2026-11-25): near-observation memory (4 m), no visibility gate. Current-scan hits always count. Reason: a 0.40 m cone falls below the lowest beam within ~2.03 m of the
 sensor, so a single scan loses it right where it matters; the corridor baseline (a) has implicit memory
 through its kept plan. The BEV input stays single-scan.
 """
@@ -58,7 +60,7 @@ class GoalFlowPlanner:
     def __init__(self, ckpt: Path = Path("runs/l2_full_seed0/goalflow_B_best.pt"), device: str = "auto",
                  M: int = 128, goal_K: int = 3, speed: float = 3.0, seed: int = 0, memory_range: float = 4.0,
                  memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1,
-                 visibility_gate: bool = True, memory_obs_range: float = 0.0):
+                 visibility_gate: bool = False, memory_obs_range: float = 4.0):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)

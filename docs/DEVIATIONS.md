@@ -382,7 +382,7 @@ those 80 episodes (feasible scenes; ties: fewer collisions).
 **Result:** near-observation memory: L0 37 / 0 / 2 / 0, L4 35 / 0 / 4 / 0 (success / collision / stalled / exit,
 feasible scenes), 6 collisions + stalls, "no safe candidate" brakes 3.0% of replans; visibility gate: L0
 38 / 0 / 1 / 0, L4 19 / 0 / 20 / 0, 21 collisions + stalls, 7.6%. **The full run uses the near-observation memory**
-(`eval_corridor.py --planners goalflow_l3_nearobs`). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
+(`eval_corridor.py --planners goalflow_l3`, the default; the losing variant is `goalflow_l3_visgate`). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
 beam within ~2.03 m of the sensor, so a single scan loses it exactly when the car reaches it (the closed-loop
 smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
 kept plan. If no candidate survives the filter, the planner brakes.

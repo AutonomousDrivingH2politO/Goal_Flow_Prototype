@@ -41,8 +41,9 @@ LABELS = {
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
-    "goalflow_l3": "GoalFlow, closed loop (NMS-K3 + safety, shadow off, 1 step, single-scan BEV; memory: visibility gate)",
-    "goalflow_l3_nearobs": "GoalFlow, closed loop (as goalflow_l3; memory: only hits observed within 4 m)",
+    "goalflow_l3": "GoalFlow, closed loop (NMS-K3 + safety, shadow off, 1 step, single-scan BEV; near-observation memory)",
+    "goalflow_l3_nearobs": "GoalFlow, closed loop (= goalflow_l3; near-observation memory)",
+    "goalflow_l3_visgate": "GoalFlow, closed loop (visibility-gate memory; lost the pre-set rule)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -71,8 +72,9 @@ _GF = None
 
 def make_planner(name: str):
     global _GF
-    gf_variants = {"goalflow_l3": dict(),                                            # visibility gate (default)
-                   "goalflow_l3_nearobs": dict(visibility_gate=False, memory_obs_range=4.0)}
+    gf_variants = {"goalflow_l3": dict(),                     # picked (pre-set rule): near-observation memory
+                   "goalflow_l3_nearobs": dict(),             # alias of goalflow_l3 (name used in the smoke test)
+                   "goalflow_l3_visgate": dict(visibility_gate=True, memory_obs_range=0.0)}   # lost the rule
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
         if _GF is None:
             from gfsem.planners.goalflow_planner import GoalFlowPlanner

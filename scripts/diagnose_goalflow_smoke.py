@@ -1,7 +1,11 @@
 #!/usr/bin/env python
-"""Replay diagnostics for the closed-loop GoalFlow smoke test (hit memory 1.5 s). No new runs: replays only.
+"""Replay diagnostics for the closed-loop GoalFlow smoke test. No new runs: replays only.
 
-    python scripts/diagnose_goalflow_smoke.py out.json
+    python scripts/diagnose_goalflow_smoke.py out.json [--variant goalflow_l3|goalflow_l3_visgate|time1.5]
+
+Updated 2026-11-25 for the position-based memory (default: the picked near-observation variant). The first
+analysis (diagnose_smoke.json) was made with the earlier 1.5 s time-window memory, which no longer exists in the
+planner; ``time1.5`` is not reproducible with the current code and is refused.
 
 1. Cone collisions (4 L0, 12 L4, 23 L4): last scan with a hit on the cone, time / speed / distance since,
    bearing and range at the last sighting, why it vanished at the next scan.
@@ -35,14 +39,13 @@ class Rec(GoalFlowPlanner):
 
     @torch.no_grad()
     def plan(self, obs, scene, true_pose, state):
-        pose_b = np.asarray(obs.pose_odom, float)
-        mem_ego = [to_frame(p, pose_b) for t, p in self.mem
-                   if self.k * self.scan_dt - t <= self.hit_memory_s + 1e-9 and len(p)]
-        mem_ego = np.concatenate(mem_ego) if mem_ego else np.zeros((0, 2))
         k = self.k
-        torch.manual_seed(self.seed * 1_000_003 + k)
         res = super().plan(obs, scene, true_pose, state)
-        # candidates: re-run the identical model call (same seed) to get the samples
+        pose_b = np.asarray(obs.pose_odom, float)
+        # remembered points the filter used at this scan (self.mem is refreshed by _memory_hits)
+        mem_ego = [to_frame(p, pose_b) for _, p in self.mem if len(p)]
+        mem_ego = np.concatenate(mem_ego) if mem_ego else np.zeros((0, 2))
+        # candidates: re-run the identical model call (same seed, same hit mask) to get the samples
         torch.manual_seed(self.seed * 1_000_003 + k)
         bev = torch.from_numpy(rasterize(obs, self.rc))[None].to(self.dev)
         ego = torch.from_numpy(np.asarray(obs.ego_state, np.float32))[None].to(self.dev)
@@ -96,7 +99,9 @@ def cone_case(P, sc, r, lid, veh):
                else "below the lowest beam" if sc.heights[j] < lid.mount_height and rng < reach
                else "in view but no return (occlusion / dropout)")
         out.update(next_bearing_deg=b, next_range_surface=rng, vanished_because=why, lowest_beam_reach=float(reach))
-    out["in_memory_window_at_contact"] = out["time_since"] <= P.hit_memory_s
+    c_last = to_frame(sc.centres[j:j + 1], P.log[-1]["true_pose"])[0]
+    M = P.log[-1]["mem"]
+    out["in_memory_at_last_scan"] = bool(len(M) and (np.hypot(*(M - c_last).T) <= sc.radii[j] + 0.25).any())
     return out
 
 
@@ -130,8 +135,16 @@ def stall_case(P, sc):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("out")
+    ap.add_argument("--variant", default="goalflow_l3")
+    a = ap.parse_args()
+    if a.variant == "time1.5":
+        raise SystemExit("the 1.5 s time-window memory is no longer in the planner; see diagnose_smoke.json")
+    kw = {"goalflow_l3": {}, "goalflow_l3_visgate": dict(visibility_gate=True, memory_obs_range=0.0)}[a.variant]
     cfg = SimConfig()
-    P = Rec()
+    P = Rec(**kw)
     out = {"cones": [], "stalls": []}
     for seed, lvl in ((4, "L0"), (12, "L4"), (23, "L4")):
         sc = generate_scene(seed)
@@ -145,7 +158,7 @@ def main():
         row = dict(seed=seed, level=lvl, outcome=r.outcome, **stall_case(P, sc))
         out["stalls"].append(row)
         print(json.dumps(row, default=float), flush=True)
-    json.dump(out, open(sys.argv[1], "w"), indent=1, default=float)
+    json.dump(out, open(a.out, "w"), indent=1, default=float)
 
 
 if __name__ == "__main__":
