@@ -1,0 +1,1865 @@
+[
+ {
+  "seed": 17,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "exit",
+    "time": 12.450000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 12.4,
+    "dist_to_goal": 2.407592232136146,
+    "speed": 3.0,
+    "steer_deg": -0.011152539969580957,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 7.324436592943295,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     6.510786248045295,
+     6.5107862639919905
+    ],
+    "edge_err_near_car": -5.971242167390756e-09
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.15,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.200000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 27,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 12.75,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.15,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.600000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 64,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 10.15,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 20
+    },
+    "events": {},
+    "first_brake_t": 8.200000000000001,
+    "dist_to_goal": 16.41394506472003,
+    "speed": 3.0,
+    "steer_deg": 2.4957192342252243,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.3942572593020062,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     20.243262636524793,
+     18.388538859282566
+    ],
+    "edge_err_near_car": 0.2970884459020624
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 14.15,
+    "n_brake_plans": 11,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 9,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 2
+    },
+    "events": {},
+    "first_brake_t": 8.200000000000001,
+    "dist_to_goal": 16.36964949023078,
+    "speed": 3.0,
+    "steer_deg": 0.10153337548821828,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.9955426534041536,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     19.108137451723994,
+     18.393592861198396
+    ],
+    "edge_err_near_car": 0.8306746835684891
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.850000000000001,
+    "n_brake_plans": 15,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 14,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1
+    },
+    "events": {},
+    "first_brake_t": 7.300000000000001,
+    "dist_to_goal": 19.3500794124487,
+    "speed": 3.0,
+    "steer_deg": -0.5560737277548503,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.20822385132075,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     24.29994526542889,
+     21.318212684470392
+    ],
+    "edge_err_near_car": 0.598339335655325
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 71,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 12.850000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.850000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.75,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 5.800000000000001,
+    "dist_to_goal": 19.581821381553965,
+    "speed": 3.0,
+    "steer_deg": 5.351778839035596,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6924407144499597,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     19.541345433488395,
+     25.862080301226424
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 82,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 12.75,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "stopped",
+    "time": 10.05,
+    "n_brake_plans": 21,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 20,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1
+    },
+    "events": {},
+    "first_brake_t": 7.7,
+    "dist_to_goal": 13.793062592058014,
+    "speed": 3.0,
+    "steer_deg": -0.40885204845141365,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.7162766095804156,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     14.297864769912904,
+     17.672331308056513
+    ],
+    "edge_err_near_car": 1.3004288999526317
+   },
+   "L2": {
+    "outcome": "stopped",
+    "time": 12.8,
+    "n_brake_plans": 42,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 40,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 2
+    },
+    "events": {},
+    "first_brake_t": 5.5,
+    "dist_to_goal": 21.12112596177417,
+    "speed": 3.0,
+    "steer_deg": 2.0805986426593845,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.5415851212661404,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     20.677137476550286,
+     25.588555900295137
+    ],
+    "edge_err_near_car": 1.4582017284919289
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 86,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.5,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.200000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.200000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 10.5,
+    "dist_to_goal": 7.905837188443961,
+    "speed": 3.0,
+    "steer_deg": 0.3133022804601929,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.7677404979199237,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     10.405488473038716,
+     11.919588870688138
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 102,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.75,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.75,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 12.9,
+    "dist_to_goal": 2.036664117613938,
+    "speed": 3.0,
+    "steer_deg": -7.4853060839917145,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.0358005496102944,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     9.004531058460177,
+     9.495691223159012
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.55,
+    "n_brake_plans": 5,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 5
+    },
+    "events": {},
+    "first_brake_t": 7.1000000000000005,
+    "dist_to_goal": 18.453108839481665,
+    "speed": 3.0,
+    "steer_deg": -0.5897552190861206,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.3475862919791797,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     22.123892781757434,
+     21.013220695090922
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 106,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 12.65,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.200000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 6.4,
+    "dist_to_goal": 17.146632194720553,
+    "speed": 3.0,
+    "steer_deg": -8.288016652791717,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6040641023237624,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     20.284987702161967,
+     20.023825125229916
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.25,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 2
+    },
+    "events": {},
+    "first_brake_t": 6.4,
+    "dist_to_goal": 17.107684793396107,
+    "speed": 3.0,
+    "steer_deg": -7.2811041532448995,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.001903132211494,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     20.480679658748954,
+     19.870366935102567
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 108,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 13.75,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 20
+    },
+    "events": {},
+    "first_brake_t": 11.8,
+    "dist_to_goal": 3.0763402039029657,
+    "speed": 3.0,
+    "steer_deg": -0.16507952957159194,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 2.064555656684581,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     9.45993506128743,
+     10.159529760087995
+    ],
+    "edge_err_near_car": null
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.450000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.600000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 9.1,
+    "dist_to_goal": 9.774777133830074,
+    "speed": 3.0,
+    "steer_deg": -1.9364245764381016,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.7400785242618941,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     12.042593426867365,
+     13.573212427752253
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 146,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.15,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.950000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 7.0,
+    "dist_to_goal": 17.313866607460643,
+    "speed": 3.0,
+    "steer_deg": -6.251593369423602,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.3799343723526768,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     19.79626094256066,
+     22.13115454445295
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.100000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 11.0,
+    "dist_to_goal": 5.433998793150316,
+    "speed": 3.0,
+    "steer_deg": 7.303076592793028,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.6681944289779216,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     11.107001276758341,
+     7.510309687765947
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 155,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 12.9,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.75,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 2
+    },
+    "events": {},
+    "first_brake_t": 12.600000000000001,
+    "dist_to_goal": 0.3230147292161405,
+    "speed": 3.0,
+    "steer_deg": -0.1934651665081495,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 4.442674191230815,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     6.886448626883496,
+     6.9263877057149
+    ],
+    "edge_err_near_car": -0.18471146253003923
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.100000000000001,
+    "n_brake_plans": 3,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 3
+    },
+    "events": {},
+    "first_brake_t": 6.7,
+    "dist_to_goal": 16.407955591444097,
+    "speed": 3.0,
+    "steer_deg": -1.3359936180376666,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.0604591839972386,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     18.34957174200381,
+     19.571538063797753
+    ],
+    "edge_err_near_car": 0.052914339132208
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 189,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.4,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.25,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.5,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 2
+    },
+    "events": {},
+    "first_brake_t": 4.7,
+    "dist_to_goal": 24.167593690667083,
+    "speed": 3.0,
+    "steer_deg": 2.8778634018056937,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6323870222582665,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     28.120921936981063,
+     26.781164875124716
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 190,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 8.55,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 20
+    },
+    "events": {},
+    "first_brake_t": 6.6000000000000005,
+    "dist_to_goal": 22.140265606693898,
+    "speed": 3.0,
+    "steer_deg": 4.714989860875368,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 4.620434707790931,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     25.91649683816398,
+     24.36257421923472
+    ],
+    "edge_err_near_car": null
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 14.3,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "no route (A*)": 1
+    },
+    "events": {},
+    "first_brake_t": 3.5,
+    "dist_to_goal": 31.432684708486796,
+    "speed": 3.0,
+    "steer_deg": -0.6224221625098195,
+    "reason": "no route (A*)",
+    "nearest_obstacle": 13.640109997442186,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     28.506489331994224,
+     27.31625629601787
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "stopped",
+    "time": 8.65,
+    "n_brake_plans": 21,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 21
+    },
+    "events": {},
+    "first_brake_t": 5.9,
+    "dist_to_goal": 24.233528045332303,
+    "speed": 3.0,
+    "steer_deg": 1.6882814945479618,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 6.647230997062364,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     27.53258585553236,
+     27.671976821743975
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 200,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.5,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.0,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.05,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 2
+    },
+    "events": {},
+    "first_brake_t": 6.1000000000000005,
+    "dist_to_goal": 20.844870146481725,
+    "speed": 3.0,
+    "steer_deg": 2.691451448725109,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.492165069811721,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     25.271690287941567,
+     23.337261919223558
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 202,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.05,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 2
+    },
+    "events": {},
+    "first_brake_t": 6.1000000000000005,
+    "dist_to_goal": 18.87081812611981,
+    "speed": 3.0,
+    "steer_deg": 6.16630219386191,
+    "reason": "tracked path broke the 0.12 m acceptance tolerance in every route",
+    "nearest_obstacle": 3.0651478993166754,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     24.37771423721813,
+     19.342629799516022
+    ],
+    "edge_err_near_car": 0.6990263563536132
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.05,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.05,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 9.3,
+    "dist_to_goal": 8.508781509145592,
+    "speed": 3.0,
+    "steer_deg": -7.643447248607945,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6468609025479587,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     13.939077140626239,
+     10.274194873224864
+    ],
+    "edge_err_near_car": 0.6662629303222474
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 203,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "exit",
+    "time": 11.65,
+    "n_brake_plans": 5,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 5
+    },
+    "events": {},
+    "first_brake_t": 11.200000000000001,
+    "dist_to_goal": 2.8511903834694223,
+    "speed": 3.0,
+    "steer_deg": -0.34311105431643213,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 3.704367761610303,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     7.4749900130047315,
+     7.152007586214866
+    ],
+    "edge_err_near_car": -3.273134563386293e-08
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.3,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.3,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 225,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 8.700000000000001,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 19,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1
+    },
+    "events": {},
+    "first_brake_t": 6.6000000000000005,
+    "dist_to_goal": 20.34594094172993,
+    "speed": 3.0,
+    "steer_deg": 2.6368004139836976,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 2.168181829912843,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     23.3216917926973,
+     22.471290058830476
+    ],
+    "edge_err_near_car": 0.2138234706105635
+   },
+   "L1": {
+    "outcome": "collision",
+    "time": 8.200000000000001,
+    "n_brake_plans": 4,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 4
+    },
+    "events": {},
+    "first_brake_t": 6.9,
+    "dist_to_goal": 19.149777554583128,
+    "speed": 3.0,
+    "steer_deg": -1.3449136667621848,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.48800364701139076,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     24.74866065832014,
+     19.074338404215485
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.3,
+    "n_brake_plans": 12,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 12
+    },
+    "events": {},
+    "first_brake_t": 2.3000000000000003,
+    "dist_to_goal": 32.852206327216855,
+    "speed": 3.0,
+    "steer_deg": -5.908760649544832,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 5.811647283520297,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     26.95615035326217,
+     30.36172814757173
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 273,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 14.25,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1,
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 7.6000000000000005,
+    "dist_to_goal": 18.063928950164435,
+    "speed": 3.0,
+    "steer_deg": 5.869841366947167,
+    "reason": "tracked path broke the 0.12 m acceptance tolerance in every route",
+    "nearest_obstacle": 1.1991592625466705,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     27.27332832585886,
+     18.23501243269812
+    ],
+    "edge_err_near_car": 1.4772265850822173
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 14.4,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.5,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 12.100000000000001,
+    "dist_to_goal": 6.822738036958427,
+    "speed": 3.0,
+    "steer_deg": -5.717145580078881,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6003076307711296,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     9.906229605305494,
+     10.240449172562666
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 287,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "collision",
+    "time": 8.3,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 7.7,
+    "dist_to_goal": 17.25282871446272,
+    "speed": 3.0,
+    "steer_deg": 2.970769954544673,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.0289906684272712,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     18.557267918920232,
+     21.602850499568245
+    ],
+    "edge_err_near_car": null
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.75,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 2
+    },
+    "events": {},
+    "first_brake_t": 6.4,
+    "dist_to_goal": 21.06501032907227,
+    "speed": 3.0,
+    "steer_deg": 1.8023601004881036,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 4.850481592659906,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     21.056031280478425,
+     27.74157258144185
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.05,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 7.800000000000001,
+    "dist_to_goal": 17.10377987774023,
+    "speed": 3.0,
+    "steer_deg": 0.40501910718275314,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.3863728770720176,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     15.627755682384633,
+     26.511495624679437
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 308,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 10.55,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 3,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 17
+    },
+    "events": {},
+    "first_brake_t": 8.6,
+    "dist_to_goal": 10.999985565148329,
+    "speed": 3.0,
+    "steer_deg": 3.6549750980068274,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.1012937212180494,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     12.499408069857116,
+     13.160345307441123
+    ],
+    "edge_err_near_car": 0.5061487503307234
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.05,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "stopped",
+    "time": 7.25,
+    "n_brake_plans": 21,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 21
+    },
+    "events": {},
+    "first_brake_t": 4.9,
+    "dist_to_goal": 22.065988368484106,
+    "speed": 3.0,
+    "steer_deg": -5.192278183318824,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.6385168706665931,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     26.352186987381042,
+     24.117783821001243
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 333,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 14.5,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 14.350000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.700000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 359,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.8,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.55,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.9,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 1.3,
+    "dist_to_goal": 36.8281771427783,
+    "speed": 3.0,
+    "steer_deg": 0.006879861332396196,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 10.76850908097954,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     22.893076560619487,
+     32.783385893463084
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 373,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.950000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.5,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.65,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 13.3,
+    "dist_to_goal": 0.8744862500109107,
+    "speed": 3.0,
+    "steer_deg": -0.012947379614332418,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 2.836111350562431,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     6.559075660476109,
+     6.356497603968417
+    ],
+    "edge_err_near_car": -0.3903427123499341
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 384,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.8,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 6.6000000000000005,
+    "dist_to_goal": 18.723675580631927,
+    "speed": 3.0,
+    "steer_deg": 6.374066621341487,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.598846228000859,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     28.257365600449862,
+     19.072041571663128
+    ],
+    "edge_err_near_car": 1.9359272331189246
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.05,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 10.600000000000001,
+    "dist_to_goal": 7.132494845575916,
+    "speed": 3.0,
+    "steer_deg": -0.14447665894066652,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6819227940926887,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     13.179127537257212,
+     8.359999006976343
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.950000000000001,
+    "n_brake_plans": 3,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 3
+    },
+    "events": {},
+    "first_brake_t": 2.3000000000000003,
+    "dist_to_goal": 32.09138342467479,
+    "speed": 3.0,
+    "steer_deg": -7.972746423622505,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 7.52296588055028,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     30.850958533031186,
+     25.87095726760695
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 394,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 13.15,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.0,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.200000000000001,
+    "n_brake_plans": 4,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 4
+    },
+    "events": {},
+    "first_brake_t": 6.4,
+    "dist_to_goal": 19.41657466099949,
+    "speed": 3.0,
+    "steer_deg": 3.1053532050809762,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.754816117256599,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     22.944232999341565,
+     22.408172714158123
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 397,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 14.100000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.5,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 13.8,
+    "n_brake_plans": 3,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 3
+    },
+    "events": {},
+    "first_brake_t": 11.9,
+    "dist_to_goal": 4.904602334289464,
+    "speed": 3.0,
+    "steer_deg": 3.8124771934488475,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.3004759852667043,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     10.235420277912366,
+     6.603925063859499
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 399,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 6.25,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 20
+    },
+    "events": {},
+    "first_brake_t": 4.3,
+    "dist_to_goal": 29.02168859787386,
+    "speed": 3.0,
+    "steer_deg": 0.9569618718785073,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 2.81943303863049,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     26.054074294882376,
+     29.58726651440713
+    ],
+    "edge_err_near_car": null
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 14.65,
+    "n_brake_plans": 5,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 5
+    },
+    "events": {},
+    "first_brake_t": 4.3,
+    "dist_to_goal": 28.9953616746617,
+    "speed": 3.0,
+    "steer_deg": -2.3679759699653884,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 3.491375977466755,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     26.560373434774707,
+     30.524082294761346
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.9,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 8.1,
+    "dist_to_goal": 19.040581275060468,
+    "speed": 3.0,
+    "steer_deg": 5.51391651062255,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.6477947688414261,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     23.095574218509142,
+     23.343400932467055
+    ],
+    "edge_err_near_car": -0.16389767012023526
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 432,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 12.450000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 12.55,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 12.55,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 6.2,
+    "dist_to_goal": 18.205605923005944,
+    "speed": 3.0,
+    "steer_deg": -4.835928943617615,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.6808504473650707,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     19.463254374573943,
+     21.932593438279795
+    ],
+    "edge_err_near_car": 0.5907121738988366
+   }
+  },
+  "mechanism_L0": "no brake"
+ },
+ {
+  "seed": 434,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 12.25,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1,
+     "lattice found no curvature-feasible path in any route corridor": 19
+    },
+    "events": {},
+    "first_brake_t": 10.3,
+    "dist_to_goal": 3.664995489806735,
+    "speed": 3.0,
+    "steer_deg": 2.5688445402784583,
+    "reason": "tracked path broke the 0.12 m acceptance tolerance in every route",
+    "nearest_obstacle": 10.251538199626559,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     6.238668930939832,
+     6.376593434717711
+    ],
+    "edge_err_near_car": 0.46119296333391446
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 11.5,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 3.8000000000000003,
+    "dist_to_goal": 23.63404123556086,
+    "speed": 3.0,
+    "steer_deg": -2.4999396837759686,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 3.6007080149173403,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     28.06085928544305,
+     25.15573628420724
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 11.450000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 4.0,
+    "dist_to_goal": 23.080242859227475,
+    "speed": 3.0,
+    "steer_deg": 0.027687924797103632,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 3.2781613471227864,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     27.025231334187144,
+     24.970610678607535
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 437,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 11.8,
+    "n_brake_plans": 21,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 21
+    },
+    "events": {},
+    "first_brake_t": 6.2,
+    "dist_to_goal": 16.96866889280944,
+    "speed": 3.0,
+    "steer_deg": -0.6132818973099813,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.5308618164310092,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     21.646126620962093,
+     17.366412418253482
+    ],
+    "edge_err_near_car": 0.5012947842519395
+   },
+   "L1": {
+    "outcome": "stopped",
+    "time": 14.3,
+    "n_brake_plans": 41,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 38,
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 3
+    },
+    "events": {},
+    "first_brake_t": 6.2,
+    "dist_to_goal": 16.968852671345793,
+    "speed": 3.0,
+    "steer_deg": -0.9796457020614434,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.5498896532390901,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     21.68851096505088,
+     17.415426046917453
+    ],
+    "edge_err_near_car": null
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 11.55,
+    "n_brake_plans": 5,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 5
+    },
+    "events": {},
+    "first_brake_t": 10.200000000000001,
+    "dist_to_goal": 3.7328117419639852,
+    "speed": 3.0,
+    "steer_deg": 7.2995781551473575,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 1.1399926390726913,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     7.796760959283571,
+     6.385667076717887
+    ],
+    "edge_err_near_car": 0.9678323015288939
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 451,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "collision",
+    "time": 10.15,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 9.0,
+    "dist_to_goal": 14.726858902353875,
+    "speed": 3.0,
+    "steer_deg": -3.680457316053408,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.42591053145173474,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     17.840869734615428,
+     17.2645091645702
+    ],
+    "edge_err_near_car": -4.659136187967761e-09
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 14.25,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.05,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 12.600000000000001,
+    "dist_to_goal": 4.17597280289143,
+    "speed": 3.0,
+    "steer_deg": 1.7833751533958602,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 0.2801098118806924,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     6.510931582598984,
+     9.218674558311392
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "plan fails, own pose OK"
+ },
+ {
+  "seed": 486,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "stopped",
+    "time": 13.15,
+    "n_brake_plans": 20,
+    "fail_causes": {
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1,
+     "lattice found no curvature-feasible path in any route corridor": 19
+    },
+    "events": {},
+    "first_brake_t": 11.200000000000001,
+    "dist_to_goal": 6.882148470367035,
+    "speed": 3.0,
+    "steer_deg": 2.6921036722822684,
+    "reason": "tracked path broke the 0.12 m acceptance tolerance in every route",
+    "nearest_obstacle": 5.783537982440042,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     8.487045290557269,
+     9.02226111551693
+    ],
+    "edge_err_near_car": 0.7988194979371102
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 13.350000000000001,
+    "n_brake_plans": 2,
+    "fail_causes": {
+     "tracked path broke the 0.12 m acceptance tolerance in every route": 1,
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 11.9,
+    "dist_to_goal": 4.7514414418117,
+    "speed": 3.0,
+    "steer_deg": 1.6550565881106574,
+    "reason": "tracked path broke the 0.12 m acceptance tolerance in every route",
+    "nearest_obstacle": 5.136659433357055,
+    "own_fail_0p12": true,
+    "own_exit": true,
+    "stub": false,
+    "edge_lengths": [
+     8.205468088075227,
+     7.2362005067171475
+    ],
+    "edge_err_near_car": 0.9730153038906764
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 14.9,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   }
+  },
+  "mechanism_L0": "fill edge inside true edge"
+ },
+ {
+  "seed": 493,
+  "config": "a",
+  "levels": {
+   "L0": {
+    "outcome": "success",
+    "time": 11.350000000000001,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L1": {
+    "outcome": "success",
+    "time": 11.55,
+    "n_brake_plans": 0,
+    "fail_causes": {},
+    "events": {}
+   },
+   "L2": {
+    "outcome": "success",
+    "time": 11.700000000000001,
+    "n_brake_plans": 1,
+    "fail_causes": {
+     "lattice found no curvature-feasible path in any route corridor": 1
+    },
+    "events": {},
+    "first_brake_t": 9.700000000000001,
+    "dist_to_goal": 5.698030082542246,
+    "speed": 3.0,
+    "steer_deg": 0.1595616154113907,
+    "reason": "lattice found no curvature-feasible path in any route corridor",
+    "nearest_obstacle": 7.789159228487584,
+    "own_fail_0p12": false,
+    "own_exit": false,
+    "stub": false,
+    "edge_lengths": [
+     7.244969679411,
+     12.216718003225347
+    ],
+    "edge_err_near_car": null
+   }
+  },
+  "mechanism_L0": "no brake"
+ }
+]

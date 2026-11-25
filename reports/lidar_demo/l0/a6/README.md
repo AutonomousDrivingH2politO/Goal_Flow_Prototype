@@ -87,3 +87,27 @@ optimistic through the fitted circles; the L0 failures are the edge-test artefac
 | 399 | stopped | 4.3 | 29.0 | 3.0 | 1.0 | 2.82 | 1.85 (pair) | False | – | plan fails, own pose OK | success | success |
 | 437 | stopped | 6.2 | 17.0 | 3.0 | -0.6 | 0.53 | 0.66 (pair) | False | 0.50 | plan fails, own pose OK | stopped | success |
 | 451 | collision | 9.0 | 14.7 | 3.0 | -3.7 | 0.43 | 1.49 (pair) | False | -0.00 | plan fails, own pose OK | success | success |
+## Rerun after the approved fixes (2026-11-25, branch a6-fixes)
+
+Same 33 seeds; `scripts/a6_rerun.py`; data `rerun_a.json`, `rerun_b.json`.
+
+| Config | L0 success | L1 | L2 | Remaining L0 mechanisms |
+|---|---|---|---|---|
+| pre-L3 (50e9ad9) | 9 | 30 | 29 | stub 10, fill edge 7, plan fails 11, other 1 |
+| (a) pre-L3 + goal-line stub fix | 20 | 30 | 30 | fill edge 7, plan fails 9 |
+| (b) stub fix + L3 (tracking, edge memory, hysteresis + fallback, hold, cache; no budget) | 29 | 31 | 31 | plan fails 4 |
+
+The 11 "plan fails, own pose OK" seeds:
+
+* Near the goal (17, 108, 203, 333, 373): the stub fix alone rescues only 373 (the stub was rejecting its
+  future poses); 333 already succeeded; (b) also rescues 17; 108 (stopped 2.8 m before the goal) and 203
+  (exit 2.6 m before) remain.
+* Collisions 287 and 451 (one failed replan, then a 1-8 mm graze): fixed by obstacle tracking alone, and
+  also by hysteresis + fallback + hold + cache alone; edge memory alone does not fix them.
+* 308 and 437 succeed under (b).
+* Still failing under (b), all "lattice found no curvature-feasible path in any route corridor": 108, 203
+  (near the goal), 190 (22 m before), 399 (29 m before, 4 s after the start). Next to analyse.
+
+Teacher check (the goal-line cut code is shared; the fix is observed mode only): privileged teacher on seeds
+0-499 at L0 = 474/477 feasible successes, 0 collisions, 0 exits, 23/23 correct brakes (unchanged; failures
+58, 170, 243 as before). `teacher_check_summary.md`.

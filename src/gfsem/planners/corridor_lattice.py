@@ -343,6 +343,7 @@ class LatticeCorridorPlanner(CorridorPlanner):
     def plan(self, inp: PlannerInput, speed: float, steer: float) -> PlanResult:
         t0 = time.perf_counter()
         self._exp0 = EXPANSIONS[0]
+        self.last_input = inp                     # for diagnostics
         if self.mode == "observed":
             return self._plan_observed(inp, speed, steer, t0)
         return self._plan_core(inp, speed, steer, t0)
