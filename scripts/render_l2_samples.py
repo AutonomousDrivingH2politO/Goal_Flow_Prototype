@@ -3,7 +3,7 @@
 val_0000 in stored order. Teacher modes, goal scores, 64 flow samples (executed), selected path
 (executed and raw), regression (executed and raw).
 
-    python scripts/render_l2_samples.py --run runs/l2_full_seed0 --out ~/Documents/H2politO_L2_full
+    python scripts/render_l2_samples.py --run runs/l2_full_seed0 --out reports/lidar_demo/l2_full
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def main():
     ap.add_argument("--run", type=Path, default=Path("runs/l2_full_seed0"))
     ap.add_argument("--shard", default="data/sim/val_0000.npz")
     ap.add_argument("--n", type=int, default=12)
-    ap.add_argument("--out", type=Path, default=Path.home() / "Documents/H2politO_L2_full")
+    ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l2_full"))
     ap.add_argument("--device", default="auto")
     a = ap.parse_args()
     dev = pick_device(a.device)
