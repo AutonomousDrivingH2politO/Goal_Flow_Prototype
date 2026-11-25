@@ -111,3 +111,49 @@ The 11 "plan fails, own pose OK" seeds:
 Teacher check (the goal-line cut code is shared; the fix is observed mode only): privileged teacher on seeds
 0-499 at L0 = 474/477 feasible successes, 0 collisions, 0 exits, 23/23 correct brakes (unchanged; failures
 58, 170, 243 as before). `teacher_check_summary.md`.
+
+### The 4 seeds still failing under (b): 108, 190, 203, 399
+
+`scripts/a6_teacher_in_observed.py`, data `remaining4_teacher_in_observed.json`. At the first failing scan
+(config b), the teacher's driven path (from its point nearest the car to the goal line) is **feasible in the
+planner's observed world**: no violation of the 0.25 m margin or the edge test, curvature <= 0.82 kappa_max,
+every observed door gap it passes satisfies the door rule, and no true obstacle ahead is missing (399 has one
+far obstacle not yet observed, not on the teacher's line). The observed corridor is not narrower than the
+truth here.
+
+But the car is not on that path: it is 1.0-3.1 m off it with an 18-32 deg heading difference. A much stronger
+search from the car's actual state (beam 3000, 13 curvatures, up to 10 routes, ladder up to 1.0 kappa_max,
+with and without the corridor restriction) finds no path, **in the observed world and in the true world
+alike**. So this is neither lattice incompleteness nor a narrower observed corridor: the car is in a dead-end
+state at that scan. No obstacle was first seen in the 0.6 s before any of the four failures; each was driving
+a kept plan ("keep" every scan) until it became invalid.
+
+| Seed | Where | Car state at the failing scan (true) | Outcome (b) |
+|---|---|---|---|
+| 108 | 2.8 m before the goal | 3.1 m left of centre, heading 36 deg toward the left edge (2.9 m away) | stopped |
+| 203 | 2.6 m before the goal | 3.9 m left of centre, heading 29 deg toward the left edge (2.1 m away) | exit |
+| 190 | 22 m before the goal | centred, heading 7 deg off the track | stopped |
+| 399 | 29 m before the goal (4.3 s) | centred, heading 3 deg off the track | stopped |
+
+Hypothesis (not yet tested): a receding-horizon dead end. Plans are validated only up to their horizon (the
+edge frontier mid-course; the goal line near the goal, beyond which nothing is checked), so a valid kept plan
+can end in a state from which no feasible continuation exists. Near the goal this shows as plans that cross
+the goal line steeply toward the edge (108, 203); with the goal-cut guard, more of that end section counts as
+"before the goal line" and is checked, which is where 108's kept plan fails. The pre-L3 planner failed both
+too, so this is not a regression of the fix. Next: check the kept plans' terminal states before the failure,
+and test a terminal-feasibility condition (e.g. a short continuation check past the horizon).
+
+### What the pre-L3 planner does after a failed replan (the 287 / 451 grazes in config a)
+
+1. The kept plan fails the 0.12 m check: as the car closes in, the near-field blind zone removes most of a
+   bollard's hits (61 -> 2-3 in one scan), and the fixed-radius circle fitted to the remaining rim points lies
+   0.30-0.33 m off the true bollard, intruding into the plan. Warm start and full replan fail.
+2. The planner returns a brake and forgets its plan; the controller commands speed 0 for that 0.1 s scan
+   while pure pursuit keeps steering along the old path (v 3.0 -> 2.85 m/s).
+3. Next scan: no kept plan, so a full plan from scratch against the displaced circle succeeds, with a sharp
+   steering change (287: +3 -> -5 deg; 451: -3.6 -> -8.3 deg), and is kept from then on. The kept-plan check
+   tests the plan's poses against each scan's (still displaced, soon unseen) circle, so it passes, and the
+   car grazes the true bollard by 1-8 mm.
+
+Obstacle tracking alone removes this (the track keeps the bollard near its earlier, accurate position), and so
+does hysteresis + fallback + hold + cache alone (the old plan, made with the accurate bollard, is not dropped).
