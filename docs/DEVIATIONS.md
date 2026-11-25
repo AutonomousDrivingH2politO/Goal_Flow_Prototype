@@ -324,6 +324,36 @@ same-information baseline (single-scan edges like GoalFlow's BEV, with tracked o
 ablation changes which config is best at a level, the best config is re-picked on these validation scenes
 before any GoalFlow closed-loop result exists, and recorded here.
 
+### L3 observed additions: findings and frozen baselines (2026-11-25)
+
+`reports/lidar_demo/l0_rerun/REPORT.md`, `reports/lidar_demo/l0_rerun/ablation_L4/`. The L3 set (tracking, edge
+memory, kept-plan hysteresis + fallback, hold, failed-search cache) helps at L0-L1 (zero collisions) but stalls
+at L3-L4. Stall ablation of (b) at L4 (success / collision / exit / stalled %, seeds 0-499):
+
+| L4 | Success | Collision | Exit | Stalled |
+|---|---|---|---|---|
+| (a) pre-L3 + stub fix | 93.7 | 2.3 | 0.4 | 3.6 |
+| (b) stub fix + L3 | 74.8 | 1.9 | 0.8 | 22.4 |
+| (b) without failed-search cache | 74.8 | 1.9 | 0.8 | 22.4 (identical in all 500: the cache never fires at L4) |
+| (b) without hold | 86.8 | 3.8 | 0.8 | 8.6 |
+| (b) without hysteresis + fallback | 77.8 | 0.8 | 0.4 | 21.0 |
+
+* The cache hypothesis is falsified: under L4 noise the tracked positions change every scan, so its "tracks
+  unchanged" condition never holds (0 hits; it fires at L0-L3: 477 / 76 / 36 / 7 hits, mostly in no-route
+  scenes, without changing outcomes). Kept for now; decided with the real-time budget after the Orin
+  measurement.
+* Hold is a filter, not a bug: in (b) a stalled episode spends 40 braked scans, 11 with a plan found but
+  held, 29 with no plan. Without hold, stalls drop (22.4 -> 8.6%) but collisions double (1.9 -> 3.8%): it
+  rejects flickering bad plans.
+* "No route (A*)" stalls at L4 (perception check, `perception_noroute_*.json`): at the failing scans the planner
+  holds ~21 tracked obstacles in view against ~11 true ones: ~5.2 phantoms per scan (no true obstacle within
+  0.6 m; in 99% of failing scans, close to the L4 clutter rate of 5 per scan) and, by difference, ~4.9 extra
+  tracks within 0.6 m of true obstacles (likely duplicate tracks of displaced fits); 0.2 true obstacles missed;
+  matched centre error 0.15 m. Not fixed yet.
+* **Stop rule applied:** no L3 variant beats (a) at L3-L4, so the L3-level rerun is skipped and the comparison
+  baselines are frozen as pre-registered: (a) at L2-L4, (b) at L0-L1, (c) reported as the same-information
+  baseline. Next: the closed-loop GoalFlow planner.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
