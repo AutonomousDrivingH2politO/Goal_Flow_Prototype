@@ -276,6 +276,15 @@ Docs note: the flow-matching notes are in `docs/` as
 16. **MPPI refinement around the chosen GoalFlow sample.** In tight gaps GoalFlow's best candidate clears the
     true obstacles by ~0.01 m (seed 17), so the safety filter brakes; a local MPPI refinement of the chosen sample
     could add margin. Not implemented.
+17. **Stall diagnosis and a "second chance" before braking (queued 2026-11-25, not run).** For the 6 goalflow_l3
+    smoke-test stalls (L0: 4, 36; L4: 1, 18, 28, 32), at the stalled scans: is baseline (a)'s route (homotopy
+    signature of its driven path vs the true obstacles) among the routes of GoalFlow's 3 NMS goals, and what is the
+    best true clearance per goal? If another route was available but not sampled, try a "second chance" before
+    braking: resample once with K = 6 goals, excluding goals whose candidates were all flagged; brake only if that
+    also yields no safe candidate. Order vs item 16 (MPPI refinement): run this diagnosis first (replays only); if
+    (a)'s route is mostly missing from the 3 goals, try the second chance first (one extra model call on ~3% of
+    replans, targets route choice, e.g. seed 28); if it is mostly present but its candidates clear by only a few cm,
+    MPPI refinement first (targets precision in tight gaps, e.g. seed 17).
 
 ### L2 findings on validation (2026-11-25)
 
