@@ -25,9 +25,9 @@ fallback, hold, failed-search cache (`l3_config()`).
   105, 107, 288, 299, 302, 385 collided), mid-course, zero guard refusals. The 50e9ad9 planner (edge-fill fix,
   no stub fix) fails all 10 the same way, so these come from the edge-fill fix. Under (b) 8 of them succeed
   (274, 308 stop); (c) 6 (274, 299, 308 stop, 302 collides); (d) 6 (107, 190, 299 stop).
-- **L4, pre-fix -> (a) (70.0 -> 93.7%):** attributed mainly to the edge-fill fix (50e9ad9), not the stub fix,
-  which acts near the goal line only and refused 0 times at L4. Being measured: the 50e9ad9 planner at L4
-  (`pre_L4/`).
+- **L4, pre-fix -> (a) (70.0 -> 93.7%), measured:** the 50e9ad9 planner (edge-fill fix, no stub fix) reaches
+  89.5% at L4 (collision 2.3, exit 2.3, stalled 5.9; `pre_L4/`). So the edge-fill fix gives +19.5 points and the
+  stub fix +4.2 (it re-cuts edges near the goal line without refusing; 0 refusals at L4).
 - Config (a) was run twice: the first run finished and was deleted by mistake at a relaunch; with no time
   budget the rerun is deterministic (see `chain.log`).
 
