@@ -17,6 +17,23 @@ Modes
   observation; it replans only if the plan collides (0.25 m), runs short of the horizon, or the
   car deviates. Replans warm-start from the still-valid prefix of the old plan, with a smaller
   beam, and fall back to a full plan from the current pose.
+
+Observed-mode additions (DEVIATIONS Part C, L3 items 1-4, 8, 9; each behind a config flag, all on by
+default in observed mode, privileged mode unchanged):
+* perception memory (``tracking.py``): tracked obstacles and remembered edge points beside the car;
+* start relief: a violation the car is already in at its current pose (e.g. a fill edge drawn inside
+  the true edge next to it, A6) does not reject every plan, as long as the tracked path leaves it
+  within ``start_relief_m``;
+* kept-plan hysteresis: a kept plan is dropped at once on a hard violation (footprint overlap, no
+  inflation), but on a soft one (< ``keep_inflation``) only after ``keep_soft_scans`` scans in a row;
+  new plans still need the 0.12 m acceptance margin;
+* fallback and hold: if replanning fails while the kept plan has no hard violation, keep driving it;
+  otherwise brake and hold until a plan is found on ``hold_confirm`` scans in a row (no brake/plan
+  alternation, the L4 crawl);
+* per-replan time budget ``budget_s``: past it the search stops; keep the kept plan if it has no hard
+  violation, else brake;
+* failed-search cache: after a failed replan, brake without searching while the car has moved less
+  than ``fail_cache_move`` and the tracked obstacles are unchanged, for up to ``fail_cache_scans``.
 """
 from __future__ import annotations
 
@@ -32,8 +49,10 @@ from ..sim.geometry import poses_from_frame, poses_to_frame
 from ..sim.lattice import CollisionWorld, LatticeConfig, lattice_search
 from ..sim.lidar import Observation
 from ..sim.vehicle import VehicleState, rollout_path
+from ..sim.edges import observed_edges
 from .corridor import (OBST, CorridorConfig, CorridorPlanner, PlannerInput, PlanResult, _arclen,
-                       input_from_observation)
+                       cluster_obstacles, input_from_observation, make_unknown_fn)
+from .tracking import EdgeMemory, ObstacleTracker, TrackingConfig
 
 
 @dataclass(frozen=True)
@@ -54,6 +73,16 @@ class LatticeCorridorConfig:
     # retries inside the same route when the tracked path fails validation: stronger clearance
     # preference (cost shaping only; the margin stays 0.25 m). (w_clear, clear_pref)
     shaping: tuple = ((5.0, 1.5), (20.0, 2.0))
+    # observed-mode additions (see module docstring)
+    tracking: bool = True
+    tracking_cfg: TrackingConfig = field(default_factory=TrackingConfig)
+    start_relief_m: float = 2.0       # 0 disables
+    keep_inflation: float = 0.06      # soft threshold for a kept plan (hard = footprint overlap)
+    keep_soft_scans: int = 2
+    hold_confirm: int = 2             # 1 disables hold
+    budget_s: float = 0.25            # per-replan time cap; 0 disables
+    fail_cache_scans: int = 10        # 0 disables
+    fail_cache_move: float = 0.3
 
 
 class LatticeCorridorPlanner(CorridorPlanner):
@@ -70,6 +99,16 @@ class LatticeCorridorPlanner(CorridorPlanner):
         self.stats: list[tuple[str, float]] = []  # (trigger, ms) per call
         self.fail_causes: Counter = Counter()
         self.kappa_log: list[float] = []          # curvature level each full plan needed
+        tc = self.lcfg.tracking_cfg
+        self.edge_mem, self.tracker = EdgeMemory(tc), ObstacleTracker(tc)
+        self.soft_count = 0
+        self.held = False
+        self.confirm_count = 0
+        self.scan = 0
+        self.fail_cache = None                    # (scan, odom pose, tracker signature)
+        self._deadline = None
+        self._skip_search = False
+        self.events: Counter = Counter()          # budget hits, cache hits, fallbacks, holds, reliefs
 
     # ---------------------------------------------------------------- routes
     def routes(self, G, commit_local=None, max_routes: int = 6):
@@ -168,7 +207,23 @@ class LatticeCorridorPlanner(CorridorPlanner):
         tr = tr[self._goal_side(G, tr) < 0]
         if len(tr) == 0:
             return True
-        return bool((world.clearance(tr, self.lcfg.validate_inflation) >= 0).all())
+        ok = world.clearance(tr, self.lcfg.validate_inflation) >= 0
+        return bool(self._relieved(world, tr, ok, self.lcfg.validate_inflation).all())
+
+    def _relieved(self, world, poses, ok, inflation):
+        """Start relief (observed mode): if the car's current pose already violates ``inflation``,
+        ignore the leading violating poses, provided they end within ``start_relief_m`` of arc."""
+        if self.mode != "observed" or self.lcfg.start_relief_m <= 0 or ok.all() or ok[0]:
+            return ok
+        if world.clearance(np.zeros(3), inflation)[0] >= 0:
+            return ok
+        first_ok = int(np.argmax(ok)) if ok.any() else len(ok)
+        s = _arclen(poses[:, :2])
+        if first_ok < len(ok) and s[first_ok] <= self.lcfg.start_relief_m:
+            self.events["relief"] += 1
+            ok = ok.copy()
+            ok[:first_ok] = True
+        return ok
 
     def _lat_cfg(self, beam: int | None):
         lc = self.lcfg.lattice
@@ -189,8 +244,11 @@ class LatticeCorridorPlanner(CorridorPlanner):
         for kf, bm in ladder:
             cfg = replace(base, kappa_frac=kf, beam=bm)
             for doors, exit_edge, chain in routes:
+                if self._over_budget():
+                    cause = "per-replan time budget exceeded"
+                    break
                 fn = self.corridor_fn(G, chain, doors)
-                lat = lattice_search(world, start, G["goal"], cfg, fn, k0)
+                lat = lattice_search(world, start, G["goal"], cfg, fn, k0, deadline=self._deadline)
                 if lat is None:
                     cause = "lattice found no curvature-feasible path in any route corridor"
                     continue
@@ -199,13 +257,22 @@ class LatticeCorridorPlanner(CorridorPlanner):
                     return lat, (doors, exit_edge, chain)
                 cause = "tracked path broke the 0.12 m acceptance tolerance in every route"
                 for wc, cp in self.lcfg.shaping:
-                    lat = lattice_search(world, start, G["goal"], replace(cfg, w_clear=wc, clear_pref=cp), fn, k0)
+                    if self._over_budget():
+                        break
+                    lat = lattice_search(world, start, G["goal"], replace(cfg, w_clear=wc, clear_pref=cp), fn, k0,
+                                         deadline=self._deadline)
                     if lat is not None and self.validate(G, world, lat, state):
                         self.kappa_log.append(kf)
                         return lat, (doors, exit_edge, chain)
+            if self._over_budget():
+                cause = "per-replan time budget exceeded"
+                break
         if record_fail:
             self.fail_causes[cause] += 1
         return None, cause
+
+    def _over_budget(self) -> bool:
+        return self._deadline is not None and time.perf_counter() > self._deadline
 
     def teacher_paths(self, inp: PlannerInput, K: int = 8, state: VehicleState | None = None,
                       max_routes: int | None = None):
@@ -231,8 +298,20 @@ class LatticeCorridorPlanner(CorridorPlanner):
 
     # ---------------------------------------------------------------- main
     def plan_observation(self, obs: Observation, speed: float, steer: float) -> PlanResult:
-        inp = input_from_observation(obs, self.cfg, self.scfg)
+        if self.mode == "observed" and self.lcfg.tracking:
+            inp = self.tracked_input(obs)
+        else:
+            inp = input_from_observation(obs, self.cfg, self.scfg)
         return self.plan(inp, speed, steer)
+
+    def tracked_input(self, obs: Observation) -> PlannerInput:
+        """Planner input from tracked obstacles and edges with memory (same structure as the raw one)."""
+        pose = np.asarray(obs.pose_odom, float)
+        C, R, _ = cluster_obstacles(obs, self.cfg, self.scfg)
+        C, R = self.tracker.update(C, R, pose)
+        ep, es = self.edge_mem.update(obs.edge_points, obs.edge_side, pose)
+        left, right = observed_edges(ep, es, self.scfg.track_width, self.cfg.edge_bin)
+        return PlannerInput(C, R, left, right, obs.goal_line.astype(float), make_unknown_fn(obs), pose)
 
     def _result(self, path, trigger, t0, **info):
         ms = 1000 * (time.perf_counter() - t0)
@@ -244,6 +323,54 @@ class LatticeCorridorPlanner(CorridorPlanner):
 
     def plan(self, inp: PlannerInput, speed: float, steer: float) -> PlanResult:
         t0 = time.perf_counter()
+        if self.mode == "observed":
+            return self._plan_observed(inp, speed, steer, t0)
+        return self._plan_core(inp, speed, steer, t0)
+
+    def _plan_observed(self, inp: PlannerInput, speed: float, steer: float, t0: float) -> PlanResult:
+        """Observed mode: budget, failed-search cache, kept-plan fallback and hold around the core."""
+        L = self.lcfg
+        self.scan += 1
+        self._deadline = t0 + L.budget_s if L.budget_s > 0 else None
+        odom = inp.pose_odom if inp.pose_odom is not None else np.zeros(3)
+        self._skip_search = False
+        if L.fail_cache_scans and self.fail_cache is not None:
+            sc, p0, sig = self.fail_cache
+            if (self.scan - sc <= L.fail_cache_scans and float(np.hypot(*(odom[:2] - p0[:2]))) < L.fail_cache_move
+                    and sig == self.tracker.signature()):
+                self.events["cache_hit"] += 1
+                self._skip_search = True             # the kept plan (if any) may still be used
+            else:
+                self.fail_cache = None
+        kept_before = self.plan_w
+        res = self._plan_core(inp, speed, steer, t0)
+        if res.brake:
+            fallback = res.info.get("fallback")
+            if fallback is not None:                 # kept plan still has no hard violation
+                self.events["fallback"] += 1
+                self.plan_w = kept_before
+                self.stats[-1] = ("keep_fallback", self.stats[-1][1])
+                return PlanResult(fallback, False, [], fallback[-1, :2],
+                                  info={"trigger": "keep_fallback", "speed": self.scfg.target_speed})
+            if res.info.get("reason") not in ("no edges", "cached failure") and L.fail_cache_scans:
+                self.fail_cache = (self.scan, odom.copy(), self.tracker.signature())
+            if "budget" in str(res.info.get("reason", "")):
+                self.events["budget"] += 1
+            self.held = True
+            self.confirm_count = 0
+            return res
+        if self.held and L.hold_confirm > 1 and res.info.get("trigger") in ("full", "warm"):
+            self.confirm_count += 1
+            if self.confirm_count < L.hold_confirm:
+                self.events["hold"] += 1
+                self.plan_w = None                   # plan again next scan; release on confirmation
+                self.stats[-1] = ("hold", self.stats[-1][1])
+                return PlanResult(np.zeros((0, 3)), True, info={"trigger": "hold"})
+        self.held = False
+        self.confirm_count = 0
+        return res
+
+    def _plan_core(self, inp: PlannerInput, speed: float, steer: float, t0: float) -> PlanResult:
         odom = inp.pose_odom if inp.pose_odom is not None else np.zeros(3)
         state = VehicleState(0.0, 0.0, 0.0, speed, steer)
         if self.mode == "privileged" and self.no_route:
@@ -266,14 +393,28 @@ class LatticeCorridorPlanner(CorridorPlanner):
             return self._result(None, "brake", t0, reason="no edges")
         world = self.world(G)
 
+        fallback = None
         if rest is not None:   # observed: event-triggered
             side = self._goal_side(G, rest)
             before = side < 0
-            clr = world.clearance(rest[before], self.lcfg.validate_inflation) if before.any() else np.zeros(0)
-            bad = np.nonzero(clr < 0)[0]
+            P = rest[before]
+            if len(P):
+                hard_ok = self._relieved(world, P, world.clearance(P, 0.0) >= 0, 0.0)
+                soft_ok = self._relieved(world, P, world.clearance(P, self.lcfg.keep_inflation) >= 0,
+                                         self.lcfg.keep_inflation)
+            else:
+                hard_ok = soft_ok = np.ones(0, bool)
             short = side[-1] < -self.lcfg.extend_short
-            if len(bad) == 0 and not short:
+            if hard_ok.all():
+                fallback = rest                      # usable if replanning fails
+                self.soft_count = 0 if soft_ok.all() else self.soft_count + 1
+            if hard_ok.all() and self.soft_count < self.lcfg.keep_soft_scans and not short:
                 return self._result(rest, "keep", t0)
+            bad = np.nonzero(~soft_ok)[0] if hard_ok.all() else np.nonzero(~hard_ok)[0]
+        if self._skip_search:                        # failed-search cache hit (observed)
+            self.plan_w = None
+            return self._result(None, "brake", t0, reason="cached failure", fallback=fallback)
+        if rest is not None:
             # warm start from the valid prefix
             s = _arclen(rest[:, :2])
             if len(bad):
@@ -301,8 +442,9 @@ class LatticeCorridorPlanner(CorridorPlanner):
             self.plan_w = None
             if self.mode == "privileged":
                 self.no_route = True
-            return self._result(None, "brake", t0, reason=route)
+            return self._result(None, "brake", t0, reason=route, fallback=fallback)
         self.plan_w = poses_from_frame(lat, odom)
+        self.soft_count = 0
         return self._result(lat, "full", t0)
 
 

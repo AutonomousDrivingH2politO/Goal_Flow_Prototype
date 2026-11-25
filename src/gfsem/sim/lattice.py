@@ -7,6 +7,7 @@ box corner beyond an edge counts as a collision (track exit).
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass
 
 import numpy as np
@@ -106,8 +107,10 @@ class CollisionWorld:
 
 
 def lattice_search(world: CollisionWorld, start, goal: tuple[np.ndarray, np.ndarray], cfg: LatticeConfig,
-                   allowed_fn=None, start_kappa: float = 0.0) -> np.ndarray | None:
+                   allowed_fn=None, start_kappa: float = 0.0, deadline: float | None = None) -> np.ndarray | None:
     """Forward arcs from ``start`` until crossing the goal segment (gL, gR).
+
+    ``deadline``: ``time.perf_counter()`` value after which the search gives up (returns None).
 
     Returns dense poses (K,3) every step / n_samples metres, or None. ``allowed_fn`` maps body
     centres (N,2) to a bool mask (corridor restriction).
@@ -138,6 +141,8 @@ def lattice_search(world: CollisionWorld, start, goal: tuple[np.ndarray, np.ndar
     for _ in range(n_layers):
         F = len(front)
         if F == 0:
+            return None
+        if deadline is not None and time.perf_counter() > deadline:
             return None
         par = np.repeat(np.arange(F), len(ks))
         ki = np.tile(np.arange(len(ks)), F)
