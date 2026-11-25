@@ -1,0 +1,50 @@
+{
+ "goal": {
+  "l_goal": 5.844379341486588,
+  "l_dis": 5.832490853198523,
+  "l_dac": 0.1188848558958005,
+  "cover@5": 0.32367709540363077,
+  "cover@10": 0.3406720741599073,
+  "mass_on_every_mode": 0.8192352259559675,
+  "gstar_collision": 0.0020496470052379866,
+  "dac_acc_near_obst": 0.9433297653849998,
+  "dac_balanced_acc": 0.9397079338012411,
+  "goal_err": 0.7958532036942185,
+  "dac_acc": 0.9497821351278175,
+  "n_multimode_frames": 7767.0
+ },
+ "trajectory": {
+  "l_flow": 0.006954706884983891,
+  "ADE_driven": 0.20017843910501998,
+  "FDE_driven": 0.4830748822214534,
+  "minADE_modes": 0.19184298319289986,
+  "ADE_driven_raw": 0.2981994319164637,
+  "FDE_driven_raw": 0.6891078536009905,
+  "minADE_modes_raw": 0.28736693845356553,
+  "minADE_samples": 0.27257911133968715,
+  "minADE_samples_raw": 0.2890416595035965,
+  "kappa_ok_raw": 0.636930707241725,
+  "kappa_ok_raw_1.1": 0.7194216896029352,
+  "endpoint_to_gstar": 0.04078115948376436,
+  "endpoint_to_gstar_raw": 0.020821498579445104,
+  "n_multimode_frames": 0.0
+ },
+ "regression": {
+  "l_reg": 0.036362919158944226,
+  "ADE_driven": 0.18980608993363612,
+  "FDE_driven": 0.49854220165645036,
+  "minADE_modes": 0.18385126933600138,
+  "ADE_driven_raw": 0.18739576479329645,
+  "FDE_driven_raw": 0.4972861418880305,
+  "minADE_modes_raw": 0.18145472874268165,
+  "kappa_ok_raw": 0.8417155474713706,
+  "kappa_ok_raw_1.1": 0.8928229503839918,
+  "n_multimode_frames": 0.0
+ },
+ "frames": 65865,
+ "split": "test",
+ "checkpoints": {
+  "goalflow": "runs/l2_full_seed0/goalflow_B_best.pt",
+  "regression": "runs/l2_full_seed0/regression_best.pt"
+ }
+}
