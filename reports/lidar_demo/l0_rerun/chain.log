@@ -1,0 +1,11 @@
+start Wed Nov 25 15:35:58 CET 2026 head dc6b1a9
+config a (observed_stubfix) start Wed Nov 25 15:35:58 CET 2026
+config a exit 0 end Wed Nov 25 16:02:19 CET 2026
+config b (observed_l3) start Wed Nov 25 16:02:19 CET 2026
+--- correction (written later): config a had finished (exit 0, 16:02:19) and the session restart killed config b
+--- at 400/2500 episodes. The relaunch at 16:05:22 deleted a's finished results by mistake, so a reruns from
+--- scratch (deterministic: no time budget, same results expected), then b, c, d.
+start Wed Nov 25 16:05:22 CET 2026 head 95de174
+config a (observed_stubfix) start Wed Nov 25 16:05:22 CET 2026
+config a exit 0 end Wed Nov 25 16:31:35 CET 2026
+config b (observed_l3) start Wed Nov 25 16:31:35 CET 2026
