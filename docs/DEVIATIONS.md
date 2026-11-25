@@ -265,6 +265,14 @@ Docs note: the flow-matching notes are in `docs/` as
     was "seen but clipped on an unobserved side" (`reports/lidar_demo/l2_selection/safety_misses.json`).
     Occluded obstacles need memory: feed the filter the same fitted/tracked circles as the observed planner
     (`tracking.py`), so both planners use identical perception. Not implemented yet.
+14. **Terminal feasibility for the observed lattice.** Accept a plan only if its end state admits a
+    continuation, or extend plans through the next door. The 4 seeds still failing under the L3 config
+    (108, 190, 203, 399) are dead-end states reached on a kept plan; for 190 and 399 the blocking door was
+    observed from t = 0 at 22-35 m (`reports/lidar_demo/l0/a6/README.md`).
+15. **Circle fit with flank-only hits.** `fit_circle_fixed_r` pushes the centre by r along the sensor ray,
+    which assumes front-face hits. When a cluster's front face is below the lowest beam or in the blind zone,
+    use a two-point geometric solution or keep the tracked centre (the 287 / 451 cone grazes, 0.30-0.33 m
+    offset). Config (a) stays as it is.
 
 ### L2 findings on validation (2026-11-25)
 

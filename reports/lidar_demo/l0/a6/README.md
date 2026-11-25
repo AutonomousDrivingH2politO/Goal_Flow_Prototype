@@ -140,25 +140,35 @@ edge frontier mid-course; the goal line near the goal, beyond which nothing is c
 can end in a state from which no feasible continuation exists. Near the goal this shows as plans that cross
 the goal line steeply toward the edge (108, 203); with the goal-cut guard, more of that end section counts as
 "before the goal line" and is checked, which is where 108's kept plan fails. The pre-L3 planner failed both
-too, so this is not a regression of the fix. Next: check the kept plans' terminal states before the failure,
-and test a terminal-feasibility condition (e.g. a short continuation check past the horizon).
+too, so this is not a regression of the fix. Next: check the kept plans' terminal states before the failure.
+
+**When the blocking door was first seen (190, 399).** The door the teacher passes next after the failing scan
+(true obstacle pairs on opposite sides of its path) was observed by the planner (config b) at t = 0 s, 22-35 m
+ahead: 190, door (6, 9) at 29.9-32.1 m (gap - width 2.30 m), 11.2 m ahead at the failure; 399, door (0, 11) at
+21.9-23.5 m (gap - width 1.85 m), 9.9 m ahead at the failure. Both were seen far beyond the ~10 m needed to
+swerve at 10 deg, so this is a horizon / terminal-state problem, not a perception limit. Queued for L3:
+terminal feasibility (accept a plan only if its end state admits a continuation, or extend plans through the
+next door).
 
 ### What the pre-L3 planner does after a failed replan (the 287 / 451 grazes in config a)
 
-1. The kept plan fails the 0.12 m check: as the car closes in, a bollard loses most of its hits in one scan
-   (61 -> 2-3), and the fixed-radius circle fitted to the remaining flank hits lies 0.30-0.33 m off the true
-   bollard, intruding into the plan. Warm start and full replan fail. Measured geometry at the drop scan
-   (sensor at the front axle, x = 1.60 m): centre range 2.09 / 2.13 m, front face 1.84 / 1.88 m, i.e. outside
-   the 1.5 m blind zone; the front-face rays return nothing and only flank hits at ~2.04 m remain. So the 1.5 m
-   blind zone alone does not explain the drop; the cut-off sits near 2.0 m and its cause in the LiDAR model is
-   still being traced. `fit_circle_fixed_r` places the centre r behind the hits along the sensor ray, which
-   assumes front-face hits, hence the 0.3 m offset with flank-only hits.
+1. The kept plan fails the 0.12 m check. In both seeds the obstacle is a **cone** (0.40 m tall, r = 0.25 m).
+   The EMX's lowest beam points 19 deg down (7 deg pitch + the -12 deg lower edge), so from 1.10 m it clears
+   a 0.40 m cone top until (1.10 - 0.40) / tan 19 deg = 2.03 m from the sensor. At the drop scan the cone's
+   front face is 1.84 / 1.88 m away: the front-face rays pass over it and only flank rays at >= 2.03 m
+   return (61 hits -> 2-3 in one scan). This is the vertical field of view, not the 1.5 m blind zone (the
+   front face is outside it). `fit_circle_fixed_r` places the centre r behind the hits along the sensor ray,
+   which assumes front-face hits; with flank-only hits the fitted circle lies 0.30-0.33 m off the true cone,
+   intruding into the plan. Warm start and full replan fail.
 2. The planner returns a brake and forgets its plan; the controller commands speed 0 for that 0.1 s scan
    while pure pursuit keeps steering along the old path (v 3.0 -> 2.85 m/s).
 3. Next scan: no kept plan, so a full plan from scratch against the displaced circle succeeds, with a sharp
    steering change (287: +3 -> -5 deg; 451: -3.6 -> -8.3 deg), and is kept from then on. The kept-plan check
    tests the plan's poses against each scan's (still displaced, soon unseen) circle, so it passes, and the
-   car grazes the true bollard by 1-8 mm.
+   car grazes the true cone by 1-8 mm.
 
-Obstacle tracking alone removes this (the track keeps the bollard near its earlier, accurate position), and so
-does hysteresis + fallback + hold + cache alone (the old plan, made with the accurate bollard, is not dropped).
+Obstacle tracking alone removes this (the track keeps the cone near its earlier, accurate position), and so
+does hysteresis + fallback + hold + cache alone (the old plan, made with the accurate cone, is not dropped).
+Config (a) stays unchanged. Queued for L3 (DEVIATIONS Part C): when a cluster's front face is below the
+lowest beam or in the blind zone, do not push the fitted centre by r along the ray (two-point geometric
+solution, or keep the tracked centre).
