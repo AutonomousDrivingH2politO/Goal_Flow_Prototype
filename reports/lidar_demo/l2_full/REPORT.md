@@ -11,10 +11,23 @@ Validation subset of 4,000 frames (fixed), best checkpoints. Full numbers: `summ
 | g* collision rate | 0.1% |
 | Mode-mass share | 0.79 |
 
-The scorer avoids obstacles (DAC accuracy near obstacles 0.94, balanced 0.94) but does not keep both teacher
-modes: in two thirds of multi-mode frames the top 10 goals miss a mode, and coverage stayed flat around 0.3
-for the whole run (see frame 6 in the renders). Mode mass is high only because the distance scores are
-fairly spread out.
+The scorer avoids obstacles (DAC accuracy near obstacles 0.94, balanced 0.94).
+
+**Correction (2026-11-25, full validation split, `../l2_selection/goal_scorer_val.json`).** The low plain
+cover@k above does not mean the scorer predicts a single route. Plain top-k on a dense vocabulary (1,024
+goals) is used up by neighbours of the best goal. Findings:
+
+- The vocabulary covers every teacher route: nearest goal median 0.015–0.02 m, p95 <= 0.07 m, 0% beyond
+  0.5 m, driven and non-driven alike. (The y in [-3.56, 3.58] m in the log is the trajectory normaliser's
+  1st/99th percentile, not the vocabulary, which spans y in [-6.56, 6.57] m.)
+- The driven route ranks first. With 1.5 m suppression, the other route is the 2nd distinct pick in 76% of
+  cases (all routes) / 61% (endpoint-distinct routes), and within the top 5 in 96.5% / 94%.
+- Suppressed cover@2 / 3 / 5 on multi-route frames: 0.71 / 0.84 / 0.96 (all routes, 7,777 frames) and
+  0.57 / 0.75 / 0.94 (endpoint-distinct, 4,864 frames), against plain cover@5 of 0.35 / 0.02.
+- The l_dis plateau (~5.8) is mostly the target's entropy floor: the gap to the mixture target is 0.29
+  nats; for non-driven routes alone it is 1.26.
+- The collapse in the renders (e.g. frame 40, all 128 samples within 1 m of one mode) comes from
+  conditioning every sample on the single g*, not from the scorer.
 
 ## 2. Share of raw samples within κ_max (teacher reference: 98.1% at 1.0 ×, 100% at 1.1 ×)
 
@@ -54,7 +67,10 @@ No stage stopped early.
 - `runs/l2_full_seed0/goalflow_B_best.pt`: full GoalFlow model, 10.12 M parameters
 - `runs/l2_full_seed0/regression_best.pt`
 - Full training states for resume: `runs/l2_full_seed0/state_{A,B,reg}.pt`
-- Renders: this folder, 12 frames by the fixed rule in `RULE.txt`
+- Renders: this folder, 12 frames by the fixed rule in `RULE.txt` (redrawn 2026-11-25 with M = 128, the one
+  sample count now used everywhere; the table above used M = 32 in the training-time evaluation)
+- The L1 test split was read once (`test_report.json`) and is now spent; final numbers come from a fresh
+  test set before L4 (DEVIATIONS, Phase L2 plan)
 
 ## Overnight interventions (details in docs/DEVIATIONS.md)
 

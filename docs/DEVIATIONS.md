@@ -231,8 +231,33 @@ Docs note: the flow-matching notes are in `docs/` as
 10. Numba (or vectorised) lattice expansion and collision checks.
 11. Try routes strictly in A* cost order, stopping at the first that validates (no route lookahead).
 12. Lookahead sweep on the corridor-funnel baseline: 2.5 / 4 / 6 m.
+13. **Safety filter on fitted/tracked obstacle circles.** The open-loop filter checks the raw hits channel
+    and misses 7.1% of truly colliding candidates (obstacles not seen in the scan, or hit only on an
+    unobserved side). Feed it the same fitted/tracked circles as the observed planner (`tracking.py`), so
+    both planners use identical perception. Not implemented yet.
 
-### Curvature-feasibility metric (reference values)
+### L2 findings on validation (2026-11-25)
+
+**Goal scorer: not a single-route predictor** (`reports/lidar_demo/l2_selection/goal_scorer_val.json`,
+full validation split, 66,063 frames; replaces the earlier "scorer keeps one mode" and "vocabulary range"
+diagnoses). The vocabulary covers every teacher route (nearest goal median 0.015–0.02 m, p95 <= 0.07 m, 0%
+beyond 0.5 m); the y in [-3.56, 3.58] m in the training log is the trajectory normaliser, not the
+vocabulary (y in [-6.56, 6.57] m). The driven route ranks first; with 1.5 m suppression the other route is
+the 2nd distinct pick in 76% (all routes) / 61% (endpoint-distinct) and within 5 in 96.5% / 94%. Suppressed
+cover@2/3/5 = 0.71/0.84/0.96 (all) and 0.57/0.75/0.94 (distinct), against plain cover@5 0.35/0.02: plain
+top-k on the dense vocabulary is used up by neighbours of the best goal. The l_dis plateau (5.83) is mostly
+the entropy floor (mixture gap 0.29 nats; non-driven routes 1.26). The sample collapse in the renders comes
+from conditioning all samples on one g*. Hence per-route / multi-goal selection (Part C item 7) is the lever,
+not the vocabulary.
+
+**Safety-filter slack: pre-set rule changed on validation.** `scripts/calibrate_safety.py` (1,600
+validation frames) pre-set the rule "largest slack with driven-route false alarms <= 1%", which picks
+0.05 m. The rule ignored recall, and recall turned out flat: 92.9% (1,686 of 1,814 truly colliding M3
+candidates) at slack 0, 0.05 and 0.1 m. False alarms rise with slack: driven routes 0.25% / 0.88% / 2.3%,
+all teacher routes 0.84% / 1.56% / 3.06%, collision-free candidates 1.06% / 2.36% / 3.85%. Slack 0 dominates
+on every rate, so the filter uses cell_slack = 0 (changed after seeing these numbers, for that reason).
+
+
 
 `kappa_ok_raw` is the share of raw samples whose discrete curvature (16 waypoints, 0.25 s) stays within
 κ_max = tan 10° / 1.60 m at every interior point; `kappa_ok_raw_1.1` allows 1.1 × κ_max. Reference: the

@@ -27,7 +27,7 @@ Variants (M = 128 samples everywhere; the same frames and the same sample noise 
   regression            baseline
   corridor-lattice observed (cold)   the observed corridor-lattice planner's own path on the same frame,
                         planned cold from the single scan (no tracking, no warm start, none of the L3
-                        additions), time-parametrised from the ego speed toward 3 m/s at 1 m/s^2 and rolled
+                        additions, no time budget; the same planner object and config as the route source), time-parametrised from the ego speed toward 3 m/s at 1 m/s^2 and rolled
                         out like every candidate; a brake counts as standing still (planner_brake logged).
                         This is the route source of the route-K variants, so it shows GoalFlow's added value.
 
@@ -112,7 +112,8 @@ COVER_R = 1.0
 NEAR = 3.0
 SHADOW_SWEEP = (0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, float("inf"))
 ROUTE_KMAX = 3
-CELL_SLACK = 0.05     # from scripts/calibrate_safety.py (rule: largest slack with driven false alarm <= 1%)
+PLANNER_CFG = dict(tracking=False, start_relief_m=0.0, budget_s=0.0, hold_confirm=1, fail_cache_scans=0)
+CELL_SLACK = 0.0      # calibrate_safety.py: recall flat over 0 / 0.05 / 0.1, so 0 (fewest false alarms); see DEVIATIONS
 
 
 class RouteFrames(Dataset):
@@ -131,9 +132,10 @@ class RouteFrames(Dataset):
         from gfsem.planners.corridor_lattice import LatticeCorridorConfig, LatticeCorridorPlanner
         out = self.base[i]
         if self.pl is None:
-            self.pl = LatticeCorridorPlanner(mode="observed", lcfg=LatticeCorridorConfig(tracking=False))
-            self.pp = LatticeCorridorPlanner(mode="observed", lcfg=LatticeCorridorConfig(
-                tracking=False, start_relief_m=0.0, budget_s=0.0, hold_confirm=1, fail_cache_scans=0))
+            # one config for the route source and the cold baseline: the original observed planner
+            # (none of the L3 additions; no time budget, so routes do not depend on CPU load)
+            self.pl = LatticeCorridorPlanner(mode="observed", lcfg=LatticeCorridorConfig(**PLANNER_CFG))
+            self.pp = self.pl
             xc = sum(self.pl.veh.body_x) / 2
             V = self.vocab
             self.cen = V[:, :2] + xc * np.stack([np.cos(V[:, 2]), np.sin(V[:, 2])], -1)
@@ -510,7 +512,16 @@ def main():
     sub = in_subset[:Fn]
     groups = {"subset4000": sub, "multi_all_routes": nm_all > 1, "multi_distinct_routes": nd_all > 1,
               "subset_near_obstacle": sub & near}
+    import hashlib
+    import subprocess
+    head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    diff = subprocess.run(["git", "diff", "HEAD"], capture_output=True, text=True).stdout
     out = {"preregistered": "metrics, variants and rules fixed 2026-11-25 before any result (see docstring)",
+           "code": {"git_head": head, "git_diff_sha256": hashlib.sha256(diff.encode()).hexdigest(),
+                    "uncommitted_changes": bool(diff.strip())},
+           "route_source_and_cold_baseline_planner": {"class": "LatticeCorridorPlanner", "mode": "observed",
+                                                      "input": "single scan, input_from_observation (no tracking)",
+                                                      **PLANNER_CFG},
            "frames": {k: int(m.sum()) for k, m in groups.items()}, "M": a.M, "seed": a.seed,
            "rule_distinct": f"endpoints >= {DISTINCT_SEP} m apart (greedy, driven first)",
            "checkpoints": {"goalflow": str(a.run / "goalflow_B_best.pt"),

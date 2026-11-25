@@ -45,5 +45,7 @@
    "free_flag": 7811
   }
  },
- "chosen_cell_slack": 0.05
+ "chosen_cell_slack": 0.05,
+ "used_cell_slack": 0.0,
+ "override": "pre-set rule picks 0.05 but ignored recall; recall is flat across slacks, so 0 dominates on every rate (DEVIATIONS, L2 findings)"
 }
