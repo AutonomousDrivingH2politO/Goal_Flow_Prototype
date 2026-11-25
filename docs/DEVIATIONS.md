@@ -315,6 +315,15 @@ on every rate, so the filter uses cell_slack = 0 (changed after seeing these num
   3.8%) against 0.36-0.59% for GoalFlow, so "collisions <= either baseline" is not met open loop. GoalFlow
   beats regression (3.17%). The closed-loop L3 comparison, with identical tracked perception for both, decides.
 
+### Pre-registered L3 comparison baseline (2026-11-25)
+
+GoalFlow (L3 configuration) is compared, at each noise level, against the **best classical observed config at
+that level**: currently (a) pre-L3 + stub fix at L2-L4 and (b) stub fix + L3 at L0-L1
+(`reports/lidar_demo/l0_rerun/REPORT.md`). Config (c), (b) without edge memory, is reported alongside as the
+same-information baseline (single-scan edges like GoalFlow's BEV, with tracked obstacles). If the stall
+ablation changes which config is best at a level, the best config is re-picked on these validation scenes
+before any GoalFlow closed-loop result exists, and recorded here.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
