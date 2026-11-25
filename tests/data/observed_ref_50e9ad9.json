@@ -1,0 +1,146 @@
+{
+ "0/L0": {
+  "outcome": "success",
+  "time": 11.9,
+  "n_replans": 119,
+  "n_brake_plans": 0,
+  "flips": 0,
+  "min_clearance": 1.542346733
+ },
+ "0/L1": {
+  "outcome": "success",
+  "time": 11.85,
+  "n_replans": 119,
+  "n_brake_plans": 0,
+  "flips": 0,
+  "min_clearance": 0.390985279
+ },
+ "0/L2": {
+  "outcome": "success",
+  "time": 12.0,
+  "n_replans": 120,
+  "n_brake_plans": 1,
+  "flips": 0,
+  "min_clearance": 0.635727238
+ },
+ "27/L0": {
+  "outcome": "stopped",
+  "time": 14.05,
+  "n_replans": 141,
+  "n_brake_plans": 20,
+  "flips": 0,
+  "min_clearance": 0.784844662
+ },
+ "27/L1": {
+  "outcome": "success",
+  "time": 12.15,
+  "n_replans": 122,
+  "n_brake_plans": 0,
+  "flips": 0,
+  "min_clearance": 0.504937892
+ },
+ "27/L2": {
+  "outcome": "success",
+  "time": 12.6,
+  "n_replans": 126,
+  "n_brake_plans": 1,
+  "flips": 0,
+  "min_clearance": 0.682007553
+ },
+ "64/L0": {
+  "outcome": "stopped",
+  "time": 10.15,
+  "n_replans": 102,
+  "n_brake_plans": 20,
+  "flips": 0,
+  "min_clearance": 1.080191519
+ },
+ "64/L1": {
+  "outcome": "success",
+  "time": 14.15,
+  "n_replans": 142,
+  "n_brake_plans": 11,
+  "flips": 0,
+  "min_clearance": 0.536079286
+ },
+ "64/L2": {
+  "outcome": "success",
+  "time": 14.85,
+  "n_replans": 149,
+  "n_brake_plans": 16,
+  "flips": 0,
+  "min_clearance": 0.373264198
+ },
+ "106/L0": {
+  "outcome": "exit",
+  "time": 12.6,
+  "n_replans": 127,
+  "n_brake_plans": 0,
+  "flips": 0,
+  "min_clearance": 0.270716047
+ },
+ "106/L1": {
+  "outcome": "success",
+  "time": 12.2,
+  "n_replans": 122,
+  "n_brake_plans": 1,
+  "flips": 0,
+  "min_clearance": 0.366347796
+ },
+ "106/L2": {
+  "outcome": "success",
+  "time": 12.25,
+  "n_replans": 123,
+  "n_brake_plans": 2,
+  "flips": 0,
+  "min_clearance": 0.241419737
+ },
+ "170/L0": {
+  "outcome": "stopped",
+  "time": 4.65,
+  "n_replans": 47,
+  "n_brake_plans": 23,
+  "flips": 0,
+  "min_clearance": 0.960709597
+ },
+ "170/L1": {
+  "outcome": "stopped",
+  "time": 4.5,
+  "n_replans": 45,
+  "n_brake_plans": 22,
+  "flips": 0,
+  "min_clearance": 0.985093979
+ },
+ "170/L2": {
+  "outcome": "stopped",
+  "time": 4.85,
+  "n_replans": 49,
+  "n_brake_plans": 23,
+  "flips": 0,
+  "min_clearance": 1.013622407
+ },
+ "288/L0": {
+  "outcome": "success",
+  "time": 14.15,
+  "n_replans": 142,
+  "n_brake_plans": 1,
+  "flips": 0,
+  "min_clearance": 0.125788795
+ },
+ "288/L1": {
+  "outcome": "success",
+  "time": 14.15,
+  "n_replans": 142,
+  "n_brake_plans": 4,
+  "flips": 0,
+  "min_clearance": 0.183422212
+ },
+ "288/L2": {
+  "outcome": "collision",
+  "time": 12.85,
+  "n_replans": 129,
+  "n_brake_plans": 11,
+  "flips": 1,
+  "min_clearance": -0.004035744
+ }
+}

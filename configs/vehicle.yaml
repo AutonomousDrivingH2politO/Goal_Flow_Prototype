@@ -1,9 +1,19 @@
-# Vehicle and camera constants (PROMPT.md TODO(Can) values). Provided by Can on 2026-11-18.
+# Vehicle and camera constants. Camera values provided by Can on 2026-11-18.
+# Vehicle values corrected 2026-11-24 to the final Juno data sheet
+# (configs/juno_relevant_info.xlsx, from Juno's designers and the strategy team).
 vehicle:
   name: Juno
-  wheelbase_m: 1.65
-  length_m: 2.55
-  width_m: 1.85
+  wheelbase_m: 1.60
+  length_m: 2.875
+  width_m: 1.165
+  track_m: 1.00
+  tyre_radius_m: 0.279
+  height_m: 1.165
+  turning_radius_m: 5.5        # mechanical, data sheet
+  max_steer_deg: 10.0          # hard limit in the AD-SEM stack -> R_min = 1.60 / tan(10 deg) = 9.07 m
+  # Overhangs are not in the data sheet. Assumption until measured: symmetric,
+  # (length - wheelbase) / 2 = 0.6375 m front and rear of the axles. TODO(Can)
+  rear_overhang_m: null
 camera:
   model: ZED 2i
   serial: 39159302           # from the SVO2 headers
