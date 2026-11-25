@@ -356,9 +356,15 @@ at L3-L4. Stall ablation of (b) at L4 (success / collision / exit / stalled %, s
 
 ### Closed-loop GoalFlow: hit memory in the safety filter (2026-11-25)
 
-GoalFlow's safety filter checks candidates against the current scan's observed hits plus the hits of the last
-1.5 s, stored in the odom frame with the believed (noisy, drifting) pose and mapped into the current ego frame;
-never the true pose. The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
+GoalFlow's safety filter checks candidates against the current scan's observed hits plus remembered hits: a map
+of 0.2 m cells in the odom frame (believed, noisy, drifting pose; never the true pose), a cell used once hit in
+>= 2 scans and while it is ahead of the rear bumper and within 4 m of the car (position-based, no time limit).
+First version (1.5 s time window) replaced after the smoke test: the cone collisions came 2.05-2.15 s after the
+cone vanished below the lowest beam, with the car crawling (1.1-1.2 m travelled); remembered single-scan clutter
+blocked candidates at L4. A cone-only memory was rejected: it would let a learned camera label gate which
+obstacles the filter keeps (team rule), drop ~1 in 5 cones at L4 (label flips), and forget bollards beside the
+car. Seed 17's L0 stall is mostly correct braking: the best candidate cleared the true obstacles by a median
+0.010 m, and only ~0.9 of 128 per stalled scan by more than 0.12 m (candidate quality in tight gaps). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
 beam within ~2.03 m of the sensor, so a single scan loses it exactly when the car reaches it (the closed-loop
 smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
 kept plan. If no candidate survives the filter, the planner brakes.

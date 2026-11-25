@@ -6,9 +6,10 @@ current scan's observed hits (cell_slack 0) drops flagged candidates, shadow pat
 the filter, brake (the geometric check stays authoritative). The chosen executed path is handed to the same
 pure-pursuit controller as the corridor baselines.
 
-Hit memory (safety filter only; ``hit_memory_s`` > 0): observed LiDAR hits from the last ``hit_memory_s`` seconds,
-stored in the odom frame with the believed (noisy, drifting) pose ``obs.pose_odom``, never the true pose, and
-mapped into the current ego frame. Reason: a 0.40 m cone falls below the lowest beam within ~2.03 m of the
+Hit memory (safety filter only; ``memory_range`` > 0): observed LiDAR hits kept in a map of 0.2 m cells in the odom
+frame (believed, noisy, drifting pose ``obs.pose_odom``; never the true pose). A cell is used once it was hit in
+>= ``memory_min_scans`` scans, and only while it lies ahead of the rear bumper and within ``memory_range`` m of the
+car (position-based, no time limit); cells behind the bumper are dropped. Current-scan hits always count. Reason: a 0.40 m cone falls below the lowest beam within ~2.03 m of the
 sensor, so a single scan loses it right where it matters; the corridor baseline (a) has implicit memory
 through its kept plan. The BEV input stays single-scan.
 """
@@ -36,14 +37,17 @@ class GoalFlowPlanner:
     name = "goalflow_l3"
 
     def __init__(self, ckpt: Path = Path("runs/l2_full_seed0/goalflow_B_best.pt"), device: str = "auto",
-                 M: int = 128, goal_K: int = 3, speed: float = 3.0, seed: int = 0, hit_memory_s: float = 1.5,
-                 scan_dt: float = 0.1):
+                 M: int = 128, goal_K: int = 3, speed: float = 3.0, seed: int = 0, memory_range: float = 4.0,
+                 memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
         self.model = load(Path(ckpt), self.dev).eval()
         self.M, self.goal_K, self.speed, self.seed = M, goal_K, speed, seed
-        self.hit_memory_s, self.scan_dt = hit_memory_s, scan_dt
+        self.memory_range, self.memory_min_scans, self.memory_cell = memory_range, memory_min_scans, memory_cell
+        self.scan_dt = scan_dt
+        from ..sim.config import VehicleConfig
+        self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
         self.reset()
 
@@ -51,19 +55,40 @@ class GoalFlowPlanner:
         self.stats: list[tuple[str, float]] = []
         self.k = 0
         self.last = {}
-        self.mem: list[tuple[float, np.ndarray]] = []     # (time, hits in the believed odom frame)
+        self.cells: dict[tuple[int, int], list] = {}      # odom cell -> [scans hit, x, y] (believed odom frame)
+        self.mem: list[tuple[float, np.ndarray]] = []     # remembered points used at the last scan (diagnostics)
 
     def _memory_hits(self, obs) -> torch.Tensor:
-        """(1, H, W) hit mask: this scan plus remembered hits (believed odom frame) mapped into the ego frame."""
+        """(1, H, W) hit mask: this scan's hits plus remembered cells (hit in >= min scans, ahead of the rear
+        bumper, within range), mapped from the believed odom frame into the current ego frame."""
         from ..sim.geometry import from_frame, to_frame
-        t = self.k * self.scan_dt
         pose = np.asarray(obs.pose_odom, float)
         cur = np.asarray(obs.points, float).reshape(-1, 2)
-        self.mem = [(tm, p) for tm, p in self.mem if t - tm <= self.hit_memory_s + 1e-9]
-        pts = [cur] + [to_frame(p, pose) for _, p in self.mem if len(p)]
         if len(cur):
-            self.mem.append((t, from_frame(cur, pose)))
-        P = np.concatenate(pts) if pts else np.zeros((0, 2))
+            W = from_frame(cur, pose)
+            keys = set()
+            for (x, y) in W:
+                k = (int(np.floor(x / self.memory_cell)), int(np.floor(y / self.memory_cell)))
+                if k in keys:
+                    continue
+                keys.add(k)
+                c = self.cells.get(k)
+                if c is None:
+                    self.cells[k] = [1, x, y]
+                else:
+                    c[0] += 1
+        rem = np.zeros((0, 2))
+        if self.cells:
+            K = list(self.cells)
+            A = np.array([self.cells[k] for k in K], float)
+            loc = to_frame(A[:, 1:3], pose)
+            behind = loc[:, 0] < self.rear_x
+            for k in [K[i] for i in np.flatnonzero(behind)]:
+                del self.cells[k]
+            use = ~behind & (A[:, 0] >= self.memory_min_scans) & (np.hypot(loc[:, 0], loc[:, 1]) <= self.memory_range)
+            rem = loc[use]
+        self.mem = [(self.k * self.scan_dt, from_frame(rem, pose))] if len(rem) else []
+        P = np.concatenate([cur, rem]) if len(rem) else cur
         rc = self.rc
         m = np.zeros((rc.size, rc.size), np.float32)
         if len(P):
@@ -79,7 +104,7 @@ class GoalFlowPlanner:
         torch.manual_seed(self.seed * 1_000_003 + self.k)
         bev = torch.from_numpy(rasterize(obs, self.rc))[None].to(self.dev)
         ego = torch.from_numpy(np.asarray(obs.ego_state, np.float32))[None].to(self.dev)
-        hits = self._memory_hits(obs) if self.hit_memory_s > 0 else None
+        hits = self._memory_hits(obs) if self.memory_range > 0 else None
         r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True, safety_slack=0.0,
                             safety_hits=hits)
         no_safe = bool(r["no_safe"][0])
