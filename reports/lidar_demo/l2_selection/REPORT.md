@@ -77,5 +77,6 @@ colliding candidates in 20 of the 21 frames that have one; the miss is a fully o
 
 ## Next
 
-The 305 near-g* frames: what the teacher did there, and whether the main path stops short where the teacher
-continues (a closed-loop stall risk once the shadow is off).
+The near-g* stall risk, on the L3 configuration (NMS-K3 + safety, main path), not M3: of the 305 frames where
+M3's g* is a near goal, how many still have a near selected goal under NMS-K3, and for those: the teacher's
+speed and progress over the 4 s, the main path's progress, and whether the main path is safe.
