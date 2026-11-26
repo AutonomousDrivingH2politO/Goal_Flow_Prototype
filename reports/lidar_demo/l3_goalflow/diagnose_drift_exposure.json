@@ -1,0 +1,41 @@
+[
+ {
+  "seed": 1,
+  "outcome": "collision",
+  "blocking_remembered_points": 23,
+  "exposure_scans_stopped": 0,
+  "exposure_scans_moving": 169,
+  "share_stopped": 0.0,
+  "collision": {
+   "obstacle": 9,
+   "cls": 2,
+   "remembered_points_within_1m": 19,
+   "their_surface_distance_median": 0.2794302380739615,
+   "min": -0.22519342005737733
+  }
+ },
+ {
+  "seed": 18,
+  "outcome": "stopped",
+  "blocking_remembered_points": 142,
+  "exposure_scans_stopped": 496,
+  "exposure_scans_moving": 1924,
+  "share_stopped": 0.2049586776859504
+ },
+ {
+  "seed": 28,
+  "outcome": "stopped",
+  "blocking_remembered_points": 72,
+  "exposure_scans_stopped": 219,
+  "exposure_scans_moving": 1504,
+  "share_stopped": 0.12710388856645385
+ },
+ {
+  "seed": 32,
+  "outcome": "stopped",
+  "blocking_remembered_points": 80,
+  "exposure_scans_stopped": 223,
+  "exposure_scans_moving": 1406,
+  "share_stopped": 0.1368937998772253
+ }
+]
