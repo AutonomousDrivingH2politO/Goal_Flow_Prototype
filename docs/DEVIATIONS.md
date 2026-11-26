@@ -339,6 +339,10 @@ that level**: currently (a) pre-L3 + stub fix at L2-L4 and (b) stub fix + L3 at 
 same-information baseline (single-scan edges like GoalFlow's BEV, with tracked obstacles). If the stall
 ablation changes which config is best at a level, the best config is re-picked on these validation scenes
 before any GoalFlow closed-loop result exists, and recorded here.
+**Re-pick after the drift change (2026-11-26):** with distance-proportional drift the best classical config is (b) at
+L0 (unchanged; no drift) and **(a) at L1-L4** (L1: (a) 97.9% vs (b) 97.1%, a 4-scene margin; previously (b) 97.3% vs
+(a) 97.1%). Chosen from the baseline rerun alone (`reports/lidar_demo/l0_rerun_distdrift/REPORT.md`); the only
+GoalFlow closed-loop results so far are 40-seed smoke tests used for variant selection, not for this choice.
 
 ### L3 observed additions: findings and frozen baselines (2026-11-25)
 
