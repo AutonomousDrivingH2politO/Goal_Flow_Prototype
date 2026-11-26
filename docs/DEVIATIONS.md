@@ -426,6 +426,11 @@ now, since L0 has no odometry drift; the L4 half waits for the distance-proporti
 `goalflow_l3_exact_jitter` (a; +-0.3 m) and `goalflow_l3_exact_refine` (b; 8 gradient steps, only when no candidate
 is safe). Reference: `goalflow_l3_exact`. The rule is applied once both halves exist; the L0 half alone is
 reported, not used to choose.
+**Final choice rule (2026-11-26, before the L4 half):** candidates `goalflow_l3_exact`, `goalflow_l3_exact_jitter`,
+`goalflow_l3_exact_refine`. Score = stalls + collisions on feasible scenes over seeds 0-39 at L0 and L4 (80
+episodes), L4 run with the distance-proportional drift; the L0 halves already run are reused (no drift at L0, so
+identical under either drift model). Lowest score wins; ties go to fewer collisions; a remaining tie keeps
+`goalflow_l3_exact`. The winner is the GoalFlow variant for the full run.
 
 ### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
 
