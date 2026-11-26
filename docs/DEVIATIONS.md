@@ -417,6 +417,11 @@ repeated.
 hit points (exact distances), then re-rollout. Both run the same 80-episode smoke test (seeds 0-39, L0 and L4). The
 winner is the one with the fewest stalls + collisions on feasible scenes, ties to fewer collisions; if neither beats
 the step-2 variant, the step-2 variant is kept. MPPI refinement (Part C item 16) only if both fail.
+**Amendment (2026-11-26, before running), split by noise model:** the L0 half of that smoke test (seeds 0-39) runs
+now, since L0 has no odometry drift; the L4 half waits for the distance-proportional drift. Variant names:
+`goalflow_l3_exact_jitter` (a; +-0.3 m) and `goalflow_l3_exact_refine` (b; 8 gradient steps, only when no candidate
+is safe). Reference: `goalflow_l3_exact`. The rule is applied once both halves exist; the L0 half alone is
+reported, not used to choose.
 
 ### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
 
