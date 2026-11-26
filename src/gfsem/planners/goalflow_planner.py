@@ -60,7 +60,8 @@ class GoalFlowPlanner:
     def __init__(self, ckpt: Path = Path("runs/l2_full_seed0/goalflow_B_best.pt"), device: str = "auto",
                  M: int = 128, goal_K: int = 3, speed: float = 3.0, seed: int = 0, memory_range: float = 4.0,
                  memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1,
-                 visibility_gate: bool = False, memory_obs_range: float = 4.0):
+                 visibility_gate: bool = False, memory_obs_range: float = 4.0, exact_filter: bool = False,
+                 safety_margin: float = 0.12):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
@@ -70,6 +71,7 @@ class GoalFlowPlanner:
         self.scan_dt = scan_dt
         self.visibility_gate = visibility_gate
         self.memory_obs_range = memory_obs_range      # > 0: only hits observed within this range of the sensor
+        self.exact_filter, self.safety_margin = exact_filter, safety_margin
         from ..sim.config import VehicleConfig
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
@@ -119,6 +121,7 @@ class GoalFlowPlanner:
                 rem = rem[unseen_mask(rem, obs)]
         self.mem = [(self.k * self.scan_dt, from_frame(rem, pose))] if len(rem) else []
         P = np.concatenate([cur, rem]) if len(rem) else cur
+        self.filter_points = P                     # exact filter: current hits + remembered stored points
         rc = self.rc
         m = np.zeros((rc.size, rc.size), np.float32)
         if len(P):
@@ -135,8 +138,14 @@ class GoalFlowPlanner:
         bev = torch.from_numpy(rasterize(obs, self.rc))[None].to(self.dev)
         ego = torch.from_numpy(np.asarray(obs.ego_state, np.float32))[None].to(self.dev)
         hits = self._memory_hits(obs) if self.memory_range > 0 else None
-        r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True, safety_slack=0.0,
-                            safety_hits=hits)
+        if self.exact_filter:
+            if hits is None:
+                self.filter_points = np.asarray(obs.points, float).reshape(-1, 2)
+            r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True,
+                                safety_points=[self.filter_points], safety_margin=self.safety_margin)
+        else:
+            r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True, safety_slack=0.0,
+                                safety_hits=hits)
         no_safe = bool(r["no_safe"][0])
         self.k += 1
         if self.dev.type == "mps":

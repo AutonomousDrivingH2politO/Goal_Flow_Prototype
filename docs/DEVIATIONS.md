@@ -400,6 +400,24 @@ beam within ~2.03 m of the sensor, so a single scan loses it exactly when the ca
 smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
 kept plan. If no candidate survives the filter, the planner brakes.
 
+### Closed-loop GoalFlow: critics off, and the tight-gap precision rule (2026-11-26)
+
+**Critics off.** GoalFlow's trajectory score uses only the distance to the candidate's goal, progress and the goal's
+own score (NMS-K); the lambda3 consistency term (distance to the previous chosen path), a smoothness critic and a
+track-edge critic are off. Reasons: lambda3 = 0 was the validated configuration (open loop has no previous path to
+tune it on); every candidate is already a rolled-out, curvature-feasible executed path, so smoothness is largely
+enforced by the rollout; track exits stayed at 0 in the smoke tests, so no edge critic was needed yet. Check in the
+full run: door flips per run for every planner, with the baselines' definition (the chosen path's side signature
+changing between consecutive replans). If GoalFlow flips more than the baseline, lambda3 is turned on and the run
+repeated.
+
+**Tight-gap precision, pre-set rule (before any run).** Variants, cheapest first, each on top of the step-2 filter
+(exact box-to-point, 0.12 m): (a) goal jitter: per NMS goal also goals shifted +-0.3 m sideways, M = 128 in total
+(3 goals x 3 offsets, ~14 samples each); (b) a few gradient steps on the chosen candidates' waypoints away from the
+hit points (exact distances), then re-rollout. Both run the same 80-episode smoke test (seeds 0-39, L0 and L4). The
+winner is the one with the fewest stalls + collisions on feasible scenes, ties to fewer collisions; if neither beats
+the step-2 variant, the step-2 variant is kept. MPPI refinement (Part C item 16) only if both fail.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

@@ -12,7 +12,9 @@
 | (c) (b) without edge memory | 95.4 / 0.0 / 4.0 | 96.9 / 0.0 / 3.1 | 94.3 / 1.0 / 4.6 | 89.5 / 0.6 / 9.2 | 77.1 / 1.5 / 20.8 |
 | (d) (b) without tracking | 97.9 / 0.0 / 1.7 | 97.5 / 0.0 / 2.5 | 94.8 / 0.2 / 4.8 | 74.4 / 1.3 / 24.1 | 37.1 / 2.5 / 60.2 |
 
-Cells: success / collision / stalled, % of feasible scenes. L3 = tracking, edge memory, kept-plan hysteresis +
+Cells: success / collision / stalled, % of feasible scenes. Exact track-exit counts (feasible scenes, of 477
+per level; L0 / L1 / L2 / L3 / L4): pre-fix 6 / 0 / 1 / 2 / 3; (a) 4 / 1 / 0 / 0 / 2; (b) 3 / 0 / 0 / 0 / 4;
+(c) 3 / 0 / 0 / 3 / 3; (d) 2 / 0 / 1 / 1 / 1. L3 = tracking, edge memory, kept-plan hysteresis +
 fallback, hold, failed-search cache (`l3_config()`).
 
 - **L3 helps at low noise, hurts at high noise.** L0-L1: (b)-(d) are best, with zero collisions. L3-L4: they

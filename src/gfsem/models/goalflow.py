@@ -82,6 +82,47 @@ def hits_distance(hits: torch.Tensor) -> torch.Tensor:
     return torch.from_numpy(out).to(hits.device)
 
 
+def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 0.12,
+                             max_step: float = 0.2) -> torch.Tensor:
+    """(B, M) bool: exact check. Juno's box along each executed path (poses densified to <= ``max_step`` m, headings
+    forward-filled) vs every hit point (points[b]: (N_b, 2) ego frame; current hits plus remembered stored points):
+    flagged if the box-to-point distance is below ``margin``. No cells, no circle cover."""
+    from ..sim.config import VehicleConfig
+    veh = VehicleConfig.from_yaml()
+    x0, x1 = veh.body_x
+    h = veh.width / 2
+    B, M, T, _ = paths.shape
+    P = torch.cat([torch.zeros_like(paths[:, :, :1]), paths], 2)
+    seg = (P[:, :, 1:] - P[:, :, :-1]).norm(dim=-1)
+    f = int(min(max(math.ceil(float(seg.max()) / max_step), 1), 12))
+    w = torch.arange(f + 1, device=paths.device, dtype=paths.dtype)[:-1] / f
+    Q = (P[:, :, :-1, None] * (1 - w[:, None]) + P[:, :, 1:, None] * w[:, None]).flatten(2, 3)
+    Q = torch.cat([Q, P[:, :, -1:]], 2)                                            # (B, M, K, 2)
+    d = torch.diff(Q, dim=2)
+    yaw = torch.atan2(d[..., 1], d[..., 0])
+    yaw = torch.where(d.norm(dim=-1) > 1e-4, yaw, torch.full_like(yaw, float("nan")))
+    yaw = torch.cat([torch.zeros_like(yaw[..., :1]), yaw], 2)
+    for k in range(1, yaw.shape[2]):
+        yaw[..., k] = torch.where(torch.isnan(yaw[..., k]), yaw[..., k - 1], yaw[..., k])
+    out = torch.zeros(B, M, dtype=torch.bool, device=paths.device)
+    reach = math.hypot(max(abs(x0), abs(x1)), h) + margin
+    for b in range(B):
+        pts = points[b]
+        if pts is None or len(pts) == 0:
+            continue
+        pts = torch.as_tensor(pts, dtype=paths.dtype, device=paths.device)
+        q, c, s_ = Q[b], torch.cos(yaw[b]), torch.sin(yaw[b])                     # (M, K, 2), (M, K)
+        near = ((q[:, :, None, :] - pts[None, None]).norm(dim=-1) <= reach + max(abs(x0), abs(x1)))
+        if not near.any():
+            continue
+        dx = pts[None, None, :, 0] - q[..., 0:1]
+        dy = pts[None, None, :, 1] - q[..., 1:2]
+        lx, ly = c[..., None] * dx + s_[..., None] * dy, -s_[..., None] * dx + c[..., None] * dy
+        dist = torch.hypot(lx - lx.clamp(x0, x1), ly - ly.clamp(-h, h))           # 0 inside the box
+        out[b] = ((dist < margin) & near).flatten(1).any(1)
+    return out
+
+
 def observed_collision(paths: torch.Tensor, hits: torch.Tensor, nx: int = 8, ny: int = 4,
                        max_step: float = 0.2, cell_slack: float = 0.1, dist: torch.Tensor | None = None) -> torch.Tensor:
     """(B, M) bool: does Juno's footprint along an executed path (B, M, T, 2; ego frame) come within reach of
@@ -193,7 +234,8 @@ class GoalFlow(nn.Module):
              roll: RolloutConfig | None = RolloutConfig(), goal_K: int = 1, goal_sep: float = 1.5,
              goal_floor: float = 3.0, l4: float = 1.0, safety: bool = False,
              route_goals: torch.Tensor | None = None, safety_slack: float = 0.1,
-             safety_hits: torch.Tensor | None = None):
+             safety_hits: torch.Tensor | None = None, safety_points: list | None = None,
+             safety_margin: float = 0.12):
         """Full GoalFlow (M3). Flags give the paper's ablations:
         M0: use_goal=False -> mean of goal-free samples; M1: use_dac=False, use_scorer=False (mean of
         goal-conditioned samples); M2: use_scorer=False; M3: all on.
@@ -255,8 +297,11 @@ class GoalFlow(nn.Module):
         if l3 > 0 and prev_path is not None:
             f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
         if safety:                                                # observed hits only (no privileged input)
-            hits = bev[:, 0] if safety_hits is None else safety_hits     # (B, H, W); default: this scan only
-            safe = ~observed_collision(S, hits, cell_slack=safety_slack)
+            if safety_points is not None:                         # exact box-to-point check (margin in m)
+                safe = ~observed_collision_exact(S, safety_points, margin=safety_margin)
+            else:
+                hits = bev[:, 0] if safety_hits is None else safety_hits     # (B, H, W); default: this scan only
+                safe = ~observed_collision(S, hits, cell_slack=safety_slack)
             any_safe = safe.any(1, keepdim=True)
             f = torch.where(safe | ~any_safe, f, torch.full_like(f, -1e9))
             out.update(safe=safe, no_safe=~any_safe[:, 0])
