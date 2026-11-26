@@ -445,6 +445,15 @@ regression test uses it).
 **Real-car lesson.** The filter memory is only as good as the odometry: on Juno it needs wheel odometry + IMU in the
 EKF (the ZED visual odometry read 10-60% low).
 
+### Run hygiene
+
+Run hygiene (house rules, 2026-11-26): (1) stopping a chain stops its whole process group (`kill -- -<PGID>`,
+or `pkill -f` on eval_corridor for that output folder), then `ps` confirms no eval_corridor / worker processes remain
+before anything is relaunched (killing a bash chain script leaves its running child evaluation alive; on 2026-11-26
+config (a) briefly ran twice into one folder because of this); (2) never two runs writing to the same output folder:
+`scripts/eval_corridor.py` holds `RUNNING.lock` in its output folder and refuses to start if a live process holds it;
+(3) more load on request still keeps >= 5% CPU idle, about 7 CPU-bound workers in total on the 8-core Mac.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

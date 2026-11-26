@@ -257,6 +257,24 @@ def main():
         for lvl in (["L0"] if name in PRIVILEGED else levels):
             jobs += [(name, s, lvl) for s in seeds]
     a.out.mkdir(parents=True, exist_ok=True)
+    # one run per output folder (house rule): refuse if a live process holds the lock; replace a stale one
+    import os
+    lock = a.out / "RUNNING.lock"
+    if lock.exists():
+        try:
+            pid = int(lock.read_text().split()[0])
+            os.kill(pid, 0)
+            raise SystemExit(f"{a.out} is in use by pid {pid} (RUNNING.lock); not starting a second run")
+        except (ValueError, ProcessLookupError, PermissionError, IndexError):
+            pass                                   # stale lock
+    lock.write_text(f"{os.getpid()} {time.ctime()} {' '.join(sys.argv)}\n")
+    try:
+        _main_body(a, jobs, seeds, levels)
+    finally:
+        lock.unlink(missing_ok=True)
+
+
+def _main_body(a, jobs, seeds, levels):
     t0 = time.time()
     rows = []
     ctx = mp.get_context("spawn")
