@@ -87,6 +87,7 @@ class GoalFlowPlanner:
         self.cells: dict[tuple[int, int], list] = {}      # odom cell -> [scans hit, x, y] (believed odom frame)
         self.mem: list[tuple[float, np.ndarray]] = []     # remembered points used at the last scan (diagnostics)
         self.circ: list[list] = []                        # circle memory: [x, y, r, n] in the believed odom frame
+        self.last_brake: dict = {}
 
     def _memory_hits(self, obs) -> torch.Tensor:
         """(1, H, W) hit mask: this scan's hits plus remembered cells (hit in >= min scans, ahead of the rear
@@ -203,6 +204,9 @@ class GoalFlowPlanner:
         if self.dev.type == "mps":
             torch.mps.synchronize()
         self.last = dict(obs=obs, true_pose=np.asarray(true_pose, float).copy(), no_safe=no_safe)
+        if no_safe:                                  # for stall diagnostics (logged at episode end)
+            self.last_brake = dict(S=r["samples"][0].cpu().numpy(), true_pose=self.last["true_pose"],
+                                   filt=np.asarray(getattr(self, "filter_points", np.zeros((0, 2))), float))
         if no_safe:
             self.stats.append(("brake", 1000 * (time.perf_counter() - t0)))
             return GFResult(np.zeros((0, 3)), True, 0.0, {"trigger": "brake", "reason": "no safe candidate"})

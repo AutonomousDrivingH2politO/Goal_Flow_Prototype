@@ -120,6 +120,32 @@ def make_planner(name: str):
     raise ValueError(name)
 
 
+def _stall_diag(lb: dict, scene, veh) -> dict:
+    """At the last "no safe candidate" scan: best true clearance among the candidates (Juno's box vs the true
+    discs); the filter element (circle / point) that flags the truly best candidate: its offset from the nearest true
+    obstacle (centre distance for circles) and that candidate's true clearance."""
+    import torch
+    from gfsem.models.goalflow import observed_collision_exact
+    from gfsem.sim.geometry import to_frame
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from eval_selection import path_clearance
+    T = to_frame(scene.centres, lb["true_pose"])
+    O = torch.zeros(1, scene.n, 3)
+    O[0, :, :2] = torch.from_numpy(T)
+    O[0, :, 2] = torch.from_numpy(scene.radii)
+    S = torch.from_numpy(lb["S"]).float()
+    clr = path_clearance(S, O.expand(len(S), -1, -1), torch.full((len(S),), scene.n), veh).numpy()
+    i = int(clr.argmax())
+    out = {"stall_best_true_clearance": round(float(clr[i]), 3)}
+    F = lb["filt"]
+    for j in range(len(F)):
+        if observed_collision_exact(S[i:i + 1][None], [torch.from_numpy(F[j:j + 1]).float()], 0.12)[0, 0]:
+            off = float(np.hypot(*(T - F[j, :2]).T).min()) if scene.n else float("nan")
+            out.update(stall_blocker_offset=round(off, 3), stall_blocker_true_clearance=round(float(clr[i]), 3))
+            break
+    return out
+
+
 def run_one(job: tuple[str, int, str]) -> dict:
     from gfsem.sim.closed_loop import run_episode
     name, seed, level = job
@@ -136,6 +162,11 @@ def run_one(job: tuple[str, int, str]) -> dict:
         cfg = SimConfig()
         row["collision_cause"] = (collision_cause(inner, scene, r.trajectory[-1, :3], cfg.vehicle, cfg.lidar)
                                   if r.outcome == "collision" else "")
+        row["stall_best_true_clearance"] = ""
+        row["stall_blocker_offset"] = ""
+        row["stall_blocker_true_clearance"] = ""
+        if r.outcome in ("stopped", "timeout") and getattr(inner, "last_brake", None):
+            row.update(_stall_diag(inner.last_brake, scene, cfg.vehicle))
     row["layout"] = scene.layout
     row["fail_cause"] = ";".join(f"{k}" for k in getattr(inner, "fail_causes", {}) or [])
     row["triggers"] = dict(Counter(t for t, _ in stats))
