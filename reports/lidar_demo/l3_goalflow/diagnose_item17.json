@@ -1,0 +1,4746 @@
+[
+ {
+  "seed": 4,
+  "level": "L0",
+  "a": "success",
+  "goalflow": "stopped",
+  "stalled_scans": 30,
+  "share_scans_a_route_among_goals": 0.6666666666666666,
+  "median_best_clearance_any_goal": -0.06138890981674194,
+  "median_best_clearance_on_a_route": -0.15236401557922363,
+  "scans": [
+   {
+    "t": 5.300000000000001,
+    "a_route_obstacles": 2,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.65,
+       4.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.011859089136123657
+     },
+     {
+      "goal": [
+       10.65,
+       4.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.012916594743728638
+     },
+     {
+      "goal": [
+       10.65,
+       4.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.006383448839187622
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.5,
+    "a_route_obstacles": 2,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.65,
+       4.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.055244773626327515
+     },
+     {
+      "goal": [
+       10.65,
+       4.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.05653008818626404
+     },
+     {
+      "goal": [
+       10.65,
+       4.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.05423799157142639
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.5,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.85,
+       4.5
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.12607333064079285
+     },
+     {
+      "goal": [
+       11.46,
+       3.11
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       9.39,
+       3.7
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.7,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.07,
+       4.17
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.09455099701881409
+     },
+     {
+      "goal": [
+       11.53,
+       2.75
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.07,
+       4.17
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.09195694327354431
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.9,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.14,
+       4.05
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07796838879585266
+     },
+     {
+      "goal": [
+       11.52,
+       2.59
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.14,
+       4.05
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07824423909187317
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 7.2,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.71
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0008926987648010254
+     },
+     {
+      "goal": [
+       11.66,
+       2.27
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.26,
+       3.71
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.0021813511848449707
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 7.300000000000001,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.3,
+       3.6
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0020749568939208984
+     },
+     {
+      "goal": [
+       11.73,
+       2.15
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.22,
+       -3.68
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": -0.22499999403953552
+   },
+   {
+    "t": 8.3,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.6,
+       2.8
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.04416319727897644
+     },
+     {
+      "goal": [
+       11.6,
+       2.8
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.039044320583343506
+     },
+     {
+      "goal": [
+       11.6,
+       2.8
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.03970634937286377
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.4,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.68,
+       2.48
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0013600587844848633
+     },
+     {
+      "goal": [
+       11.68,
+       2.48
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.0055179595947265625
+     },
+     {
+      "goal": [
+       11.68,
+       2.48
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.003511667251586914
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.5,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.34
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.02258443832397461
+     },
+     {
+      "goal": [
+       11.96,
+       0.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.6,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.78,
+       1.98
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.06079590320587158
+     },
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.99,
+       0.46
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.3,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.78,
+       1.98
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       10.55,
+       -5.1
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 9.4,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.72,
+       -4.85
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.71,
+       2.34
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.37,
+       -3.47
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 9.5,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.81,
+       -4.68
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.4,
+       -3.29
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.73,
+       2.31
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 9.600000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.91,
+       -4.52
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.73,
+       2.31
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.95,
+       0.81
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 9.700000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.99,
+       -4.33
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.69,
+       2.5
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.93,
+       1.02
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 9.8,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.99,
+       -4.33
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.69,
+       2.5
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.57,
+       -2.91
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 10.4,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 10.5,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.06,
+       -4.2
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.57,
+       2.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.61,
+       -2.74
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.25
+   },
+   {
+    "t": 10.600000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.13,
+       -4.07
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22057127952575684
+     }
+    ],
+    "best_clearance_on_a_route": -0.22057127952575684
+   },
+   {
+    "t": 10.700000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.07471966743469238
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.07471966743469238
+   },
+   {
+    "t": 10.8,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.028397321701049805
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.028397321701049805
+   },
+   {
+    "t": 10.9,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.08415675163269043
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.08415675163269043
+   },
+   {
+    "t": 11.0,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.08208131790161133
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.08208131790161133
+   },
+   {
+    "t": 11.100000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.06380820274353027
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.06380820274353027
+   },
+   {
+    "t": 11.200000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.03517007827758789
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.03517007827758789
+   },
+   {
+    "t": 11.3,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.05325150489807129
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.05325150489807129
+   },
+   {
+    "t": 11.4,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.061981916427612305
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.061981916427612305
+   },
+   {
+    "t": 11.5,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.029712438583374023
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.029712438583374023
+   },
+   {
+    "t": 11.600000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.06990981101989746
+     },
+     {
+      "goal": [
+       11.21,
+       -3.9
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.06990981101989746
+   }
+  ]
+ },
+ {
+  "seed": 36,
+  "level": "L0",
+  "a": "success",
+  "goalflow": "stopped",
+  "stalled_scans": 31,
+  "share_scans_a_route_among_goals": 0.12903225806451613,
+  "median_best_clearance_any_goal": 0.013048037886619568,
+  "median_best_clearance_on_a_route": 0.024768918752670288,
+  "scans": [
+   {
+    "t": 5.5,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.59,
+       2.47
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.10075560212135315
+     },
+     {
+      "goal": [
+       11.59,
+       2.47
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.09762957692146301
+     },
+     {
+      "goal": [
+       11.59,
+       2.47
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.0937323272228241
+     }
+    ],
+    "best_clearance_on_a_route": 0.10075560212135315
+   },
+   {
+    "t": 5.800000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.66,
+       2.42
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.019756585359573364
+     },
+     {
+      "goal": [
+       11.21,
+       3.89
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.66,
+       2.42
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.02114662528038025
+     }
+    ],
+    "best_clearance_on_a_route": 0.02114662528038025
+   },
+   {
+    "t": 6.1000000000000005,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.66,
+       2.46
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.028391212224960327
+     },
+     {
+      "goal": [
+       11.21,
+       3.89
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.86,
+       0.95
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": 0.028391212224960327
+   },
+   {
+    "t": 6.2,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.0783633291721344
+     },
+     {
+      "goal": [
+       11.15,
+       3.83
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.92,
+       0.91
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": -0.0783633291721344
+   },
+   {
+    "t": 6.300000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.07309719920158386
+     },
+     {
+      "goal": [
+       11.15,
+       3.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.92,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.4,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.0786883533000946
+     },
+     {
+      "goal": [
+       11.15,
+       3.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.92,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.5,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.08615389466285706
+     },
+     {
+      "goal": [
+       11.15,
+       3.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.92,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.6000000000000005,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.09761449694633484
+     },
+     {
+      "goal": [
+       11.15,
+       3.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.92,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.2113085687160492
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 7.0,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.03698095679283142
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.18407359719276428
+     },
+     {
+      "goal": [
+       11.02,
+       4.27
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 7.9,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.67,
+       2.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.12170615792274475
+     },
+     {
+      "goal": [
+       11.11,
+       3.98
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10430136322975159
+     },
+     {
+      "goal": [
+       11.94,
+       1.07
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.2169468104839325
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.0,
+    "a_route_obstacles": 7,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.67,
+       2.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11443004012107849
+     },
+     {
+      "goal": [
+       11.94,
+       1.07
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.09071585536003113
+     },
+     {
+      "goal": [
+       11.11,
+       3.98
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.09741804003715515
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.1,
+    "a_route_obstacles": 7,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.65,
+       2.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.12084975838661194
+     },
+     {
+      "goal": [
+       11.94,
+       1.07
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07318612933158875
+     },
+     {
+      "goal": [
+       11.11,
+       3.98
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.020871013402938843
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.200000000000001,
+    "a_route_obstacles": 7,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.65,
+       2.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10981306433677673
+     },
+     {
+      "goal": [
+       11.94,
+       1.07
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10964509844779968
+     },
+     {
+      "goal": [
+       11.11,
+       3.98
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.10792234539985657
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.3,
+    "a_route_obstacles": 7,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0916464626789093
+     },
+     {
+      "goal": [
+       11.21,
+       3.89
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.96,
+       0.9
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.014331072568893433
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.700000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.42,
+       3.32
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.04036453366279602
+     },
+     {
+      "goal": [
+       11.86,
+       -1.49
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.11925478279590607
+     },
+     {
+      "goal": [
+       11.82,
+       1.87
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.1471041738986969
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.8,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.89,
+       -1.34
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.04534909129142761
+     },
+     {
+      "goal": [
+       11.36,
+       3.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.06470194458961487
+     },
+     {
+      "goal": [
+       11.76,
+       2.11
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.14630398154258728
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.9,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.9,
+       -1.19
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.05491635203361511
+     },
+     {
+      "goal": [
+       11.36,
+       3.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.13133350014686584
+     },
+     {
+      "goal": [
+       11.98,
+       0.35
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.100000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.93,
+       -1.05
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.08439955115318298
+     },
+     {
+      "goal": [
+       11.28,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.013048037886619568
+     },
+     {
+      "goal": [
+       11.75,
+       2.2
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.200000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.93,
+       -1.05
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.06233528256416321
+     },
+     {
+      "goal": [
+       11.28,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.05559268593788147
+     },
+     {
+      "goal": [
+       11.98,
+       0.47
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.600000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.005707994103431702
+     },
+     {
+      "goal": [
+       11.93,
+       -1.05
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.018445655703544617
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.700000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.00907847285270691
+     },
+     {
+      "goal": [
+       11.76,
+       2.22
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.8,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.008725911378860474
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.9,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.017233580350875854
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.21505382657051086
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.0,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.009298533201217651
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.100000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.01984313130378723
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22033652663230896
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.200000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.0015076100826263428
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.1682961881160736
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.3,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.00636640191078186
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.4,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.012534648180007935
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.5,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0235043466091156
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22060206532478333
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.600000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.012271374464035034
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.700000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.26,
+       3.73
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.011160999536514282
+     },
+     {
+      "goal": [
+       7.29,
+       1.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.75,
+       2.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": null
+   }
+  ]
+ },
+ {
+  "seed": 1,
+  "level": "L4",
+  "a": "success",
+  "goalflow": "stopped",
+  "stalled_scans": 21,
+  "share_scans_a_route_among_goals": 0.2857142857142857,
+  "median_best_clearance_any_goal": 0.1870887279510498,
+  "median_best_clearance_on_a_route": 0.1977686882019043,
+  "scans": [
+   {
+    "t": 3.7,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       12.0,
+       0.12
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.0128975510597229
+     },
+     {
+      "goal": [
+       11.25,
+       3.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     },
+     {
+      "goal": [
+       11.83,
+       1.69
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.25
+     }
+    ],
+    "best_clearance_on_a_route": -0.0128975510597229
+   },
+   {
+    "t": 4.5,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       11.99,
+       0.37
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07552522420883179
+     },
+     {
+      "goal": [
+       10.95,
+       -4.21
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.1545884907245636
+     },
+     {
+      "goal": [
+       11.87,
+       -1.15
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07940024137496948
+     }
+    ],
+    "best_clearance_on_a_route": 0.1545884907245636
+   },
+   {
+    "t": 4.6000000000000005,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.9,
+       -4.44
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.25951746106147766
+     },
+     {
+      "goal": [
+       11.98,
+       0.63
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0719115138053894
+     },
+     {
+      "goal": [
+       11.81,
+       -1.33
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11074519157409668
+     }
+    ],
+    "best_clearance_on_a_route": 0.25951746106147766
+   },
+   {
+    "t": 4.7,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.9,
+       -4.44
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.19944053888320923
+     },
+     {
+      "goal": [
+       11.97,
+       0.8
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07895392179489136
+     },
+     {
+      "goal": [
+       11.82,
+       -1.52
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.14818331599235535
+     }
+    ],
+    "best_clearance_on_a_route": 0.19944053888320923
+   },
+   {
+    "t": 4.800000000000001,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       10.95,
+       -4.4
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.19748759269714355
+     },
+     {
+      "goal": [
+       11.97,
+       0.7
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.14624899625778198
+     },
+     {
+      "goal": [
+       11.5,
+       -2.93
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": -0.22499999403953552
+     }
+    ],
+    "best_clearance_on_a_route": 0.19748759269714355
+   },
+   {
+    "t": 4.9,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.20298290252685547
+     },
+     {
+      "goal": [
+       10.9,
+       -4.44
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.19804978370666504
+     },
+     {
+      "goal": [
+       11.96,
+       0.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.16103434562683105
+     }
+    ],
+    "best_clearance_on_a_route": 0.19804978370666504
+   },
+   {
+    "t": 5.0,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1978340446949005
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1978340446949005
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1978340446949005
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.1000000000000005,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1768898069858551
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1768898069858551
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1768898069858551
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.2,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18124616146087646
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18124616146087646
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18124616146087646
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.300000000000001,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18413317203521729
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18413317203521729
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18413317203521729
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.4,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18654358386993408
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18654358386993408
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18654358386993408
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.5,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.6000000000000005,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.7,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.800000000000001,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 5.9,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.0,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.1000000000000005,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.2,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.300000000000001,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 6.4,
+    "a_route_obstacles": 6,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1870887279510498
+     }
+    ],
+    "best_clearance_on_a_route": null
+   }
+  ]
+ },
+ {
+  "seed": 18,
+  "level": "L4",
+  "a": "success",
+  "goalflow": "stopped",
+  "stalled_scans": 21,
+  "share_scans_a_route_among_goals": 0.0,
+  "median_best_clearance_any_goal": 0.3447095453739166,
+  "median_best_clearance_on_a_route": null,
+  "scans": [
+   {
+    "t": 8.700000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.99,
+       0.22
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.20539525151252747
+     },
+     {
+      "goal": [
+       11.83,
+       1.74
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.1803869903087616
+     },
+     {
+      "goal": [
+       11.47,
+       3.2
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.04447713494300842
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.9,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.99,
+       0.1
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.2610761225223541
+     },
+     {
+      "goal": [
+       11.82,
+       1.64
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.2565450966358185
+     },
+     {
+      "goal": [
+       11.9,
+       -1.41
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.2695598900318146
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.0,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.96,
+       0.68
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.28861621022224426
+     },
+     {
+      "goal": [
+       11.96,
+       -0.84
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.28861621022224426
+     },
+     {
+      "goal": [
+       11.76,
+       2.22
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.21568551659584045
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.1,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       12.0,
+       -0.04
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.30035462975502014
+     },
+     {
+      "goal": [
+       11.88,
+       1.49
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.28298988938331604
+     },
+     {
+      "goal": [
+       11.88,
+       -1.54
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.30035462975502014
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.5,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3214919865131378
+     },
+     {
+      "goal": [
+       12.0,
+       -0.24
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3214919865131378
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3214919865131378
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.600000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.93,
+       -1.17
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3290390074253082
+     },
+     {
+      "goal": [
+       11.98,
+       0.35
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3290390074253082
+     },
+     {
+      "goal": [
+       11.64,
+       -2.69
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3290390074253082
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.700000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.86,
+       -1.65
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.33740535378456116
+     },
+     {
+      "goal": [
+       11.99,
+       -0.1
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.33740535378456116
+     },
+     {
+      "goal": [
+       11.49,
+       -3.15
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.33740535378456116
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.8,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.88,
+       -1.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3419828712940216
+     },
+     {
+      "goal": [
+       11.98,
+       -0.01
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3424578011035919
+     },
+     {
+      "goal": [
+       11.83,
+       1.5
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3424578011035919
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.9,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.88,
+       -1.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.34281912446022034
+     },
+     {
+      "goal": [
+       11.98,
+       -0.01
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3439619839191437
+     },
+     {
+      "goal": [
+       11.83,
+       1.5
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.34460869431495667
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.0,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.88,
+       -1.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3382999002933502
+     },
+     {
+      "goal": [
+       11.98,
+       -0.01
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.34227630496025085
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3394140303134918
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.100000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3448045551776886
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3448045551776886
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.34010592103004456
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.200000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3447095453739166
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.33687976002693176
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3447095453739166
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.3,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.33912983536720276
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.4,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3419729769229889
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.5,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.340849906206131
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.600000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.339753657579422
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.700000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.33901360630989075
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.8,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3396205008029938
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.9,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3404288589954376
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.0,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3390794098377228
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.100000000000001,
+    "a_route_obstacles": 3,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     },
+     {
+      "goal": [
+       7.49,
+       0.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3393118679523468
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.344750314950943
+     }
+    ],
+    "best_clearance_on_a_route": null
+   }
+  ]
+ },
+ {
+  "seed": 28,
+  "level": "L4",
+  "a": "success",
+  "goalflow": "stopped",
+  "stalled_scans": 22,
+  "share_scans_a_route_among_goals": 0.0,
+  "median_best_clearance_any_goal": 0.12972506880760193,
+  "median_best_clearance_on_a_route": null,
+  "scans": [
+   {
+    "t": 6.800000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.9,
+       0.9
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10452386736869812
+     },
+     {
+      "goal": [
+       11.71,
+       2.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.22499999403953552
+     },
+     {
+      "goal": [
+       11.9,
+       0.9
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10191825032234192
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 7.7,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.73,
+       1.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10794225335121155
+     },
+     {
+      "goal": [
+       11.2,
+       3.36
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.13253965973854065
+     },
+     {
+      "goal": [
+       11.97,
+       0.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.06639277935028076
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.200000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.69,
+       2.33
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.054258137941360474
+     },
+     {
+      "goal": [
+       11.14,
+       3.74
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.0664200484752655
+     },
+     {
+      "goal": [
+       11.93,
+       0.82
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.011710762977600098
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.3,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.65,
+       2.56
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.003453165292739868
+     },
+     {
+      "goal": [
+       11.09,
+       3.95
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.07329091429710388
+     },
+     {
+      "goal": [
+       11.94,
+       1.07
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10626682639122009
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.4,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.010391980409622192
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.13101384043693542
+     },
+     {
+      "goal": [
+       10.91,
+       4.23
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.04378053545951843
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.5,
+    "a_route_obstacles": 5,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.32,
+       3.42
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0006219446659088135
+     },
+     {
+      "goal": [
+       11.8,
+       1.95
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07731357216835022
+     },
+     {
+      "goal": [
+       10.72,
+       4.79
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.14408764243125916
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.6,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.37,
+       3.36
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.015072494745254517
+     },
+     {
+      "goal": [
+       11.79,
+       1.9
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.12843629717826843
+     },
+     {
+      "goal": [
+       10.67,
+       4.77
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.10069665312767029
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.700000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.42,
+       3.22
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.010088473558425903
+     },
+     {
+      "goal": [
+       11.85,
+       1.76
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.06928786635398865
+     },
+     {
+      "goal": [
+       10.82,
+       4.62
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.11719682812690735
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.8,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.46,
+       3.11
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.0020326077938079834
+     },
+     {
+      "goal": [
+       11.85,
+       1.65
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.09222874045372009
+     },
+     {
+      "goal": [
+       10.85,
+       4.5
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.08484813570976257
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 8.9,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.51,
+       2.96
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.020464807748794556
+     },
+     {
+      "goal": [
+       11.88,
+       1.49
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10719683766365051
+     },
+     {
+      "goal": [
+       10.87,
+       4.32
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.018258124589920044
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.0,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.025011688470840454
+     },
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.14218655228614807
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11759135127067566
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.1,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.029437750577926636
+     },
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07070043683052063
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.13852360844612122
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.200000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.14187201857566833
+     },
+     {
+      "goal": [
+       11.64,
+       2.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.047179073095321655
+     },
+     {
+      "goal": [
+       11.09,
+       3.95
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.024881035089492798
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.3,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.14869424700737
+     },
+     {
+      "goal": [
+       11.64,
+       2.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.04211583733558655
+     },
+     {
+      "goal": [
+       11.09,
+       3.95
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.026672273874282837
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.4,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.17724773287773132
+     },
+     {
+      "goal": [
+       11.64,
+       2.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.048952311277389526
+     },
+     {
+      "goal": [
+       11.09,
+       3.95
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": -0.021184295415878296
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.5,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11395850777626038
+     },
+     {
+      "goal": [
+       11.64,
+       2.53
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.043884485960006714
+     },
+     {
+      "goal": [
+       11.93,
+       1.04
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.09499940276145935
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.600000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18243572115898132
+     },
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.026554971933364868
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.10432478785514832
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.700000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.16351231932640076
+     },
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.019621223211288452
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11021503806114197
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.8,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18243572115898132
+     },
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.017121940851211548
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11412200331687927
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 9.9,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.14108482003211975
+     },
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.027885109186172485
+     },
+     {
+      "goal": [
+       11.9,
+       1.37
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.07886376976966858
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.0,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.12731853127479553
+     },
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.023146837949752808
+     },
+     {
+      "goal": [
+       11.88,
+       1.39
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.11804327368736267
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 10.100000000000001,
+    "a_route_obstacles": 4,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       10.3,
+       0.91
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.12242898344993591
+     },
+     {
+      "goal": [
+       11.55,
+       2.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.020013779401779175
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18243572115898132
+     }
+    ],
+    "best_clearance_on_a_route": null
+   }
+  ]
+ },
+ {
+  "seed": 32,
+  "level": "L4",
+  "a": "success",
+  "goalflow": "stopped",
+  "stalled_scans": 21,
+  "share_scans_a_route_among_goals": 0.8095238095238095,
+  "median_best_clearance_any_goal": 0.4571695327758789,
+  "median_best_clearance_on_a_route": 0.4571695327758789,
+  "scans": [
+   {
+    "t": 11.0,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.55,
+       -2.83
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.2915668487548828
+     },
+     {
+      "goal": [
+       11.88,
+       -1.36
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.4396148920059204
+     },
+     {
+      "goal": [
+       10.95,
+       -4.21
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.2007962465286255
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.200000000000001,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.47,
+       -3.09
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3012099266052246
+     },
+     {
+      "goal": [
+       11.85,
+       -1.64
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.39431142807006836
+     },
+     {
+      "goal": [
+       10.88,
+       -4.54
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.18208706378936768
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.5,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       11.66,
+       -2.41
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3923649787902832
+     },
+     {
+      "goal": [
+       11.95,
+       -0.94
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.4238474369049072
+     },
+     {
+      "goal": [
+       11.13,
+       -3.85
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.3489811420440674
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.600000000000001,
+    "a_route_obstacles": 1,
+    "a_route_among_goals": false,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.4412810802459717
+     },
+     {
+      "goal": [
+       11.73,
+       -2.16
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.40259993076324463
+     },
+     {
+      "goal": [
+       11.98,
+       -0.66
+      ],
+      "follows_a_route": false,
+      "best_true_clearance": 0.43398070335388184
+     }
+    ],
+    "best_clearance_on_a_route": null
+   },
+   {
+    "t": 11.700000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.44409072399139404
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.44409072399139404
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.44409072399139404
+     }
+    ],
+    "best_clearance_on_a_route": 0.44409072399139404
+   },
+   {
+    "t": 11.8,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4473104476928711
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4473104476928711
+     },
+     {
+      "goal": [
+       0.96,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4473104476928711
+     }
+    ],
+    "best_clearance_on_a_route": 0.4473104476928711
+   },
+   {
+    "t": 11.9,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.44956648349761963
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.44956648349761963
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.44956648349761963
+     }
+    ],
+    "best_clearance_on_a_route": 0.44956648349761963
+   },
+   {
+    "t": 12.0,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.24,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4542069435119629
+     },
+     {
+      "goal": [
+       0.24,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4542069435119629
+     },
+     {
+      "goal": [
+       0.24,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4542069435119629
+     }
+    ],
+    "best_clearance_on_a_route": 0.4542069435119629
+   },
+   {
+    "t": 12.100000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4561898708343506
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4561898708343506
+     },
+     {
+      "goal": [
+       0.54,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4561898708343506
+     }
+    ],
+    "best_clearance_on_a_route": 0.4561898708343506
+   },
+   {
+    "t": 12.200000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.24,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.45707571506500244
+     },
+     {
+      "goal": [
+       0.24,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.45707571506500244
+     },
+     {
+      "goal": [
+       0.24,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.45707571506500244
+     }
+    ],
+    "best_clearance_on_a_route": 0.45707571506500244
+   },
+   {
+    "t": 12.3,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4572713375091553
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4572713375091553
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4572713375091553
+     }
+    ],
+    "best_clearance_on_a_route": 0.4572713375091553
+   },
+   {
+    "t": 12.4,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 12.5,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 12.600000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 12.700000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 12.8,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 12.9,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 13.0,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 13.100000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 13.200000000000001,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   },
+   {
+    "t": 13.3,
+    "a_route_obstacles": 0,
+    "a_route_among_goals": true,
+    "per_goal": [
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       1.5,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     },
+     {
+      "goal": [
+       0.0,
+       0.0
+      ],
+      "follows_a_route": true,
+      "best_true_clearance": 0.4571695327758789
+     }
+    ],
+    "best_clearance_on_a_route": 0.4571695327758789
+   }
+  ]
+ }
+]

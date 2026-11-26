@@ -1,0 +1,98 @@
+[
+ {
+  "seed": 1,
+  "outcome": "collision",
+  "brake_scans": 13,
+  "brake_scans_with_truly_clear": 8,
+  "blocking_hits": {
+   "current": {
+    "on": 0,
+    "displaced": 10,
+    "clutter": 1
+   },
+   "remembered": {
+    "on": 0,
+    "displaced": 7,
+    "clutter": 9
+   }
+  },
+  "near_obstacle_scans": 21,
+  "min_hits_per_near_obstacle": 1,
+  "median_hits_per_near_obstacle": 25.0,
+  "near_obstacle_scans_failing_rule": 0,
+  "near_clutter_hits": 8,
+  "near_clutter_hits_passing_rule": 8
+ },
+ {
+  "seed": 18,
+  "outcome": "stopped",
+  "brake_scans": 20,
+  "brake_scans_with_truly_clear": 20,
+  "blocking_hits": {
+   "current": {
+    "on": 0,
+    "displaced": 0,
+    "clutter": 0
+   },
+   "remembered": {
+    "on": 0,
+    "displaced": 51,
+    "clutter": 76
+   }
+  },
+  "near_obstacle_scans": 18,
+  "min_hits_per_near_obstacle": 1,
+  "median_hits_per_near_obstacle": 30.5,
+  "near_obstacle_scans_failing_rule": 0,
+  "near_clutter_hits": 5,
+  "near_clutter_hits_passing_rule": 4
+ },
+ {
+  "seed": 28,
+  "outcome": "stopped",
+  "brake_scans": 26,
+  "brake_scans_with_truly_clear": 7,
+  "blocking_hits": {
+   "current": {
+    "on": 1,
+    "displaced": 6,
+    "clutter": 0
+   },
+   "remembered": {
+    "on": 0,
+    "displaced": 0,
+    "clutter": 15
+   }
+  },
+  "near_obstacle_scans": 35,
+  "min_hits_per_near_obstacle": 1,
+  "median_hits_per_near_obstacle": 13.0,
+  "near_obstacle_scans_failing_rule": 1,
+  "near_clutter_hits": 8,
+  "near_clutter_hits_passing_rule": 8
+ },
+ {
+  "seed": 32,
+  "outcome": "stopped",
+  "brake_scans": 20,
+  "brake_scans_with_truly_clear": 20,
+  "blocking_hits": {
+   "current": {
+    "on": 0,
+    "displaced": 0,
+    "clutter": 0
+   },
+   "remembered": {
+    "on": 0,
+    "displaced": 0,
+    "clutter": 60
+   }
+  },
+  "near_obstacle_scans": 13,
+  "min_hits_per_near_obstacle": 3,
+  "median_hits_per_near_obstacle": 27.0,
+  "near_obstacle_scans_failing_rule": 0,
+  "near_clutter_hits": 35,
+  "near_clutter_hits_passing_rule": 33
+ }
+]
