@@ -418,6 +418,28 @@ hit points (exact distances), then re-rollout. Both run the same 80-episode smok
 winner is the one with the fewest stalls + collisions on feasible scenes, ties to fewer collisions; if neither beats
 the step-2 variant, the step-2 variant is kept. MPPI refinement (Part C item 16) only if both fail.
 
+### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
+
+**Change.** The closed-loop noise model's odometry drift was a time-based random walk: every replan (10 Hz) added
+N(0, drift_xy) to x and y and N(0, drift_yaw) to the heading, whatever the car did. It now scales with the distance
+driven since the previous replan: each increment is multiplied by sqrt(ds / 0.30 m), so the variance grows in
+proportion to distance. **Calibration:** 0.30 m is one replan at 3 m/s, so at cruising speed the drift per scan
+equals the old value and each noise level keeps its meaning; only slow and stopped driving change (a stopped car
+no longer drifts). Same random draws as before (the streams stay aligned); only their scale changes.
+**Reason.** With the time-based walk a car crawling at 0.5 m/s accrued ~6x more drift per metre than at 3 m/s, and a
+stopped car kept drifting; real wheel odometry error grows with distance. The GoalFlow filter memory exposed it:
+80-100% of the remembered points blocking truly clear candidates at the L4 stalls had drifted while moving slowly,
+and at seed 1 drifted points (median 0.28 m off the true surface) let a path through a remembered cone
+(`reports/lidar_demo/l3_goalflow/diagnose_drift_exposure.json`). A zero-velocity update was rejected: it would
+remove at most ~15-20% of that drift.
+**Scope.** Applies to every planner (corridor baselines and GoalFlow). The baselines (a)-(d) are rerun at L1-L4
+(L0 has no drift); the old L1-L4 tables stay, labelled "time-based drift". Training data is **not** regenerated:
+drift affects only map-derived inputs there (the goal line and the track-relative ego status), and the shards
+used the time-based model. `run_episode(drift_per_distance=False)` reproduces the old model (the 50e9ad9 planner
+regression test uses it).
+**Real-car lesson.** The filter memory is only as good as the odometry: on Juno it needs wheel odometry + IMU in the
+EKF (the ZED visual odometry read 10-60% low).
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

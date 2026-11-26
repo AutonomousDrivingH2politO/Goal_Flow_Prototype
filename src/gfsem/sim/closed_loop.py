@@ -115,7 +115,12 @@ def side_signature(path_w: np.ndarray, centres: np.ndarray, s_obs: np.ndarray, s
 
 
 def run_episode(scene: Scene, planner: Planner, noise: NoiseLevel | str = "L0", cfg: SimConfig | None = None,
-                noise_seed: int | None = None, record: bool = False, start=(0.0, 0.0, 0.0)) -> EpisodeResult:
+                noise_seed: int | None = None, record: bool = False, start=(0.0, 0.0, 0.0),
+                drift_per_distance: bool = True, drift_ref_ds: float = 0.30) -> EpisodeResult:
+    """``drift_per_distance`` (default, 2026-11-26): each per-replan odometry-drift increment is scaled by
+    sqrt(ds / ``drift_ref_ds``) with ds the distance driven since the previous replan, so drift variance grows with
+    distance; 0.30 m = one replan at 3 m/s, where the drift equals the old time-based value. False = the old
+    time-based random walk (same draws, unscaled)."""
     cfg = cfg or SimConfig()
     noise = NOISE_LEVELS[noise] if isinstance(noise, str) else noise
     veh, ctl, track = cfg.vehicle, cfg.control, scene.track
@@ -127,6 +132,7 @@ def run_episode(scene: Scene, planner: Planner, noise: NoiseLevel | str = "L0", 
     p0 = track.pose(*start)
     st = VehicleState(p0[0], p0[1], p0[2], cfg.scene.spawn_speed, 0.0)
     drift = np.zeros(3)
+    last_replan_xy = None
     path_odom = np.zeros((0, 3))
     idx = 0
     v_cmd = cfg.scene.target_speed
@@ -151,8 +157,13 @@ def run_episode(scene: Scene, planner: Planner, noise: NoiseLevel | str = "L0", 
         true_pose = st.pose
         if k % ctl.replan_every == 0:
             if noise.drift_xy > 0 or noise.drift_yaw_deg > 0:
-                drift = drift + np.array([rng_drift.normal(0, noise.drift_xy), rng_drift.normal(0, noise.drift_xy),
-                                          rng_drift.normal(0, math.radians(noise.drift_yaw_deg))])
+                inc = np.array([rng_drift.normal(0, noise.drift_xy), rng_drift.normal(0, noise.drift_xy),
+                                rng_drift.normal(0, math.radians(noise.drift_yaw_deg))])
+                if drift_per_distance:
+                    ds = float(np.hypot(*(true_pose[:2] - last_replan_xy))) if last_replan_xy is not None else 0.0
+                    inc = inc * math.sqrt(ds / drift_ref_ds)
+                drift = drift + inc
+            last_replan_xy = true_pose[:2].copy()
             belief = true_pose + drift
             yaw_rate = st.v * math.tan(st.steer) / veh.wheelbase
             obs = scan(scene, true_pose, noise, rng_scan, cfg.lidar, belief=belief,
