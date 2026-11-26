@@ -431,6 +431,10 @@ reported, not used to choose.
 episodes), L4 run with the distance-proportional drift; the L0 halves already run are reused (no drift at L0, so
 identical under either drift model). Lowest score wins; ties go to fewer collisions; a remaining tie keeps
 `goalflow_l3_exact`. The winner is the GoalFlow variant for the full run.
+**Result:** exact L0 37/0/2/0, L4 27/0/12/0 (score 14); jitter 38/0/1/0, 23/0/16/0 (17); refine 36/0/3/0, 28/0/11/0
+(14) (success / collision / stalled / exit, feasible scenes). Exact and refine tie at 14 with 0 collisions each, so
+the rule keeps **`goalflow_l3_exact`** for the full run. Note: at L4 its stalls rose from 8 (time-based drift) to 12
+with the distance-proportional drift; the drift fix did not remove the L4 stalls.
 
 ### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
 
