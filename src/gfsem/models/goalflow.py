@@ -85,8 +85,9 @@ def hits_distance(hits: torch.Tensor) -> torch.Tensor:
 def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 0.12,
                              max_step: float = 0.2) -> torch.Tensor:
     """(B, M) bool: exact check. Juno's box along each executed path (poses densified to <= ``max_step`` m, headings
-    forward-filled) vs every hit point (points[b]: (N_b, 2) ego frame; current hits plus remembered stored points):
-    flagged if the box-to-point distance is below ``margin``. No cells, no circle cover."""
+    forward-filled) vs every hit point (points[b]: (N_b, 2) ego frame; current hits plus remembered stored points), or
+    every circle (points[b]: (N_b, 3) with the radius in the third column; distance to the circle surface): flagged
+    if the box-to-point distance is below ``margin``. No cells, no circle cover."""
     from ..sim.config import VehicleConfig
     veh = VehicleConfig.from_yaml()
     x0, x1 = veh.body_x
@@ -105,12 +106,14 @@ def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 
     for k in range(1, yaw.shape[2]):
         yaw[..., k] = torch.where(torch.isnan(yaw[..., k]), yaw[..., k - 1], yaw[..., k])
     out = torch.zeros(B, M, dtype=torch.bool, device=paths.device)
-    reach = math.hypot(max(abs(x0), abs(x1)), h) + margin
+    reach = math.hypot(max(abs(x0), abs(x1)), h) + margin + 0.5          # + max obstacle radius
     for b in range(B):
         pts = points[b]
         if pts is None or len(pts) == 0:
             continue
         pts = torch.as_tensor(pts, dtype=paths.dtype, device=paths.device)
+        rad = pts[:, 2] if pts.shape[1] > 2 else torch.zeros(len(pts), dtype=paths.dtype, device=paths.device)
+        pts = pts[:, :2]
         q, c, s_ = Q[b], torch.cos(yaw[b]), torch.sin(yaw[b])                     # (M, K, 2), (M, K)
         near = ((q[:, :, None, :] - pts[None, None]).norm(dim=-1) <= reach + max(abs(x0), abs(x1)))
         if not near.any():
@@ -118,7 +121,7 @@ def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 
         dx = pts[None, None, :, 0] - q[..., 0:1]
         dy = pts[None, None, :, 1] - q[..., 1:2]
         lx, ly = c[..., None] * dx + s_[..., None] * dy, -s_[..., None] * dx + c[..., None] * dy
-        dist = torch.hypot(lx - lx.clamp(x0, x1), ly - ly.clamp(-h, h))           # 0 inside the box
+        dist = torch.hypot(lx - lx.clamp(x0, x1), ly - ly.clamp(-h, h)) - rad      # to the point / circle surface
         out[b] = ((dist < margin) & near).flatten(1).any(1)
     return out
 

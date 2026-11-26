@@ -61,7 +61,8 @@ class GoalFlowPlanner:
                  M: int = 128, goal_K: int = 3, speed: float = 3.0, seed: int = 0, memory_range: float = 4.0,
                  memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1,
                  visibility_gate: bool = False, memory_obs_range: float = 4.0, exact_filter: bool = False,
-                 safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0):
+                 safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0,
+                 circle_filter: bool = False, circle_gate: float = 0.6):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
@@ -73,6 +74,7 @@ class GoalFlowPlanner:
         self.memory_obs_range = memory_obs_range      # > 0: only hits observed within this range of the sensor
         self.exact_filter, self.safety_margin = exact_filter, safety_margin
         self.goal_jitter, self.refine_steps = goal_jitter, refine_steps
+        self.circle_filter, self.circle_gate = circle_filter, circle_gate
         from ..sim.config import VehicleConfig
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
@@ -84,6 +86,7 @@ class GoalFlowPlanner:
         self.last = {}
         self.cells: dict[tuple[int, int], list] = {}      # odom cell -> [scans hit, x, y] (believed odom frame)
         self.mem: list[tuple[float, np.ndarray]] = []     # remembered points used at the last scan (diagnostics)
+        self.circ: list[list] = []                        # circle memory: [x, y, r, n] in the believed odom frame
 
     def _memory_hits(self, obs) -> torch.Tensor:
         """(1, H, W) hit mask: this scan's hits plus remembered cells (hit in >= min scans, ahead of the rear
@@ -132,6 +135,49 @@ class GoalFlowPlanner:
             m[i[ok], j[ok]] = 1.0
         return torch.from_numpy(m)[None].to(self.dev)
 
+    def _circles(self, obs) -> np.ndarray:
+        """(N, 3) circles (ego frame): this scan's circles (cluster_obstacles, as baseline (a)) plus remembered
+        near-field circles (observed within memory_obs_range of the sensor, centre averaged over sightings within
+        circle_gate, kept until behind the rear bumper or > memory_range away; believed odom frame)."""
+        from ..planners.corridor import CorridorConfig, cluster_obstacles
+        from ..sim.config import SceneConfig
+        from ..sim.geometry import from_frame, to_frame
+        if not hasattr(self, "_ccfg"):
+            self._ccfg, self._scfg = CorridorConfig(), SceneConfig.from_yaml()
+        pose = np.asarray(obs.pose_odom, float)
+        C, R, _ = cluster_obstacles(obs, self._ccfg, self._scfg)
+        C = np.asarray(C, float).reshape(-1, 2)
+        sx, sy = obs.sensor_xy
+        if len(C):
+            near = np.hypot(C[:, 0] - sx, C[:, 1] - sy) <= (self.memory_obs_range or 1e9)
+            W = from_frame(C, pose)
+            for (x, y), r, nr in zip(W, R, near):
+                if not nr:
+                    continue
+                best, bd = None, self.circle_gate
+                for m in self.circ:
+                    d = np.hypot(m[0] - x, m[1] - y)
+                    if d < bd:
+                        best, bd = m, d
+                if best is None:
+                    self.circ.append([x, y, float(r), 1])
+                else:                                   # running mean of the centre over sightings
+                    n = best[3]
+                    best[0] = (best[0] * n + x) / (n + 1)
+                    best[1] = (best[1] * n + y) / (n + 1)
+                    best[2] = max(best[2], float(r))
+                    best[3] = n + 1
+        rem = np.zeros((0, 3))
+        if self.circ:
+            A = np.array(self.circ, float)
+            loc = to_frame(A[:, :2], pose)
+            keep = loc[:, 0] >= self.rear_x
+            self.circ = [c for c, k_ in zip(self.circ, keep) if k_]
+            use = keep & (np.hypot(loc[:, 0], loc[:, 1]) <= self.memory_range)
+            rem = np.c_[loc[use], A[use, 2]]
+        cur = np.c_[C, np.asarray(R, float)] if len(C) else np.zeros((0, 3))
+        return np.concatenate([cur, rem]) if len(rem) else cur
+
     @torch.no_grad()
     def plan(self, obs, scene, true_pose, state):
         t0 = time.perf_counter()
@@ -139,7 +185,11 @@ class GoalFlowPlanner:
         bev = torch.from_numpy(rasterize(obs, self.rc))[None].to(self.dev)
         ego = torch.from_numpy(np.asarray(obs.ego_state, np.float32))[None].to(self.dev)
         hits = self._memory_hits(obs) if self.memory_range > 0 else None
-        if self.exact_filter:
+        if self.circle_filter:
+            self.filter_points = self._circles(obs)
+            r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True,
+                                safety_points=[self.filter_points], safety_margin=self.safety_margin)
+        elif self.exact_filter:
             if hits is None:
                 self.filter_points = np.asarray(obs.points, float).reshape(-1, 2)
             r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True,

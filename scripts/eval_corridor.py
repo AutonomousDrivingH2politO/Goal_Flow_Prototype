@@ -47,6 +47,7 @@ LABELS = {
     "goalflow_l3_exact": "GoalFlow, closed loop (goalflow_l3 + exact box-to-point safety filter, 0.12 m)",
     "goalflow_l3_exact_jitter": "GoalFlow, closed loop (exact filter + goal jitter +-0.3 m)",
     "goalflow_l3_exact_refine": "GoalFlow, closed loop (exact filter + 8 gradient steps when no candidate is safe)",
+    "goalflow_l3_circles": "GoalFlow, closed loop (exact 0.12 m filter against fitted obstacle circles + circle memory)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -80,7 +81,8 @@ def make_planner(name: str):
                    "goalflow_l3_visgate": dict(visibility_gate=True, memory_obs_range=0.0),   # lost the rule
                    "goalflow_l3_exact": dict(exact_filter=True, safety_margin=0.12),        # exact box-to-point filter
                    "goalflow_l3_exact_jitter": dict(exact_filter=True, safety_margin=0.12, goal_jitter=0.3),
-                   "goalflow_l3_exact_refine": dict(exact_filter=True, safety_margin=0.12, refine_steps=8)}
+                   "goalflow_l3_exact_refine": dict(exact_filter=True, safety_margin=0.12, refine_steps=8),
+                   "goalflow_l3_circles": dict(circle_filter=True, safety_margin=0.12)}   # circles, as baseline (a)
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
         if _GF is None:
             from gfsem.planners.goalflow_planner import GoalFlowPlanner
