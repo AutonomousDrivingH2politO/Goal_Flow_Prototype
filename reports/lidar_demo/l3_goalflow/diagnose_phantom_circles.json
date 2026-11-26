@@ -1,0 +1,90 @@
+[
+ {
+  "seed": 4,
+  "outcome": "stopped",
+  "scans": 55,
+  "circles": 804,
+  "phantoms": 244,
+  "blocking": 19,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 19
+ },
+ {
+  "seed": 11,
+  "outcome": "stopped",
+  "scans": 20,
+  "circles": 265,
+  "phantoms": 84,
+  "blocking": 20,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 20
+ },
+ {
+  "seed": 17,
+  "outcome": "stopped",
+  "scans": 34,
+  "circles": 503,
+  "phantoms": 161,
+  "blocking": 8,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 8
+ },
+ {
+  "seed": 18,
+  "outcome": "stopped",
+  "scans": 20,
+  "circles": 247,
+  "phantoms": 107,
+  "blocking": 20,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 20
+ },
+ {
+  "seed": 23,
+  "outcome": "stopped",
+  "scans": 21,
+  "circles": 164,
+  "phantoms": 96,
+  "blocking": 20,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 20
+ },
+ {
+  "seed": 28,
+  "outcome": "stopped",
+  "scans": 122,
+  "circles": 1460,
+  "phantoms": 490,
+  "blocking": 36,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 36
+ },
+ {
+  "seed": 32,
+  "outcome": "stopped",
+  "scans": 20,
+  "circles": 125,
+  "phantoms": 82,
+  "blocking": 20,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 20
+ },
+ {
+  "seed": 36,
+  "outcome": "stopped",
+  "scans": 30,
+  "circles": 484,
+  "phantoms": 147,
+  "blocking": 42,
+  "blocking_phantom": 0,
+  "blocking_phantom_1sight": 0,
+  "blocking_real": 42
+ }
+]

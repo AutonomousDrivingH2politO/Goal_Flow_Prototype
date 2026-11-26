@@ -450,6 +450,12 @@ only, no time limit. **Rule:** 80-episode smoke test (seeds 0-39, L0 and L4; L4 
 drift; L0 is rerun because the filter changes L0 too), score = stalls + collisions on feasible scenes, compared with
 `goalflow_l3_exact` (score 14); lower wins, ties to fewer collisions, otherwise `goalflow_l3_exact` is kept. Full run
 only after that, on Can's go.
+**Result:** circles L0 36/0/3/0, L4 31/0/8/0 (score 11, 0 collisions; brake 2.9% / 7.5%, 215 ms per replan) vs exact
+14 -> the rule picks **`goalflow_l3_circles`**. L4 still trails (a) on these seeds (37/1/1/0). Phantom check on the 8
+L4 stalls (`diagnose_phantom_circles.json`): 30-65% of the filter's circles are phantoms (no true obstacle within
+0.5 m), but none of the circles blocking truly clear candidates is a phantom; every blocker is a real obstacle's
+fitted circle, slightly off the true disc, against candidates that clear the truth by only a little. A 2-sighting
+rule would not remove these stalls; the remaining lever is candidate margin.
 
 ### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
 
