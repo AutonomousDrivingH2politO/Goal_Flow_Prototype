@@ -429,6 +429,8 @@ waypoint jitter: a 3 cm lateral wiggle at 0.75 m spacing already implies about Î
   0.34) confirmed the validation finding. Its numbers can no longer count as held-out. The split is
   frozen (kept, never re-read for any choice), and **before L4 a fresh test set is generated with
   new, disjoint scene seeds**; every final number in L4 comes from that set, read once at the end.
+  **Fresh test seeds (decided 2026-11-26): 400000+.** 300000+ is the spent L1 test split; training uses
+  100000+, validation 200000+, and closed-loop development seeds 0-499.
   Until then all comparisons (selection variants, thresholds, the shadow trigger) use validation only.
 * **Training-target mode (checked 2026-11-25).** `SimFrames` is built with `driven_only=False`
   (`train.py:453`), so each time a frame is loaded one teacher mode is drawn uniformly
