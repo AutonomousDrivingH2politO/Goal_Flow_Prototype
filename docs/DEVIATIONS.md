@@ -436,6 +436,21 @@ identical under either drift model). Lowest score wins; ties go to fewer collisi
 the rule keeps **`goalflow_l3_exact`** for the full run. Note: at L4 its stalls rose from 8 (time-based drift) to 12
 with the distance-proportional drift; the drift fix did not remove the L4 stalls.
 
+**Halo diagnosis and `goalflow_l3_circles` (pre-registered 2026-11-26, before running).** Replays of 5 of the 12 L4
+stalls (1, 13, 21, 29, 35; `reports/lidar_demo/l3_goalflow/diagnose_halo.json`): the points that block truly clear
+candidates lie a median 0.17-0.36 m outside the true obstacle surface (on the free/gap side), are 65-100%
+remembered, come from 23-80 scans per obstacle, and sit in the outer part of the scatter (above the obstacle's own
+median protrusion, but only 5-39% in its outermost decile). L4 range noise scatters raw hits and the memory keeps their
+union, so each obstacle grows a ~0.3 m halo that closes tight gaps; the corridor baseline fits circles, which
+averages the noise. **Variant:** the safety filter checks the exact 0.12 m clearance (Juno's box to the circle
+surface) against obstacle circles fitted per scan by the same `cluster_obstacles` code as baseline (a), plus a
+near-field memory of circles: circles observed within 4 m of the sensor update it (centre averaged over sightings,
+associated within 0.6 m, in the believed odom frame), kept until behind the rear bumper or > 4 m away; position
+only, no time limit. **Rule:** 80-episode smoke test (seeds 0-39, L0 and L4; L4 with the distance-proportional
+drift; L0 is rerun because the filter changes L0 too), score = stalls + collisions on feasible scenes, compared with
+`goalflow_l3_exact` (score 14); lower wins, ties to fewer collisions, otherwise `goalflow_l3_exact` is kept. Full run
+only after that, on Can's go.
+
 ### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
 
 **Change.** The closed-loop noise model's odometry drift was a time-based random walk: every replan (10 Hz) added
