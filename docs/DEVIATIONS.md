@@ -714,7 +714,9 @@ values confirmed by Can before any per-change run):**
   of its near surface; the simulator decides visibility at the near surface, so near-field cones below the lowest beam
   were dropped; seed 4: cone dropped at 2.04 m centre / 1.79 m near surface vs the 2.03 m lowest-beam reach). Fixed to the
   near surface, as the registered rule intends (b2e61a7); seeds 4 / 17 / 37 then match the reference with no collision.
-  (a2) rerun alone, same seeds and rule; both runs are reported.
+  (a2) rerun alone, same seeds and rule; both runs are reported. **(a2) rerun (09:34): 90.3% / 0 / 26 accepted, no
+  flag** (L0 94.8 / 0 / 4, L2 92.7 / 0 / 6, L4 83.3 / 0 / 16). Accepted set: (a), (c), (d), (a2); (a) flagged (L4 -2.1
+  points); the combined run (0-499 x L0-L4) waits for Can's decision on (a).
 - **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
   at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
