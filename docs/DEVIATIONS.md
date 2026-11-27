@@ -534,19 +534,31 @@ a clear drop is a sim-to-real warning and puts retraining with EMX-level data in
 **EMX mounting (analytic; height 1.10 m, vertical FOV -12/+8 deg about the pitched axis, blind zone 1.5 m, Juno's body
 front at 2.24 m from the rear axle, assuming symmetric 0.6375 m overhangs, still unmeasured):**
 
-| mount_x [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] | 0.40 m cone invisible within [m from sensor / past bumper] | lowest beam hits ground [m from sensor / past bumper] |
-|---|---|---|---|---|---|
-| 1.60 (front axle) | 7 | -19 / +1 | +0.86 | 2.03 / +1.40 | 3.19 / +2.56 |
-| 1.60 | 4 | -16 / +4 | +0.86 | 2.44 / +1.80 | 3.84 / +3.20 |
-| 1.60 | 0 | -12 / +8 | +0.86 | 3.29 / +2.66 | 5.18 / +4.54 |
-| 1.00 | 7 | -19 / +1 | +0.26 | 2.03 / +0.80 | 3.19 / +1.96 |
-| 1.00 | 4 | -16 / +4 | +0.26 | 2.44 / +1.20 | 3.84 / +2.60 |
-| 1.00 | 0 | -12 / +8 | +0.26 | 3.29 / +2.06 | 5.18 / +3.94 |
-| 0.50 | 7 | -19 / +1 | -0.24 | 2.03 / +0.30 | 3.19 / +1.46 |
-| 0.50 | 4 | -16 / +4 | -0.24 | 2.44 / +0.70 | 3.84 / +2.10 |
-| 0.50 | 0 | -12 / +8 | -0.24 | 3.29 / +1.56 | 5.18 / +3.44 |
+| mount_x [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] | 0.40 m cone invisible within [m from sensor / past bumper] | lowest beam hits ground [m from sensor / past bumper] | 0.40 m cone hit up to | 1.10 m bollard hit up to |
+|---|---|---|---|---|---|---|---|
+| 1.60 (front axle) | 10 | -22 / -2 | +0.86 | 1.73 / +1.10 | 2.72 / +2.09 | 31.5 m | 31.5 m |
+| 1.60 | 8 | -20 / +0 | +0.86 | 1.92 / +1.29 | 3.02 / +2.38 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.60 | 7 | -19 / +1 | +0.86 | 2.03 / +1.40 | 3.19 / +2.56 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.60 | 4 | -16 / +4 | +0.86 | 2.44 / +1.80 | 3.84 / +3.20 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.60 | 0 | -12 / +8 | +0.86 | 3.29 / +2.66 | 5.18 / +4.54 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.00 | 10 | -22 / -2 | +0.26 | 1.73 / +0.50 | 2.72 / +1.49 | 31.5 m | 31.5 m |
+| 1.00 | 8 | -20 / +0 | +0.26 | 1.92 / +0.69 | 3.02 / +1.78 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.00 | 7 | -19 / +1 | +0.26 | 2.03 / +0.80 | 3.19 / +1.96 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.00 | 4 | -16 / +4 | +0.26 | 2.44 / +1.20 | 3.84 / +2.60 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.00 | 0 | -12 / +8 | +0.26 | 3.29 / +2.06 | 5.18 / +3.94 | max range (200 m @10%) | max range (200 m @10%) |
+| 0.50 | 10 | -22 / -2 | -0.24 | 1.73 / -0.00 | 2.72 / +0.99 | 31.5 m | 31.5 m |
+| 0.50 | 8 | -20 / +0 | -0.24 | 1.92 / +0.19 | 3.02 / +1.28 | max range (200 m @10%) | max range (200 m @10%) |
+| 0.50 | 7 | -19 / +1 | -0.24 | 2.03 / +0.30 | 3.19 / +1.46 | max range (200 m @10%) | max range (200 m @10%) |
+| 0.50 | 4 | -16 / +4 | -0.24 | 2.44 / +0.70 | 3.84 / +2.10 | max range (200 m @10%) | max range (200 m @10%) |
+| 0.50 | 0 | -12 / +8 | -0.24 | 3.29 / +1.56 | 5.18 / +3.44 | max range (200 m @10%) | max range (200 m @10%) |
 
-Every pitch below 8 deg leaves some beams above the horizontal (+1 / +4 / +8 deg at 7 / 4 / 0 deg pitch). Mounting the
+Far coverage (geometric; height 1.1 m): at pitch <= 8 deg the top beam is at or above the horizontal, so cones and
+bollards are hit at any range (up to the sensor's 200 m @ 10% and beam density); above 8 deg every beam points down
+and nothing standing on the ground is hit beyond where the top beam meets the ground (1.1 m / tan(pitch - 8 deg): 31.5
+m at 10 deg). Every pitch below 8 deg leaves some beams above the horizontal (+1 / +4 / +8 deg at 7 / 4 / 0 deg pitch).
+**Far range needed:** a gap must be seen ~10 m before the swerve at 3 m/s, plus planning, so ~15-20 m; geometrically
+the steepest pitch that keeps 20 m is 11.1 deg (15 m: 12.2 deg), so 10 deg still meets it (31.5 m) while
+cutting the cone blind range to 1.73 m from the sensor; this ignores reflectivity and beam density at range. Mounting the
 sensor further back shrinks the blind region in front of the bumper, and more downward pitch shrinks the region where
 low cones vanish. But both cost far range and upward coverage, and at 1.10 m height a rearward sensor may have its
 near field hidden by Juno's own body (not modelled).
