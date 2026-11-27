@@ -165,6 +165,7 @@ class NoiseLevel:
     p_mis: float                 # class label flip probability
     drift_xy: float              # odom drift per replan, m (1 sigma)
     drift_yaw_deg: float         # odom drift per replan, deg (1 sigma)
+    h_step_deg: float | None = None   # horizontal ray step override (None = LidarConfig.h_step_deg, 0.2 deg)
 
 
 NOISE_LEVELS: dict[str, NoiseLevel] = {
@@ -173,7 +174,12 @@ NOISE_LEVELS: dict[str, NoiseLevel] = {
     "L2": NoiseLevel("L2", 0.05, 0.10, 0.15, 1.5, 0.15, 0.6, 0.08, 0.010, 0.10),
     "L3": NoiseLevel("L3", 0.08, 0.20, 0.30, 3.0, 0.25, 1.0, 0.12, 0.020, 0.20),
     "L4": NoiseLevel("L4", 0.12, 0.30, 0.45, 5.0, 0.40, 1.5, 0.20, 0.040, 0.40),
+    # Realistic RoboSense EMX (2026-11-26): range accuracy 5 cm @1 sigma and 0.08 deg horizontal resolution from the
+    # EMX user guide (Table 1); dropout, clutter, edge noise, class flips, drift and bearing jitter are not in the
+    # spec and use the L1 values (assumptions, DEVIATIONS). Not part of the L0-L4 ladder.
+    "EMX": NoiseLevel("EMX", 0.05, 0.05, 0.05, 0.5, 0.10, 0.3, 0.05, 0.005, 0.05, h_step_deg=0.08),
 }
+LADDER = ("L0", "L1", "L2", "L3", "L4")        # the robustness / stress levels (EMX is separate)
 
 
 @dataclass(frozen=True)

@@ -493,6 +493,64 @@ config (a) briefly ran twice into one folder because of this); (2) never two run
 `scripts/eval_corridor.py` holds `RUNNING.lock` in its output folder and refuses to start if a live process holds it;
 (3) more load on request still keeps >= 5% CPU idle, about 7 CPU-bound workers in total on the 8-core Mac.
 
+### EMX sensor level (2026-11-27)
+
+**Sensor facts (RoboSense EMX user guide, Table 1 "EMX Specifications", p. 8; generationrobots.com copy):** range
+1.5-200 m (200 m @ 10% NIST), blind zone <= 1.5 m; horizontal FOV 120 deg (-60 to +60), resolution 0.08 deg; vertical
+FOV 20 deg (-12 to +8), resolution 0.1 deg (192 lines); accuracy +-5 cm @ 1 sigma (typical); frame rate 10 Hz;
+2,880,000 pts/s. These match `LidarConfig` (blind zone 1.5 m, 120 deg, -12/+8 deg, 10 Hz), so L0-L4 are unchanged.
+A reseller's 140 deg horizontal FOV contradicts the manufacturer's guide; 120 deg is used. The guide gives 0.1 deg
+vertical resolution but no per-beam table: uniform spacing is assumed (the simulator models the vertical span as
+continuous, which 0.1 deg spacing approximates).
+
+**Preset `EMX`** (added alongside L0-L4, never replacing them; `NOISE_LEVELS["EMX"]`, not in `LADDER`):
+
+| Parameter | EMX value | Source |
+|---|---|---|
+| range noise (1 sigma) | 0.05 m | spec (accuracy +-5 cm @ 1 sigma) |
+| horizontal ray step | 0.08 deg (1,501 rays over 120 deg) | spec (horizontal resolution) |
+| vertical span | continuous, -12 to +8 deg | spec (0.1 deg over 20 deg) |
+| frame rate | 10 Hz | spec; Juno's planning rate |
+| bearing jitter | 0.05 deg | **assumption** (L1 value) |
+| point dropout | 5% | **assumption** (L1) |
+| clutter | 0.5 clusters / scan | **assumption** (L1) |
+| edge noise / edge dropouts | 0.10 m / 0.3 per side per scan | **assumption** (L1) |
+| class flips | 5% | **assumption** (L1) |
+| odometry drift | 0.005 m, 0.05 deg per 0.30 m driven | **assumption** (L1; distance-proportional model) |
+
+Unit check (2D simulator, one return per horizontal ray per obstacle; not comparable to the 3D 2.88 M pts/s): hits per
+bollard EMX vs L2 at 3 / 10 / 20 m from the sensor: 104 vs 40 / 32 vs 15 / 18 vs 11 (mean of 20 scans); per scan on
+scene 3: 238 vs 87 points, simulation 0.7 vs 0.5 ms, rasterisation 4.7 vs 2.5 ms. `observation_from_shard` now
+derives the ray geometry from the stored scan length, so 0.08 deg shards rebuild correctly (0.2 deg shards
+unchanged).
+
+**Pre-registered (2026-11-27, before any EMX result):** EMX is the realistic headline level of the final comparison;
+L0-L4 remain robustness and stress levels (L4 in particular is far noisier and sparser than the real sensor). The
+per-level baseline rule (best classical config per level, chosen from the baseline run alone) applies to EMX too.
+GoalFlow runs at EMX only after the baselines at EMX and the open-loop distribution-shift check
+(`scripts/emx_shift_check.py`: GoalFlow was trained on 0.2 deg rays; same validation scenes, seeds 250000+, at EMX vs L2;
+a clear drop is a sim-to-real warning and puts retraining with EMX-level data in the queue).
+
+**EMX mounting (analytic; height 1.10 m, vertical FOV -12/+8 deg about the pitched axis, blind zone 1.5 m, Juno's body
+front at 2.24 m from the rear axle, assuming symmetric 0.6375 m overhangs, still unmeasured):**
+
+| mount_x [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] | 0.40 m cone invisible within [m from sensor / past bumper] | lowest beam hits ground [m from sensor / past bumper] |
+|---|---|---|---|---|---|
+| 1.60 (front axle) | 7 | -19 / +1 | +0.86 | 2.03 / +1.40 | 3.19 / +2.56 |
+| 1.60 | 4 | -16 / +4 | +0.86 | 2.44 / +1.80 | 3.84 / +3.20 |
+| 1.60 | 0 | -12 / +8 | +0.86 | 3.29 / +2.66 | 5.18 / +4.54 |
+| 1.00 | 7 | -19 / +1 | +0.26 | 2.03 / +0.80 | 3.19 / +1.96 |
+| 1.00 | 4 | -16 / +4 | +0.26 | 2.44 / +1.20 | 3.84 / +2.60 |
+| 1.00 | 0 | -12 / +8 | +0.26 | 3.29 / +2.06 | 5.18 / +3.94 |
+| 0.50 | 7 | -19 / +1 | -0.24 | 2.03 / +0.30 | 3.19 / +1.46 |
+| 0.50 | 4 | -16 / +4 | -0.24 | 2.44 / +0.70 | 3.84 / +2.10 |
+| 0.50 | 0 | -12 / +8 | -0.24 | 3.29 / +1.56 | 5.18 / +3.44 |
+
+Every pitch below 8 deg leaves some beams above the horizontal (+1 / +4 / +8 deg at 7 / 4 / 0 deg pitch). Mounting the
+sensor further back shrinks the blind region in front of the bumper, and more downward pitch shrinks the region where
+low cones vanish. But both cost far range and upward coverage, and at 1.10 m height a rearward sensor may have its
+near field hidden by Juno's own body (not modelled).
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
