@@ -63,7 +63,7 @@ class GoalFlowPlanner:
                  visibility_gate: bool = False, memory_obs_range: float = 4.0, exact_filter: bool = False,
                  safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0,
                  circle_filter: bool = False, circle_gate: float = 0.6, filter_off: bool = False,
-                 log_scans: bool = False):
+                 log_scans: bool = False, entry_scans: int = 1, lambda3: float = 0.0, edge_w: float = 0.0):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
@@ -80,6 +80,11 @@ class GoalFlowPlanner:
         # the planner executes the top-ranked candidate and never brakes. log_scans: per-scan record (top-ranked
         # candidate, its filter verdict, the executed path) for true-clearance scoring after the episode.
         self.filter_off, self.log_scans = filter_off, log_scans
+        # pre-registered changes (DEVIATIONS 2026-11-27), all off by default: entry_scans = 2: a circle enters the
+        # filter only if a circle was also seen within circle_gate in the previous scan (odom frame), near-field
+        # circles exempt; lambda3: consistency with the previous chosen path; edge_w: track-edge hinge critic;
+        # refine_steps with the circle filter: refinement against the circles.
+        self.entry_scans, self.lambda3, self.edge_w = entry_scans, lambda3, edge_w
         from ..sim.config import VehicleConfig
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
@@ -94,6 +99,9 @@ class GoalFlowPlanner:
         self.circ: list[list] = []                        # circle memory: [x, y, r, n] in the believed odom frame
         self.last_brake: dict = {}
         self.scan_log: list[dict] = []
+        self.prev_C = np.zeros((0, 2))                    # previous scan's cluster centres (odom frame)
+        self.prev_path = None                             # previous chosen path (odom frame) for lambda3
+        self.n_cur = 0                                    # circles from the current scan (first rows of the filter)
 
     def _memory_hits(self, obs) -> torch.Tensor:
         """(1, H, W) hit mask: this scan's hits plus remembered cells (hit in >= min scans, ahead of the rear
@@ -183,6 +191,16 @@ class GoalFlowPlanner:
             use = keep & (np.hypot(loc[:, 0], loc[:, 1]) <= self.memory_range)
             rem = np.c_[loc[use], A[use, 2]]
         cur = np.c_[C, np.asarray(R, float)] if len(C) else np.zeros((0, 3))
+        if len(C):
+            Wc = from_frame(C, pose)
+            if self.entry_scans >= 2:                   # 2-scan entry rule (near-field circles exempt)
+                seen = (np.hypot(Wc[:, None, 0] - self.prev_C[None, :, 0], Wc[:, None, 1] - self.prev_C[None, :, 1])
+                        .min(1) <= self.circle_gate) if len(self.prev_C) else np.zeros(len(C), bool)
+                cur = cur[seen | near]
+            self.prev_C = Wc
+        else:
+            self.prev_C = np.zeros((0, 2))
+        self.n_cur = len(cur)
         return np.concatenate([cur, rem]) if len(rem) else cur
 
     @torch.no_grad()
@@ -194,8 +212,18 @@ class GoalFlowPlanner:
         hits = self._memory_hits(obs) if self.memory_range > 0 else None
         if self.circle_filter:
             self.filter_points = self._circles(obs)
+            kw = {}
+            pose_b = np.asarray(obs.pose_odom, float)
+            if self.lambda3 > 0:
+                from ..sim.geometry import to_frame
+                kw.update(lambdas=(1.0, 0.5, self.lambda3),
+                          prev_path=[None if self.prev_path is None else to_frame(self.prev_path, pose_b)])
+            if self.edge_w > 0:
+                kw.update(edge_w=self.edge_w, edge_points=[_densify_edges(obs)])
+            if self.refine_steps > 0:
+                kw.update(refine_steps=self.refine_steps)
             r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=not self.filter_off,
-                                safety_points=[self.filter_points], safety_margin=self.safety_margin)
+                                safety_points=[self.filter_points], safety_margin=self.safety_margin, **kw)
             if self.filter_off:
                 from ..models.goalflow import observed_collision_exact
                 r["safe"] = ~observed_collision_exact(r["samples"], [self.filter_points], margin=self.safety_margin)
@@ -227,15 +255,37 @@ class GoalFlowPlanner:
             self.last_brake = dict(S=r["samples"][0].cpu().numpy(), true_pose=self.last["true_pose"],
                                    filt=np.asarray(getattr(self, "filter_points", np.zeros((0, 2))), float))
         if no_safe:
+            self.prev_path = None
             self.stats.append(("brake", 1000 * (time.perf_counter() - t0)))
             return GFResult(np.zeros((0, 3)), True, 0.0, {"trigger": "brake", "reason": "no safe candidate"})
         xy = r["traj_main"][0].cpu().numpy().astype(np.float64)                  # executed path, ego frame
+        if self.lambda3 > 0:
+            from ..sim.geometry import from_frame
+            self.prev_path = from_frame(xy, np.asarray(obs.pose_odom, float))
         P = np.concatenate([np.zeros((1, 2)), xy])
         d = np.diff(P, axis=0)
         yaw = np.arctan2(d[:, 1], d[:, 0])
         path = np.concatenate([P, np.r_[yaw[:1], yaw][:, None]], 1)
         self.stats.append(("plan", 1000 * (time.perf_counter() - t0)))
         return GFResult(path, False, self.speed, {"trigger": "plan"})
+
+
+def _densify_edges(obs, step: float = 0.1, max_gap: float = 2.0) -> np.ndarray:
+    """Observed road-edge points (ego frame) per side, sorted along x and linearly densified to ``step`` across gaps up
+    to ``max_gap`` m, so the box cannot slip between sparse edge samples."""
+    P = np.asarray(obs.edge_points, float).reshape(-1, 2)
+    S_ = np.asarray(obs.edge_side).reshape(-1)
+    out = []
+    for sd in np.unique(S_):
+        Q = P[S_ == sd]
+        Q = Q[np.argsort(Q[:, 0])]
+        out.append(Q)
+        for a, b in zip(Q[:-1], Q[1:]):
+            g = float(np.hypot(*(b - a)))
+            if step < g <= max_gap:
+                t = np.arange(step, g, step)[:, None] / g
+                out.append(a + t * (b - a))
+    return np.concatenate(out) if out else np.zeros((0, 2))
 
 
 def collision_cause(planner: GoalFlowPlanner, scene, final_pose, veh, lidar) -> str:

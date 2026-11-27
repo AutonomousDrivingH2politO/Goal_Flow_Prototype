@@ -126,6 +126,36 @@ def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 
     return out
 
 
+def observed_min_distance(paths: torch.Tensor, points: torch.Tensor, max_step: float = 0.2) -> torch.Tensor:
+    """(M,) minimum distance from Juno's box along each executed path (M, T, 2; ego frame; densified to <= ``max_step``,
+    headings forward-filled, as in ``observed_collision_exact``) to a point set (N, 2); +inf without points."""
+    from ..sim.config import VehicleConfig
+    veh = VehicleConfig.from_yaml()
+    x0, x1 = veh.body_x
+    h = veh.width / 2
+    M = paths.shape[0]
+    if points is None or len(points) == 0:
+        return torch.full((M,), float("inf"), dtype=paths.dtype, device=paths.device)
+    pts = torch.as_tensor(points, dtype=paths.dtype, device=paths.device)[:, :2]
+    P = torch.cat([torch.zeros_like(paths[:, :1]), paths], 1)
+    seg = (P[:, 1:] - P[:, :-1]).norm(dim=-1)
+    f = int(min(max(math.ceil(float(seg.max()) / max_step), 1), 12))
+    w = torch.arange(f + 1, device=paths.device, dtype=paths.dtype)[:-1] / f
+    Q = (P[:, :-1, None] * (1 - w[:, None]) + P[:, 1:, None] * w[:, None]).flatten(1, 2)
+    Q = torch.cat([Q, P[:, -1:]], 1)                                                # (M, K, 2)
+    d = torch.diff(Q, dim=1)
+    yaw = torch.atan2(d[..., 1], d[..., 0])
+    yaw = torch.where(d.norm(dim=-1) > 1e-4, yaw, torch.full_like(yaw, float("nan")))
+    yaw = torch.cat([torch.zeros_like(yaw[:, :1]), yaw], 1)
+    for k in range(1, yaw.shape[1]):
+        yaw[:, k] = torch.where(torch.isnan(yaw[:, k]), yaw[:, k - 1], yaw[:, k])
+    c, s_ = torch.cos(yaw), torch.sin(yaw)
+    dx = pts[None, None, :, 0] - Q[..., 0:1]
+    dy = pts[None, None, :, 1] - Q[..., 1:2]
+    lx, ly = c[..., None] * dx + s_[..., None] * dy, -s_[..., None] * dx + c[..., None] * dy
+    return torch.hypot(lx - lx.clamp(x0, x1), ly - ly.clamp(-h, h)).flatten(1).min(1).values
+
+
 def observed_collision(paths: torch.Tensor, hits: torch.Tensor, nx: int = 8, ny: int = 4,
                        max_step: float = 0.2, cell_slack: float = 0.1, dist: torch.Tensor | None = None) -> torch.Tensor:
     """(B, M) bool: does Juno's footprint along an executed path (B, M, T, 2; ego frame) come within reach of
@@ -240,6 +270,7 @@ class GoalFlow(nn.Module):
         x0, x1 = veh.body_x
         h = veh.width / 2
         P = torch.as_tensor(pts, dtype=S_raw_b.dtype, device=S_raw_b.device)
+        rad = P[:, 2] if P.shape[1] > 2 else torch.zeros(len(P), dtype=P.dtype, device=P.device)   # circles: surface
         idx = torch.argsort(torch.where(f_b > -1e8, f_b, f_b), descending=True)[:top]
         w0 = S_raw_b[idx].detach()
         w = w0.clone().requires_grad_(True)
@@ -255,7 +286,7 @@ class GoalFlow(nn.Module):
                 dx = P[None, None, :, 0] - Q[..., 0:1]
                 dy = P[None, None, :, 1] - Q[..., 1:2]
                 lx, ly = c * dx + s_ * dy, -s_ * dx + c * dy
-                dist = torch.sqrt((lx - lx.clamp(x0, x1)) ** 2 + (ly - ly.clamp(-h, h)) ** 2 + 1e-9)
+                dist = torch.sqrt((lx - lx.clamp(x0, x1)) ** 2 + (ly - ly.clamp(-h, h)) ** 2 + 1e-9) - rad
                 loss = torch.relu(margin + 0.08 - dist).pow(2).sum() + 0.5 * (w - w0).pow(2).sum(-1).mean()
                 opt.zero_grad()
                 loss.backward()
@@ -277,6 +308,7 @@ class GoalFlow(nn.Module):
              route_goals: torch.Tensor | None = None, safety_slack: float = 0.1,
              safety_hits: torch.Tensor | None = None, safety_points: list | None = None,
              safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0, refine_top: int = 16,
+             edge_points: list | None = None, edge_w: float = 0.0,
              refine_lr: float = 0.03):
         """Full GoalFlow (M3). Flags give the paper's ablations:
         M0: use_goal=False -> mean of goal-free samples; M1: use_dac=False, use_scorer=False (mean of
@@ -352,7 +384,21 @@ class GoalFlow(nn.Module):
         if goal_K > 1:                                            # prefer the better-scored route
             f = f + l4 * minmax(G_score[ar[:, None], goal_of])
         if l3 > 0 and prev_path is not None:
-            f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
+            # consistency: mean distance of each candidate's points to the nearest point of the previous chosen path
+            # (prev_path (B, K, 2) in the current ego frame, any K), min-max normalised: a full door flip costs l3
+            if isinstance(prev_path, (list, tuple)):
+                for b, pp in enumerate(prev_path):
+                    if pp is not None and len(pp):
+                        pp = torch.as_tensor(pp, dtype=S.dtype, device=S.device)
+                        dd = (S[b, :, :, None] - pp[None, None]).norm(dim=-1).min(-1).values.mean(-1)
+                        f[b] = f[b] - l3 * minmax(dd[None])[0]
+            else:
+                f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
+        if edge_w > 0 and edge_points is not None:
+            # track-edge critic: hinge below the 0.12 m filter margin, not normalised (zero when clear)
+            for b, ep in enumerate(edge_points):
+                d = observed_min_distance(S[b], ep)
+                f[b] = f[b] - edge_w * ((safety_margin - d) / safety_margin).clamp(0, 1)
         out["scores_raw"] = f.clone()                             # before the safety mask (top-ranked = argmax)
         if safety:                                                # observed hits only (no privileged input)
             if safety_points is not None:                         # exact box-to-point check (margin in m)

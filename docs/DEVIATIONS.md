@@ -663,6 +663,20 @@ values confirmed by Can before any per-change run):**
 - edge critic: hinge on the distance d from Juno's box along the path to the observed track edge,
   1.0 * clamp((0.12 - d) / 0.12, 0, 1) (zero beyond the 0.12 m filter margin, 1 at contact), weighted like lambda1 = 1.0;
   one value, no sweep. Not min-max normalised (that would amplify differences when every candidate is clear).
+- **Decisions (Can, 2026-11-27):** radius allowance dropped, class radii unchanged. **(a) = the 2-scan entry rule
+  only:** a circle from the current scan enters the filter only if a circle was also seen within the association gate
+  (0.6 m, odom frame) in the previous scan; near-field circles (observed within 4 m of the sensor, the circle memory's
+  range) are exempt and enter at once (`entry_scans=2`). lambda3 and the edge critic confirmed as defined here.
+  **(d) refinement against circles:** step C's settings (8 Adam steps, top 16, lr 0.03, hinge at 0.12 + 0.08 m) with
+  the distance taken to the circle surface (the refinement previously ignored the radius column; fixed). **Acceptance**
+  per change vs the full run's rows for the same seeds, pooled over L0 / L2 / L4 (300 episodes): collisions not above
+  the reference AND stalls below it (or success above it); per-level numbers reported alongside. The per-change runs
+  start once lambda3 is written here, unless lambda3 is outside 0.5-3 (then stop and report).
+- **False-alarm diagnostic (replays, before the per-change runs; `scripts/diagnose_false_alarms.py`):** each full-run
+  stall with a candidate truly clear by >= 0.12 m, the blocking circle classified as phantom / remembered near-field /
+  class-flipped / real, with centre errors (single scan and 3-scan mean). If real obstacles with offset centres
+  dominate, change (a2) = centre averaging (mean of the associated cluster centres over the last 3 scans, odom frame,
+  gate 0.3 m) is pre-registered here and tested alone like the others; otherwise dropped.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
   0.25 m under a class flip), not a fitted radius (`cluster_obstacles`, `fit_circle_fixed_r`), so a cap at class radius +
   allowance is a no-op. Part (a) therefore reduces to the 2-scan entry rule unless Can replaces the cap.

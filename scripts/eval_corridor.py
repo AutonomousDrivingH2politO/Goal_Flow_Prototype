@@ -50,6 +50,10 @@ LABELS = {
     "goalflow_l3_circles": "GoalFlow, closed loop (exact 0.12 m filter against fitted obstacle circles + circle memory)",
     "goalflow_l3_circles_scanlog": "goalflow_l3_circles with per-scan logging (filter on)",
     "goalflow_l3_circles_filteroff": "goalflow_l3_circles, safety filter off (verdict logged, not applied), memory on",
+    "goalflow_l3_circles_entry2": "goalflow_l3_circles + 2-scan entry rule (change a)",
+    "goalflow_l3_circles_lambda3": "goalflow_l3_circles + lambda3 consistency (change b)",
+    "goalflow_l3_circles_edge": "goalflow_l3_circles + track-edge critic 1.0 (change c)",
+    "goalflow_l3_circles_refine": "goalflow_l3_circles + refinement against circles (change d)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -74,6 +78,7 @@ def _scene(seed: int):
 
 
 _GF = None
+LAMBDA3 = None    # set from the spread replay (median best-vs-3rd goal-group gap), DEVIATIONS 2026-11-27
 
 
 def make_planner(name: str):
@@ -88,7 +93,14 @@ def make_planner(name: str):
                    # model or system? (DEVIATIONS 2026-11-27): same planner with per-scan logging, filter on / off
                    "goalflow_l3_circles_scanlog": dict(circle_filter=True, safety_margin=0.12, log_scans=True),
                    "goalflow_l3_circles_filteroff": dict(circle_filter=True, safety_margin=0.12, log_scans=True,
-                                                         filter_off=True)}
+                                                         filter_off=True),
+                   # pre-registered per-change runs (DEVIATIONS 2026-11-27), each alone on top of goalflow_l3_circles
+                   "goalflow_l3_circles_entry2": dict(circle_filter=True, safety_margin=0.12, entry_scans=2),
+                   "goalflow_l3_circles_lambda3": dict(circle_filter=True, safety_margin=0.12, lambda3=LAMBDA3),
+                   "goalflow_l3_circles_edge": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0),
+                   "goalflow_l3_circles_refine": dict(circle_filter=True, safety_margin=0.12, refine_steps=8)}
+    if name == "goalflow_l3_circles_lambda3":
+        assert LAMBDA3 is not None, "lambda3 not set yet (spread replay)"
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
         if _GF is None:
             from gfsem.planners.goalflow_planner import GoalFlowPlanner
