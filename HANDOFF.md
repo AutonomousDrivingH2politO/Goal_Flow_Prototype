@@ -60,6 +60,11 @@ log ends with "end" after COMPARISON.md is built. Stop: `kill -- -2469`, then co
 9. Smaller: brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix;
    Orin expansion budget (after Can's measurement); MPPI only as fallback.
 
+**Combined run finished 19:14 (COMPARISON.md built): collisions ROSE vs goalflow_l3_circles: 2 -> 15 (L0-L4: 0.2 /
+0.4 / 0.6 / 0.8 / 1.0% vs 0 / 0 / 0 / 0 / 0.4%), 13 of them "safety-filter miss (obstacle in hit memory)"; success +0 to
++2.1 points, stalls down at L2-L4, exits 11 / 10 -> 4 / 2 at L0 / L1. Flagged to Can; the per-change test (seeds 0-99)
+did not show it. Needs Can's decision on the final config.**
+
 **Done today** (details in DEVIATIONS 2026-11-27): EMX baselines ((a) = EMX baseline); model or system (the filter
 provides the safety); lambda3 = 1.29 measured; beams-only (denser beams alone do not help); false-alarm diagnostic
 (remembered circles dominate); per-change runs ((a), (c), (d), (a2) accepted; lambda3 not; (a2) rerun after a guard
@@ -94,3 +99,5 @@ GoalFlow + (a), (b), (c); seeds 0-99 x L0/L2/L4) -> 8 scene overlap. Script `scr
 `reports/lidar_demo/chain_after_combined.log`. Not approved (wait for Can): item 7 (EMX shift check, GoalFlow at EMX,
 roof-mount shift), item 9. Progress lines below are appended by the script as items finish.
 
+- 11-27 19:14 item 2 McNemar + stall overlap: exit 0 (COMPARISON.md of combined and circles runs)
+- 11-27 19:14 item 3 L4 collisions diagnosed: exit 0 (reports/lidar_demo/l3_goalflow/l4_collisions/)
