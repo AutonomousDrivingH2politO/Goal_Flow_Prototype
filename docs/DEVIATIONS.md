@@ -644,6 +644,20 @@ clusters enter the filter after 2 scans, except the near-field memory; the 0.12 
 (d) refinement against the fitted circles for the L0-L1 precision stalls (item 18).
 Weights and allowances are fixed in this file before the first of these runs.
 
+**Principles for the values (2026-11-27; derived from a stated principle, not from results; no sweeps on dev seeds;
+values confirmed by Can before any per-change run):**
+- lambda3: the consistency term is lambda3 * minmax(mean distance to the previous chosen path), so a full door flip (the
+  farthest candidate) costs lambda3. lambda3 = the median, over all scans of the filter-on scanlog run (seeds 0-99, L0 /
+  L2 / L4), of the pre-filter critic-score spread between the best and the 3rd-best goal group (`top3_goal_score_spread`
+  in `scans.csv`; a deterministic rerun of that run with the spread logged, `scripts/run_spread_replay.sh`). A
+  measurement of the existing score's scale, not a tuning result.
+- edge critic: hinge on the distance d from Juno's box along the path to the observed track edge,
+  1.0 * clamp((0.12 - d) / 0.12, 0, 1) (zero beyond the 0.12 m filter margin, 1 at contact), weighted like lambda1 = 1.0;
+  one value, no sweep. Not min-max normalised (that would amplify differences when every candidate is clear).
+- radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
+  0.25 m under a class flip), not a fitted radius (`cluster_obstacles`, `fit_circle_fixed_r`), so a cap at class radius +
+  allowance is a no-op. Part (a) therefore reduces to the 2-scan entry rule unless Can replaces the cap.
+
 ### Is GoalFlow's low collision rate the model or the system around it? (2026-11-27)
 
 **Input check (code-traced, `sim/lidar.py`, `sim/raster.py`):** none of the 6 BEV channels uses privileged information.

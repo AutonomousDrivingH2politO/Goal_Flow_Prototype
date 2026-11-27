@@ -212,8 +212,11 @@ class GoalFlowPlanner:
         no_safe = bool(r["no_safe"][0])
         if self.log_scans and "safe" in r:
             top = int(r["scores_raw"][0].argmax())
+            fr, go = r["scores_raw"][0], r["goal_of"][0]
+            gb = torch.stack([fr[go == g].max() for g in torch.unique(go)]).sort(descending=True).values
+            spread = float(gb[0] - gb[min(2, len(gb) - 1)])     # best minus 3rd-best goal group (pre-filter score)
             self.scan_log.append(dict(k=self.k, true_pose=np.asarray(true_pose, float).copy(), no_safe=no_safe,
-                                      top_rejected=not bool(r["safe"][0, top]),
+                                      top_rejected=not bool(r["safe"][0, top]), spread=spread,
                                       top=r["samples"][0, top].cpu().numpy(),
                                       exe=None if no_safe else r["traj_main"][0].cpu().numpy()))
         self.k += 1

@@ -169,7 +169,7 @@ def _scan_rows(planner, scene, veh) -> list:
         c = path_clearance(torch.from_numpy(np.stack(P)).float(), O.expand(len(P), -1, -1),
                            torch.full((len(P),), scene.n), veh).numpy()
         out.append((L["k"], int(L["top_rejected"]), round(float(c[0]), 3), int(L["no_safe"]),
-                    round(float(c[1]), 3) if len(c) > 1 else ""))
+                    round(float(c[1]), 3) if len(c) > 1 else "", round(L.get("spread", float("nan")), 4)))
     planner.scan_log = []
     return out
 
@@ -374,7 +374,7 @@ def _main_body(a, jobs, seeds, levels):
         with open(a.out / "scans.csv", "w", newline="") as f:
             w = csv.writer(f)
             w.writerow(["planner", "noise", "seed", "k", "top_rejected", "top_true_clearance", "brake",
-                        "executed_true_clearance"])
+                        "executed_true_clearance", "top3_goal_score_spread"])
             for r in rows:
                 for s in r.get("scan_log") or []:
                     w.writerow([r["planner"], r["noise"], r["seed"], *s])
