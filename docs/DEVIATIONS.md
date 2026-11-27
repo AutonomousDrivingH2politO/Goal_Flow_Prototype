@@ -631,6 +631,25 @@ clusters enter the filter after 2 scans, except the near-field memory; the 0.12 
 (d) refinement against the fitted circles for the L0-L1 precision stalls (item 18).
 Weights and allowances are fixed in this file before the first of these runs.
 
+### Is GoalFlow's low collision rate the model or the system around it? (2026-11-27)
+
+**Input check (code-traced, `sim/lidar.py`, `sim/raster.py`):** none of the 6 BEV channels uses privileged information.
+hits = simulated LiDAR returns (noise, dropout, clutter, occlusion, blind zone, lowest-beam cut-off); free = per-ray
+clearing from the same scan; unknown = cells no ray reached; drivable = observed noisy road-edge points within 25 m with
+the nominal 12 m width fill (a constant); class = camera label per hit with flips; goal line = the map's goal line
+through the believed (drifting) pose. The ego vector (speed, steer, yaw rate, heading and lateral offset relative to the
+track) uses the believed pose too. The true scene, teacher routes and true edges appear only as training targets.
+
+**Dev seeds are optimistic.** Seeds 0-499 drove design decisions (safety filter, memory, NMS goals, selection rules),
+so every dev-seed result is optimistic. The unbiased number is the fresh test set (seeds 400000+), which stays untouched
+until the final configuration is frozen.
+
+**Queued behind the EMX baselines:** (1) filter-off ablation: goalflow_l3_circles with the safety filter off (memory on),
+seeds 0-99 at L0 / L2 / L4, vs the full run on the same seeds; per level, the share of scans where the top-ranked
+candidate was rejected by the filter and how many of those would truly have collided (needs replays: the full run logs
+episodes, not scans). (2) Scene overlap: for each dev scene 0-499, the nearest training scene (100000+) by obstacle
+layout; report any near-copy.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

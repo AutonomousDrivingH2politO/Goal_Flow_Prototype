@@ -49,6 +49,10 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
    at L0, L2, L4, accepted only if collisions do not rise AND stalls drop (or success rises); per-change numbers in one
    small table; then the accepted set combined on 0-499 x L0-L4.
 5. Latency: single-worker per-component profile (step 5); 241 ms with 5 workers sharing the GPU is not the number.
+5b. "Model or system?" (DEVIATIONS 2026-11-27): filter-off ablation (safety filter off, memory on; seeds 0-99, L0/L2/L4)
+   vs the full run on the same seeds; per level, share of scans where the top-ranked candidate was rejected and how many
+   would truly have collided (replays); scene overlap of dev 0-499 vs training 100000+ by obstacle layout. Input check
+   done: no privileged channel. Dev results are optimistic; fresh test 400000+ untouched until the config is frozen.
 6. EMX pitch check (roof mount, 5-9 deg); EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); GoalFlow at
    EMX after review; roof-mount shift check before any retraining.
 7. Brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix; Orin
