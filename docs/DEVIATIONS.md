@@ -677,6 +677,13 @@ values confirmed by Can before any per-change run):**
   class-flipped / real, with centre errors (single scan and 3-scan mean). If real obstacles with offset centres
   dominate, change (a2) = centre averaging (mean of the associated cluster centres over the last 3 scans, odom frame,
   gate 0.3 m) is pre-registered here and tested alone like the others; otherwise dropped.
+  **Amended (Can, 2026-11-27), (a2) by the dominant category:** remembered near-field circles (which (a) exempts) ->
+  (a2) = memory fix: a remembered circle's centre is replaced by the matching current observation when the obstacle is
+  seen again (gate 0.3 m), and a remembered circle is dropped when the current scan's free channel covers its
+  footprint; real obstacles with offset centres -> centre averaging as above; phantoms -> no (a2), (a) as is.
+  (a2) is tested alone like the others.
+- **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
+  at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
   0.25 m under a class flip), not a fitted radius (`cluster_obstacles`, `fit_circle_fixed_r`), so a cap at class radius +
   allowance is a no-op. Part (a) therefore reduces to the 2-scan entry rule unless Can replaces the cap.
