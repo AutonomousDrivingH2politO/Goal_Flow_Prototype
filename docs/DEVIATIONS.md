@@ -539,6 +539,15 @@ obstacle); all other artefacts (bearing jitter 0.05 deg, dropout 5%, clutter 0.5
 lowest-beam cut-off, 120 deg FOV, 40 m sim range and 25 m edge range are the same as at every level. None is off, so
 the "EMX + L2 artefacts" shift-check variant is not triggered; the L1 artefact values remain assumptions.
 
+**Beams-only comparison (Can's question "EMX vs our L4"; queued 2026-11-27):** because EMX mixes the denser beam pattern
+with lighter (assumed L1) artefacts, two levels separate the two: `emx_L2art` / `emx_L4art` = EMX beam pattern (0.08 deg)
+and range noise (0.05 m) with the L2 / L4 artefacts. Baselines (a) and (c), seeds 0-499, vs the existing L2 and L4
+baselines (`scripts/run_emx_art.sh`, after the lambda3 spread replay, before the per-change runs; output
+`reports/lidar_demo/emx_art/`). Hits per obstacle (`scripts/hits_per_obstacle.py`, 60 scenes x 3 poses, mean returns
+within r + 0.15 m, occluded = 0; bollard at 2-5 / 8-12 / 18-22 m; cone likewise): L2 29.6 / 10.4 / 5.0 and 30.8 / 12.0 /
+5.3; L4 17.8 / 6.2 / 2.7 and 19.1 / 7.1 / 3.2; EMX 82.8 / 29.0 / 13.9 and 86.3 / 33.1 / 15.1; emx_L2art 74.9 / 26.0 /
+12.6 and 76.2 / 29.6 / 13.5; emx_L4art 49.2 / 16.9 / 7.8 and 47.6 / 19.4 / 8.1.
+
 **EMX baselines (2026-11-27, seeds 0-499; `reports/lidar_demo/emx_baselines/`):** success / collision / stalled % /
 exits: (b) 97.7 / 0.0 / 1.9 / 2, (a) 98.7 / 0.0 / 1.0 / 1, (c) 97.9 / 0.0 / 1.9 / 1; **EMX baseline = (a)** by the
 rule (reviewed). These use the **front-axle mount (1.60 m, 1.10 m, 7 deg) and constant 3 m/s**; the roof-mount and
@@ -699,6 +708,21 @@ seen inside that distance (out of occlusion) cannot be stopped for. **Safety che
 decision) are to assume 2.22 m/s plus the brake delay; the planners brake immediately when no checked path is safe, and
 their checked paths reach well beyond 1.9 m, so the requirement is that an obstacle is flagged at that range; the
 rollouts' path geometry is near speed-independent (pure pursuit + bicycle) and stays as trained.
+
+**Stopping distance with the planner's own latency** (reaction = planner latency + 0.1 s scan + 0.3 s brake delay at
+constant speed, then 3.0 m/s^2; placeholders):
+
+| speed | planner latency | reaction | stopping distance | can't stop if first seen closer than (past the bumper, + 0.12 m margin) |
+|---|---|---|---|---|
+| 2.220 m/s | 241 ms (Mac, 5 workers) | 0.641 s | 2.24 m | 2.36 m |
+| 2.220 m/s | 50 ms (Orin target) | 0.450 s | 1.82 m | 1.94 m |
+| 2.445 m/s | 241 ms (Mac, 5 workers) | 0.641 s | 2.56 m | 2.68 m |
+| 2.445 m/s | 50 ms (Orin target) | 0.450 s | 2.10 m | 2.22 m |
+
+So with the roof mount, an obstacle first seen closer than ~1.8-2.1 m (Orin target) or ~2.2-2.6 m (current Mac latency)
+past the bumper, e.g. appearing from behind another obstacle, cannot be stopped for (+0.12 m to keep the filter margin).
+The 0.40 m cone's invisible zone (0.93-1.02 m past the bumper) lies inside that range; cones seen from farther away
+are unaffected. 241 ms is the 5-worker shared-GPU number; the single-worker latency profile (step 5) replaces it.
 
 **Queued after the margin-fix run:** GoalFlow (final accepted config) and the frozen baselines with `juno_bangbang`,
 seeds 0-99 at L0 / L2 / L4, vs constant 3 m/s on the same seeds.

@@ -230,6 +230,10 @@ NOISE_LEVELS: dict[str, NoiseLevel] = {
     # EMX user guide (Table 1); dropout, clutter, edge noise, class flips, drift and bearing jitter are not in the
     # spec and use the L1 values (assumptions, DEVIATIONS). Not part of the L0-L4 ladder.
     "EMX": NoiseLevel("EMX", 0.05, 0.05, 0.05, 0.5, 0.10, 0.3, 0.05, 0.005, 0.05, h_step_deg=0.08),
+    # beams-only comparison (2026-11-27): EMX beam pattern (0.08 deg) and range noise (0.05 m) with the L2 / L4
+    # artefacts (bearing jitter, dropout, clutter, edge noise/dropouts, class flips, drift), vs L2 / L4 themselves.
+    "emx_L2art": NoiseLevel("emx_L2art", 0.05, 0.10, 0.15, 1.5, 0.15, 0.6, 0.08, 0.010, 0.10, h_step_deg=0.08),
+    "emx_L4art": NoiseLevel("emx_L4art", 0.05, 0.30, 0.45, 5.0, 0.40, 1.5, 0.20, 0.040, 0.40, h_step_deg=0.08),
 }
 LADDER = ("L0", "L1", "L2", "L3", "L4")        # the robustness / stress levels (EMX is separate)
 

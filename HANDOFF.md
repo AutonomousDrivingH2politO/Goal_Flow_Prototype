@@ -47,6 +47,11 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
    rejected y/n, its true clearance, brake, executed path's true clearance). Report vs the full run on the same seeds
    (seed 0 L0 reproduces it exactly) and per level the rejection share and how many rejected tops would truly collide.
    Then the scene-overlap check (dev 0-499 vs training 100000+). Input check done (no privileged channel).
+1c. Queued in order, each script waits for the previous: `scripts/run_spread_replay.sh` (lambda3 scale: deterministic
+   rerun of the scanlog config with the top-3 goal-group score spread; then send Can lambda3 / edge critic 1.0 / radius
+   note for confirmation) -> `scripts/run_emx_art.sh` (beams-only: (a), (c) at emx_L2art / emx_L4art, seeds 0-499,
+   `reports/lidar_demo/emx_art/`; report vs L2 / L4 baselines with hits per obstacle). Per-change runs only after Can
+   confirms the values.
 2. COMPARISON.md additions (in `scripts/build_comparison.py`): paired McNemar on success, GoalFlow vs baseline and vs
    (c), per level; stall overlap (GoalFlow stalls on seeds where the baseline also stalls), split truly blocked vs filter
    false alarm.
