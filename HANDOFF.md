@@ -49,6 +49,11 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
    rejected y/n, its true clearance, brake, executed path's true clearance). Report vs the full run on the same seeds
    (seed 0 L0 reproduces it exactly) and per level the rejection share and how many rejected tops would truly collide.
    Then the scene-overlap check (dev 0-499 vs training 100000+). Input check done (no privileged channel).
+1e. **Decided (Can, 2026-11-27): combined = (a2) memory fix + (c) edge critic**; (a) dropped, lambda3 off, (d) out on
+   latency (+~95 ms on brake scans). **Prepared, not launched:** `nohup ./scripts/run_combined.sh > /dev/null 2>&1 &`
+   (planner `goalflow_l3_combined`, seeds 0-499 x L0-L4, 5 workers, ~4.5 h, output
+   `reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/`, then COMPARISON.md via `scripts/build_comparison.py`).
+   **Wait for Can's go.** EMX numbers stay unquoted until artefact rates are measured from Juno recordings.
 1d. Per-change runs DONE (09:34; `reports/lidar_demo/l3_goalflow/per_change/TABLE.md`): accepted (a) [flag: L4 -2.1],
    (c), (d), (a2) memory fix (rerun after a guard bug; first run kept as `_guardbug`); lambda3 not accepted. **Next:
    combined run of the accepted set on 0-499 x L0-L4, waiting for Can's decision on (a).**

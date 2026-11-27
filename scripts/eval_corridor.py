@@ -55,6 +55,7 @@ LABELS = {
     "goalflow_l3_circles_edge": "goalflow_l3_circles + track-edge critic 1.0 (change c)",
     "goalflow_l3_circles_refine": "goalflow_l3_circles + refinement against circles (change d)",
     "goalflow_l3_circles_memfix": "goalflow_l3_circles + memory fix: re-observation replaces, free rays drop (a2)",
+    "goalflow_l3_combined": "GoalFlow combined: circles + memory fix (a2) + track-edge critic (c)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -100,7 +101,10 @@ def make_planner(name: str):
                    "goalflow_l3_circles_lambda3": dict(circle_filter=True, safety_margin=0.12, lambda3=LAMBDA3),
                    "goalflow_l3_circles_edge": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0),
                    "goalflow_l3_circles_refine": dict(circle_filter=True, safety_margin=0.12, refine_steps=8),
-                   "goalflow_l3_circles_memfix": dict(circle_filter=True, safety_margin=0.12, mem_fix=True)}
+                   "goalflow_l3_circles_memfix": dict(circle_filter=True, safety_margin=0.12, mem_fix=True),
+                   # combined config (Can, 2026-11-27): (a2) memory fix + (c) edge critic; (a), lambda3 off; (d) out
+                   # on its brake-scan latency cost (DEVIATIONS)
+                   "goalflow_l3_combined": dict(circle_filter=True, safety_margin=0.12, mem_fix=True, edge_w=1.0)}
     if name == "goalflow_l3_circles_lambda3":
         assert LAMBDA3 is not None, "lambda3 not set yet (spread replay)"
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)

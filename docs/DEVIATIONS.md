@@ -717,6 +717,28 @@ values confirmed by Can before any per-change run):**
   (a2) rerun alone, same seeds and rule; both runs are reported. **(a2) rerun (09:34): 90.3% / 0 / 26 accepted, no
   flag** (L0 94.8 / 0 / 4, L2 92.7 / 0 / 6, L4 83.3 / 0 / 16). Accepted set: (a), (c), (d), (a2); (a) flagged (L4 -2.1
   points); the combined run (0-499 x L0-L4) waits for Can's decision on (a).
+- **Decisions after the per-change runs (Can, 2026-11-27):**
+  - **Combined config = (a2) memory fix + (c) edge critic** (+ (d) refinement only if its latency cost is small; see
+    below: it is not, so (d) is out). (a) dropped: no pooled gain, the L4 flag, and (a2) covers the larger false-alarm
+    source (103 remembered vs 56 phantom blocking circles). lambda3 stays off. Note: lambda3's acceptance should have
+    measured door flips rather than stalls; its flips were mixed (L0 0.19 -> 0.08, L2 0.12 -> 0.21, L4 0.20 -> 0.15),
+    so off stands.
+  - **(d) latency, from the per-change runs' plan_times.csv** (5 workers sharing the GPU, same load for every run; ms per
+    replan): all scans 245.5 (refine) vs 239.3-245.2 for (a2) / (a) / lambda3 (+~5 ms, +2%), p95 302.9 vs 288.0-295.0;
+    **brake scans 337.2 vs 238.0-247.1 (+~95 ms, +40%), p95 399.4 vs 286.0-295.6.** Refinement runs exactly when no
+    candidate is safe, so it delays the brake decision by ~95 ms on this machine (~0.2 m more stopping distance at
+    2.22 m/s); judged noticeable, so (d) is out of the combined config (reversible if the Orin cost is small). Also
+    noted: the edge critic costs ~+22 ms on every scan (262.6 vs ~240, +9%); kept (not conditional), to be revisited in
+    the latency profile.
+  - **All per-change differences are within noise** (1-4 of 300 episodes); the combined run on seeds 0-499 x L0-L4 is
+    the real test. (c)'s test had only 1 exit in the reference, so it barely measured its purpose.
+  - **Filter-off L2 / L4 check:** the identical totals (89.6 / 9.4 / 0) are a coincidence, not a duplicated row: the
+    results file has 300 distinct (level, seed) rows, no L2 / L4 row pair is identical (outcome, replans, flips), and
+    the colliding seeds differ (L2: 1, 4, 11, 23, 28, 36, 37, 58, 80; L4: 4, 11, 23, 28, 36, 58, 75, 78, 80).
+  - **Recorded findings:** the safety is the system's (filter off: 8-9 collisions per 100 episodes; filter on 0 / 0 / 1);
+    denser EMX beams alone do not help the classical planner; **EMX numbers stay unquoted until the artefact rates
+    (dropout, clutter, edge noise, class flips) are measured from Juno recordings.**
+  - Combined run prepared, not launched (`scripts/run_combined.sh`, planner `goalflow_l3_combined`); Can starts it.
 - **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
   at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
