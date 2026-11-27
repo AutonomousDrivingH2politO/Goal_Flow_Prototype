@@ -240,8 +240,8 @@ class GoalFlowPlanner:
             dist = math.hypot(dx, dy)
             h_obj = self._scfg.bollard_height if abs(r - self._scfg.bollard_radius) < 1e-6 else self._scfg.cone_height
             reach = (self.lidar.mount_height - h_obj) / math.tan(lo) if lo > 0 else 0.0
-            if dist - r <= obs.blind_zone or dist < reach:
-                continue                                  # inside the blind zone or below the lowest beam: keep
+            if dist - r <= obs.blind_zone or dist - r < reach:
+                continue                                  # near surface inside the blind zone or below the lowest beam
             half = math.asin(min(1.0, r / dist))
             b = math.atan2(dy, dx)
             m = np.abs(ang - b) <= half
