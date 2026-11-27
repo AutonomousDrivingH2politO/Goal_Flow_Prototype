@@ -242,6 +242,29 @@ class ControllerConfig:
     timeout: float = 40.0        # s
     stop_speed: float = 0.05     # m/s, below this the car counts as stopped
     stop_hold: float = 1.0       # s stopped -> episode ends
+    # speed mode: "constant" (every result so far: the planner's speed, 3 m/s, accel/brake limits of the vehicle) or
+    # "juno_bangbang" (Juno's real controller: ICE valve open below v_lo, closed above v_hi, coasting in between;
+    # never brakes; the planner's brake command uses the real brake). Juno values are ASSUMED placeholders until
+    # measured (DEVIATIONS 2026-11-27).
+    speed_mode: str = "constant"
+    juno: "JunoSpeedConfig" = field(default_factory=lambda: JunoSpeedConfig())
+
+
+@dataclass(frozen=True)
+class JunoSpeedConfig:
+    v_lo: float = 1.67           # m/s (6 km/h): valve opens
+    v_hi: float = 2.22           # m/s (8 km/h): valve closes
+    a_open: float = 1.0          # m/s^2 valve open (assumed)
+    d_coast: float = 0.1         # m/s^2 coasting, valve closed (assumed)
+    valve_delay: float = 0.2     # s command to valve (assumed)
+    d_brake: float = 3.0         # m/s^2 brake (assumed)
+    brake_delay: float = 0.3     # s brake command to braking (assumed)
+
+    def stopping_distance(self, v: float | None = None, latency: float = 0.0) -> float:
+        """Distance from the brake decision to standstill from ``v`` (default v_hi): latency + brake delay at constant
+        speed, then constant deceleration."""
+        v = self.v_hi if v is None else v
+        return v * (latency + self.brake_delay) + v * v / (2 * self.d_brake)
 
 
 @dataclass(frozen=True)

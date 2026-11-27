@@ -130,7 +130,15 @@ def run_episode(scene: Scene, planner: Planner, noise: NoiseLevel | str = "L0", 
     planner.reset()
 
     p0 = track.pose(*start)
-    st = VehicleState(p0[0], p0[1], p0[2], cfg.scene.spawn_speed, 0.0)
+    juno = None
+    if ctl.speed_mode == "juno_bangbang":
+        from .vehicle import JunoSpeed
+        jc = ctl.juno
+        assert jc.a_open <= veh.max_accel and jc.d_brake <= veh.max_decel, "Juno placeholders exceed vehicle limits"
+        juno = JunoSpeed(jc, ctl.dt)
+    else:
+        assert ctl.speed_mode == "constant", ctl.speed_mode
+    st = VehicleState(p0[0], p0[1], p0[2], cfg.scene.spawn_speed if juno is None else ctl.juno.v_hi, 0.0)
     drift = np.zeros(3)
     last_replan_xy = None
     path_odom = np.zeros((0, 3))
@@ -197,7 +205,8 @@ def run_episode(scene: Scene, planner: Planner, noise: NoiseLevel | str = "L0", 
                                       ctl.lookahead, veh.wheelbase, idx)
         else:
             delta = 0.0
-        st = step(st, 0.0 if brake else v_cmd, delta, ctl.dt, veh)
+        v_target = (0.0 if brake else v_cmd) if juno is None else juno.target(st.v, brake)
+        st = step(st, v_target, delta, ctl.dt, veh)
         traj.append((st.x, st.y, st.yaw, st.v, st.steer))
 
         # --- checks on the true state

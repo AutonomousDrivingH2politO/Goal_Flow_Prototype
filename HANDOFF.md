@@ -24,6 +24,9 @@
 - Uncommitted: `docs/report/report.pdf` and `report.tex` (Can's edits, not touched by Claude); `reports/status/`
   handoff notes; `reports/lidar_demo/emx_baselines/` (run in progress).
 
+- EMX baselines finished 03:36 (`reports/lidar_demo/emx_baselines/`): (b) 97.7/0.0/1.9, (a) 98.7/0.0/1.0, (c)
+  97.9/0.0/1.9; EMX baseline = (a) by the rule. The model-or-system runs started 03:36 (item 1b).
+
 ## 3. Frozen baselines (per level, chosen from baseline runs alone)
 - (b) stub fix + L3 at **L0**: `reports/lidar_demo/l0_rerun/b/`.
 - (a) pre-L3 + stub fix at **L1-L4**: `reports/lidar_demo/l0_rerun_distdrift/a/` (distance-proportional drift).
@@ -56,6 +59,9 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
    at L0, L2, L4, accepted only if collisions do not rise AND stalls drop (or success rises); per-change numbers in one
    small table; then the accepted set combined on 0-499 x L0-L4.
 5. Latency: single-worker per-component profile (step 5); 241 ms with 5 workers sharing the GPU is not the number.
+5c. After the margin-fix run: GoalFlow (final accepted config) and the frozen baselines with `--speed-mode
+   juno_bangbang` (Juno's valve bang-bang, placeholders; DEVIATIONS 2026-11-27), seeds 0-99 at L0/L2/L4, vs constant
+   3 m/s on the same seeds.
 6. EMX pitch check (roof mount, 5-9 deg); EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); GoalFlow at
    EMX after review; roof-mount shift check before any retraining.
 7. Brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix; Orin
@@ -66,6 +72,9 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 - Windshield top edge and base (x, height); nose top (x, height); front and rear overhang.
 - At first power-on: check the point cloud for a fixed cluster on the glass or hood.
 - Body crop box in AD-SEM at bring-up.
+- Speed control: from the SEM stop-sign recording (if it exists) brake decel and command-to-braking delay, otherwise a
+  short logged brake test at 8 km/h; a coast-down from 8 km/h with the valve closed (coast decel); valve-open accel in
+  the 6-8 km/h band and the valve delay.
 
 ## 7. Rules (verbatim)
 - validation and dev seeds only;

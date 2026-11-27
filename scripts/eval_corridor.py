@@ -179,13 +179,16 @@ def run_one(job: tuple) -> dict:
     from gfsem.sim.config import LidarConfig, SimConfig
     name, seed, level = job[:3]
     mount = job[3] if len(job) > 3 else "front_axle"
+    speed_mode = job[4] if len(job) > 4 else "constant"
     scene = _scene(seed)
     P = make_planner(name)
     gf = name.startswith("goalflow")
-    simcfg = SimConfig(lidar=LidarConfig.with_mount(mount))
+    from gfsem.sim.config import ControllerConfig
+    simcfg = SimConfig(lidar=LidarConfig.with_mount(mount), control=ControllerConfig(speed_mode=speed_mode))
     r = run_episode(scene, P, level, simcfg, record=gf)
     row = r.row()
     row["mount"] = mount
+    row["speed_mode"] = speed_mode
     inner = getattr(P, "p", P)
     stats = getattr(inner, "stats", [])
     if gf:
@@ -314,6 +317,8 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l0"))
     ap.add_argument("--l3", action="store_true", help="run 'observed' as config (b): stub fix + approved L3 set")
     ap.add_argument("--mount", default="front_axle", help="LiDAR mount preset (gfsem.sim.config.LIDAR_MOUNTS)")
+    ap.add_argument("--speed-mode", default="constant", choices=("constant", "juno_bangbang"),
+                    help="constant 3 m/s (all results so far) or Juno's bang-bang valve control (placeholders)")
     a = ap.parse_args()
     if a.l3:
         a.planners = ",".join("observed_l3" if p == "observed" else p for p in a.planners.split(","))
@@ -322,7 +327,7 @@ def main():
     jobs = []
     for name in a.planners.split(","):
         for lvl in (["L0"] if name in PRIVILEGED else levels):
-            jobs += [(name, s, lvl, a.mount) for s in seeds]
+            jobs += [(name, s, lvl, a.mount, a.speed_mode) for s in seeds]
     a.out.mkdir(parents=True, exist_ok=True)
     # one run per output folder (house rule): refuse if a live process holds the lock; replace a stale one
     import os

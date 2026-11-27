@@ -650,6 +650,36 @@ candidate was rejected by the filter and how many of those would truly have coll
 runs (filter on and filter off; `scans.csv`), not a replay of the full run. (2) Scene overlap: for each dev scene 0-499, the nearest training scene (100000+) by obstacle
 layout; report any near-copy.
 
+### Juno's real speed control: `juno_bangbang` speed mode (2026-11-27)
+
+**Real controller (from Can):** 6-8 km/h band (1.67-2.22 m/s), bang-bang on the ICE valve: open until 2.22 m/s, then
+closed (coasting) until 1.67 m/s. The speed controller never brakes; the AD stack commands the real brake for stops (it
+stopped at a stop sign at SEM). **All simulation results so far use a constant 3 m/s with 3 m/s^2 braking.**
+
+**Config:** `ControllerConfig.speed_mode` = `"constant"` (default, every result so far; reproduces exactly, regression
+test passes) or `"juno_bangbang"` (`JunoSpeedConfig`, `sim/vehicle.py: JunoSpeed`; `eval_corridor.py --speed-mode`).
+Valve and brake commands pass through FIFO delays; the planner's brake command closes the valve and applies the brake;
+in this mode the planner's speed command is ignored. **Placeholders (assumptions until measured):** valve-open accel
+1.0 m/s^2, coast decel 0.1 m/s^2, valve delay 0.2 s; brake decel 3.0 m/s^2, brake delay 0.3 s. With the valve delay the
+speed overshoots the band: steady state 1.645-2.445 m/s, mean 2.03 m/s (one episode: 17.5 s vs 12.0 s at 3 m/s).
+
+**Stopping distance** (brake decision to standstill; delay at constant speed, then 3.0 m/s^2): from 2.22 m/s **1.49 m**;
+1.71 m with one scan (0.1 s) of perception latency; from the 2.445 m/s overshoot 1.70 m (simulated) to 1.94 m (with the
+scan latency). **Against the roof mount's cone-invisible zone** (0.40 m cone, `roof` preset: 0.93-1.02 m past the
+bumper for a body front at 2.445 / 2.35 m): the stopping distance is longer, so a cone must be detected and acted on
+while still >= ~1.7-1.9 m (+ 0.12 m margin) past the bumper. It is visible there; the margin is ~0.8 m. A cone first
+seen inside that distance (out of occlusion) cannot be stopped for. **Safety checks** (filter rollouts and the brake
+decision) are to assume 2.22 m/s plus the brake delay; the planners brake immediately when no checked path is safe, and
+their checked paths reach well beyond 1.9 m, so the requirement is that an obstacle is flagged at that range; the
+rollouts' path geometry is near speed-independent (pure pursuit + bicycle) and stays as trained.
+
+**Queued after the margin-fix run:** GoalFlow (final accepted config) and the frozen baselines with `juno_bangbang`,
+seeds 0-99 at L0 / L2 / L4, vs constant 3 m/s on the same seeds.
+
+**Measurements needed (Can):** from the SEM stop-sign recording, if it exists: brake decel and command-to-braking delay
+(otherwise a short logged brake test at 8 km/h); a coast-down from 8 km/h with the valve closed (coast decel);
+valve-open accel in the 6-8 km/h band and the valve delay.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
