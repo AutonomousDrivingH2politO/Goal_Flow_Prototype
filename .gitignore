@@ -20,3 +20,6 @@ reports/lidar_demo/*/plan_times.csv
 # evaluation run logs can contain local paths (warnings, tracebacks): keep them local
 reports/lidar_demo/**/*.log
 reports/lidar_demo/**/plan_times.csv
+
+# internal Juno data sheet (values used are recorded in docs/DEVIATIONS.md)
+configs/juno_relevant_info.xlsx
