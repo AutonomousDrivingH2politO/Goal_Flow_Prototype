@@ -563,6 +563,81 @@ sensor further back shrinks the blind region in front of the bumper, and more do
 low cones vanish. But both cost far range and upward coverage, and at 1.10 m height a rearward sensor may have its
 near field hidden by Juno's own body (not modelled).
 
+### Vehicle data and the roof LiDAR mount (2026-11-27)
+
+**Juno data (Juno data sheet, internal spreadsheet, not committed; values recorded here):** overall height 1,165 mm,
+ground clearance 100 mm, length 2,875 mm, width 1,165 mm, wheelbase 1,600 mm, track 1,000 mm, tyre radius 0.2792 m. The
+sheet's 5.5 m turning radius is mechanical; the planners keep the 10 deg software steering limit (~9.1 m radius). From
+a side photo: nose ~2.35 m ahead of the rear axle (front overhang ~0.75 m); the AD-SEM footprint says +2.445 m. The
+simulator still assumes symmetric 0.6375 m overhangs (body front 2.2375 m) for every run so far.
+
+**Roof mount.** The EMX will sit on the roof at the base of the ZED support, at the top edge of the windshield,
+outside the glass (the ZED stays on top of the support): ~1.0-1.1 m ahead of the rear axle, optical centre ~1.20 m
+(roof 1.165 m + half the housing). The LiDAR mount is one config entry, `LidarConfig` (mount_x from the rear axle,
+height, pitch), with presets in `LIDAR_MOUNTS`: `front_axle` (1.60 m, 1.10 m, 7 deg; the default, every run so far)
+and `roof` (1.05 m, 1.20 m, 7 deg; provisional until measured). Sim, raster and planners take the mount from it;
+`eval_corridor.py --mount roof` selects it.
+
+**Self-occlusion (placeholder geometry, assumptions until measured).** The windshield and hood are a polyline in the
+sensor's vertical plane: roof edge 3.5 cm below the optical centre just ahead of it, windshield sloping 20 deg below
+the horizontal (from the photo) over 0.6 m, a mid-hood point, the nose top at 0.55 m height at the body front
+(`placeholder_body_profile`). Beams below its clearance angle hit the car; with a profile set, the simulator clips the
+lowest beam there (`LidarConfig.body_clearance_rad`; the `roof` preset sets it, `front_axle` does not). Roof preset:
+clearance -22.9 deg, so the steepest usable pitch is ~10.9 deg (lowest beam = -12 deg - pitch). It depends on the
+unmeasured windshield length: 0.4 / 0.6 / 0.9 / 1.2 m of glass give -24.3 / -22.9 / -21.9 / -21.5 deg, i.e. a steepest
+pitch of 12.3 / 10.9 / 9.9 / 9.5 deg; a long 20 deg windshield tends to ~8 deg.
+
+**Roof mounting table (analytic; blind zone 1.5 m; -12/+8 deg about the pitched axis; placeholder body profile):**
+
+| mount_x [m] | height [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] (front 2.35 / 2.445) | 0.40 m cone invisible past bumper [m] (2.35 / 2.445) | lowest beams hit windshield/hood | cone & bollard hit up to | beams on a cone at 20 m |
+|---|---|---|---|---|---|---|---|---|
+| 1.00 | 1.15 | 5 | -17 / +3 | +0.15 / +0.06 | +1.10 / +1.01 | no | max range | 12 |
+| 1.00 | 1.15 | 6 | -18 / +2 | +0.15 / +0.06 | +0.96 / +0.86 | no | max range | 12 |
+| 1.00 | 1.15 | 7 | -19 / +1 | +0.15 / +0.06 | +0.83 / +0.73 | no | max range | 12 |
+| 1.00 | 1.15 | 8 | -20 / +0 | +0.15 / +0.06 | +0.71 / +0.62 | no | max range | 12 |
+| 1.00 | 1.15 | 9 | -21 / -1 | +0.15 / +0.06 | +0.60 / +0.51 | no | 65.9 m | 12 |
+| 1.00 | 1.20 | 5 | -17 / +3 | +0.15 / +0.06 | +1.27 / +1.17 | no | max range | 12 |
+| 1.00 | 1.20 | 6 | -18 / +2 | +0.15 / +0.06 | +1.11 / +1.02 | no | max range | 12 |
+| 1.00 | 1.20 | 7 | -19 / +1 | +0.15 / +0.06 | +0.97 / +0.88 | no | max range | 12 |
+| 1.00 | 1.20 | 8 | -20 / +0 | +0.15 / +0.06 | +0.85 / +0.75 | no | max range | 12 |
+| 1.00 | 1.20 | 9 | -21 / -1 | +0.15 / +0.06 | +0.73 / +0.64 | no | 68.7 m | 12 |
+| 1.00 | 1.25 | 5 | -17 / +3 | +0.15 / +0.06 | +1.43 / +1.34 | no | max range | 12 |
+| 1.00 | 1.25 | 6 | -18 / +2 | +0.15 / +0.06 | +1.27 / +1.17 | no | max range | 12 |
+| 1.00 | 1.25 | 7 | -19 / +1 | +0.15 / +0.06 | +1.12 / +1.02 | no | max range | 12 |
+| 1.00 | 1.25 | 8 | -20 / +0 | +0.15 / +0.06 | +0.99 / +0.89 | no | max range | 12 |
+| 1.00 | 1.25 | 9 | -21 / -1 | +0.15 / +0.06 | +0.86 / +0.77 | no | 71.6 m | 12 |
+| 1.10 | 1.15 | 5 | -17 / +3 | +0.25 / +0.16 | +1.20 / +1.11 | no | max range | 12 |
+| 1.10 | 1.15 | 6 | -18 / +2 | +0.25 / +0.16 | +1.06 / +0.96 | no | max range | 12 |
+| 1.10 | 1.15 | 7 | -19 / +1 | +0.25 / +0.16 | +0.93 / +0.83 | no | max range | 12 |
+| 1.10 | 1.15 | 8 | -20 / +0 | +0.25 / +0.16 | +0.81 / +0.72 | no | max range | 12 |
+| 1.10 | 1.15 | 9 | -21 / -1 | +0.25 / +0.16 | +0.70 / +0.61 | no | 65.9 m | 12 |
+| 1.10 | 1.20 | 5 | -17 / +3 | +0.25 / +0.16 | +1.37 / +1.27 | no | max range | 12 |
+| 1.10 | 1.20 | 6 | -18 / +2 | +0.25 / +0.16 | +1.21 / +1.12 | no | max range | 12 |
+| 1.10 | 1.20 | 7 | -19 / +1 | +0.25 / +0.16 | +1.07 / +0.98 | no | max range | 12 |
+| 1.10 | 1.20 | 8 | -20 / +0 | +0.25 / +0.16 | +0.95 / +0.85 | no | max range | 12 |
+| 1.10 | 1.20 | 9 | -21 / -1 | +0.25 / +0.16 | +0.83 / +0.74 | no | 68.7 m | 12 |
+| 1.10 | 1.25 | 5 | -17 / +3 | +0.25 / +0.16 | +1.53 / +1.44 | no | max range | 12 |
+| 1.10 | 1.25 | 6 | -18 / +2 | +0.25 / +0.16 | +1.37 / +1.27 | no | max range | 12 |
+| 1.10 | 1.25 | 7 | -19 / +1 | +0.25 / +0.16 | +1.22 / +1.12 | no | max range | 12 |
+| 1.10 | 1.25 | 8 | -20 / +0 | +0.25 / +0.16 | +1.09 / +0.99 | no | max range | 12 |
+| 1.10 | 1.25 | 9 | -21 / -1 | +0.25 / +0.16 | +0.96 / +0.87 | no | 71.6 m | 12 |
+
+Beams on a cone at 20 m: vertical count at 0.1 deg spacing (12 for every row; the 2D simulator models one row).
+**Recommended pitch:** 7-8 deg. 8 deg is the steepest that keeps the top beam at the horizontal (unlimited far range)
+and still clears a 20 deg windshield of any length, but with no margin against an unmeasured steeper glass or mounting
+tolerance; 7 deg leaves 1 deg. Final choice after the measurement and the simulated pitch check.
+
+**All results so far use the front-axle mount (1.60 m, 1.10 m, 7 deg).** The final comparison and any retraining will
+use the measured roof mount: it moves the blind area and the cone-invisible zone in GoalFlow's input, so the
+front-axle numbers do not transfer as they are.
+
+**Measurements needed (Can):** LiDAR optical-centre position (x from the rear axle) and height, and its pitch;
+windshield top edge and base (x, height); nose top (x, height); front and rear overhang. At first power-on: check the
+point cloud for a fixed cluster on the windshield or hood (self-hits).
+
+**Queued after the full run:** pitch check in simulation: EMX preset, roof mount, pitch 5-9 deg; hits per cone and
+bollard at 10-30 m, and whether `cluster_obstacles` returns a circle for each.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

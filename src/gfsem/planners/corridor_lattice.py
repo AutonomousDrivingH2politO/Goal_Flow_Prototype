@@ -323,7 +323,7 @@ class LatticeCorridorPlanner(CorridorPlanner):
         pose = np.asarray(obs.pose_odom, float)
         C, R, _ = cluster_obstacles(obs, self.cfg, self.scfg)
         if self.lcfg.tracking:
-            C, R = self.tracker.update(C, R, pose)
+            C, R = self.tracker.update(C, R, pose, sensor_x=float(obs.sensor_xy[0]))
         if self.lcfg.edge_memory:
             ep, es = self.edge_mem.update(obs.edge_points, obs.edge_side, pose)
         else:

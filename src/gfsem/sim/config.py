@@ -135,6 +135,9 @@ class LidarConfig:
     edge_range: float = 25.0              # road-edge points (segmentation + ground intensity)
     edge_spacing: float = 0.5
     clutter_band: tuple[float, float] = (-0.3, 1.2)  # |d| - W/2 band where clutter appears
+    # body profile below/ahead of the sensor in its vertical plane, (x from the rear axle, height) [m]; None = no
+    # self-occlusion (all runs so far). Beams steeper than the profile's clearance angle hit the car.
+    body_profile: tuple | None = None
 
     @property
     def n_rays(self) -> int:
@@ -148,9 +151,58 @@ class LidarConfig:
 
     @property
     def elev_range(self) -> tuple[float, float]:
-        """Absolute beam elevation range (radians, positive up)."""
-        return (math.radians(self.v_min_deg - self.pitch_deg),
-                math.radians(self.v_max_deg - self.pitch_deg))
+        """Absolute beam elevation range (radians, positive up); the lower bound is clipped to the body clearance
+        angle when a body profile is set (beams below it hit the car)."""
+        lo = math.radians(self.v_min_deg - self.pitch_deg)
+        clr = self.body_clearance_rad
+        return (max(lo, clr) if clr is not None else lo, math.radians(self.v_max_deg - self.pitch_deg))
+
+    @property
+    def body_clearance_rad(self) -> float | None:
+        """Steepest downward beam elevation that still clears the body profile (radians), or None."""
+        return body_clearance(self.mount_x, self.mount_height, self.body_profile)
+
+    @classmethod
+    def with_mount(cls, name: str, **kw) -> "LidarConfig":
+        """A LiDAR config at a named mount (LIDAR_MOUNTS); other fields default or from ``kw``."""
+        return cls(**{**LIDAR_MOUNTS[name], **kw})
+
+
+def body_clearance(sx: float, sz: float, profile, n: int = 200) -> float | None:
+    """Max elevation angle (radians) from the sensor (sx, sz) to the body polyline ``profile`` [(x, z), ...]
+    ahead of it: beams below this angle hit the car."""
+    if not profile:
+        return None
+    import numpy as np
+    P = np.asarray(profile, float)
+    best = -math.pi / 2
+    for a, b in zip(P[:-1], P[1:]):
+        t = np.linspace(0, 1, n)[:, None]
+        Q = a + t * (b - a)
+        ahead = Q[:, 0] > sx + 1e-6
+        if ahead.any():
+            best = max(best, float(np.max(np.arctan2(Q[ahead, 1] - sz, Q[ahead, 0] - sx))))
+    return best
+
+
+def placeholder_body_profile(sx: float, sz: float, body_front: float, edge_below: float = 0.035,
+                             glass_len: float = 0.60, glass_slope_deg: float = 20.0, nose_top_z: float = 0.55):
+    """ASSUMED windshield/hood profile until measured (DEVIATIONS): roof edge just ahead of / under the sensor
+    (``edge_below`` m below the optical centre), windshield sloping ``glass_slope_deg`` below the horizontal over
+    ``glass_len`` m (from the side photo), then a mid-hood point and the nose top at ``body_front``."""
+    ze = sz - edge_below
+    xb, zb = sx + glass_len, ze - glass_len * math.tan(math.radians(glass_slope_deg))
+    xm, zm = 0.5 * (xb + body_front), 0.5 * (zb + nose_top_z) + 0.03
+    return ((sx + 0.01, ze), (xb, zb), (xm, zm), (body_front, nose_top_z))
+
+
+# LiDAR mounts: mount_x from the rear axle, optical-centre height, pitch down. "front_axle" = every run so far;
+# "roof" = EMX on the roof at the base of the ZED support (top edge of the windshield), provisional until measured.
+LIDAR_MOUNTS = {
+    "front_axle": dict(mount_x=1.60, mount_height=1.10, pitch_deg=7.0),
+    "roof": dict(mount_x=1.05, mount_height=1.20, pitch_deg=7.0,
+                 body_profile=placeholder_body_profile(1.05, 1.20, 2.35)),
+}
 
 
 @dataclass(frozen=True)

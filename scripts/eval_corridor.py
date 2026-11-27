@@ -146,20 +146,24 @@ def _stall_diag(lb: dict, scene, veh) -> dict:
     return out
 
 
-def run_one(job: tuple[str, int, str]) -> dict:
+def run_one(job: tuple) -> dict:
     from gfsem.sim.closed_loop import run_episode
-    name, seed, level = job
+    from gfsem.sim.config import LidarConfig, SimConfig
+    name, seed, level = job[:3]
+    mount = job[3] if len(job) > 3 else "front_axle"
     scene = _scene(seed)
     P = make_planner(name)
     gf = name.startswith("goalflow")
-    r = run_episode(scene, P, level, record=gf)
+    simcfg = SimConfig(lidar=LidarConfig.with_mount(mount))
+    r = run_episode(scene, P, level, simcfg, record=gf)
     row = r.row()
+    row["mount"] = mount
     inner = getattr(P, "p", P)
     stats = getattr(inner, "stats", [])
     if gf:
         from gfsem.planners.goalflow_planner import collision_cause
         from gfsem.sim.config import SimConfig
-        cfg = SimConfig()
+        cfg = simcfg
         row["collision_cause"] = (collision_cause(inner, scene, r.trajectory[-1, :3], cfg.vehicle, cfg.lidar)
                                   if r.outcome == "collision" else "")
         row["stall_best_true_clearance"] = ""
@@ -280,6 +284,7 @@ def main():
     ap.add_argument("--workers", type=int, default=max(1, mp.cpu_count() - 1))
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l0"))
     ap.add_argument("--l3", action="store_true", help="run 'observed' as config (b): stub fix + approved L3 set")
+    ap.add_argument("--mount", default="front_axle", help="LiDAR mount preset (gfsem.sim.config.LIDAR_MOUNTS)")
     a = ap.parse_args()
     if a.l3:
         a.planners = ",".join("observed_l3" if p == "observed" else p for p in a.planners.split(","))
@@ -288,7 +293,7 @@ def main():
     jobs = []
     for name in a.planners.split(","):
         for lvl in (["L0"] if name in PRIVILEGED else levels):
-            jobs += [(name, s, lvl) for s in seeds]
+            jobs += [(name, s, lvl, a.mount) for s in seeds]
     a.out.mkdir(parents=True, exist_ok=True)
     # one run per output folder (house rule): refuse if a live process holds the lock; replace a stale one
     import os
