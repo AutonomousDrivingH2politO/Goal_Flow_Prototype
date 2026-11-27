@@ -38,37 +38,36 @@ Headline: GoalFlow is the safest planner at every level and matches (c) on succe
 success gap is stalls (L0-L1 mostly truly blocked, L2-L4 mostly filter false alarms). Door flips at L0-L2 trigger
 lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 
-## 5. Queue (2026-11-27 14:45; one run at a time)
+## 5. Queue (updated 2026-11-27 20:40; one run at a time)
 
-**Running:** combined run `goalflow_l3_combined` = circles + (a2) memory fix + (c) edge critic (vectorised), seeds
-0-499 x L0-L4, started 14:30 from dd68c5a, ~4.5 h; process group 2469 (eval PID 2483), lock
-`reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/RUNNING.lock`, progress `full_goalflow_l3_combined.log`, chain
-log ends with "end" after COMPARISON.md is built. Stop: `kill -- -2469`, then confirm with ps.
+**Running (approved chain, `scripts/run_chain_after_combined.sh`, log `reports/lidar_demo/chain_after_combined.log`):**
+item 5 `juno_bangbang` (combined GoalFlow done; baselines (b) -> (a) -> (c) running, seeds 0-99 x L0/L2/L4, output
+`reports/lidar_demo/juno/`), then item 8 scene overlap. Chain end ~21:15. Each item appends a line at the end of this file.
 
-**Next, in order (each waits for the previous; GoalFlow runs at 5 workers):**
-1. Combined-run COMPARISON.md: report vs the frozen baselines and vs `goalflow_l3_circles`.
-2. COMPARISON.md additions (`scripts/build_comparison.py`): paired McNemar on success vs the baseline and vs (c) per
-   level; stall overlap (GoalFlow stalls on seeds where the baseline also stalls), truly blocked vs false alarm.
-3. The full run's two L4 collisions ("safety-filter miss, obstacle in hit memory"): render, find why the remembered
-   obstacle did not block; fix if a bug. Recheck on the combined run.
-4. Latency: single-worker per-component profile (the 241 ms is 5 workers sharing the GPU; single worker ~143 ms).
-5. `juno_bangbang` speed mode: final GoalFlow config and the frozen baselines, seeds 0-99 at L0/L2/L4, vs 3 m/s.
-6. EMX pitch check (EMX, roof mount, pitch 5-9 deg; hits per cone/bollard at 10-30 m; circle fitted?).
-7. EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); then GoalFlow at EMX after review; roof-mount shift
-   check before any retraining. EMX numbers stay unquoted until artefact rates are measured from Juno recordings.
-8. Scene-overlap check (dev 0-499 vs training 100000+ by obstacle layout).
-9. Smaller: brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix;
-   Orin expansion budget (after Can's measurement); MPPI only as fallback.
+**Waiting for Can:**
+- **Final GoalFlow config.** The combined run (memory fix + edge critic) raised collisions 2 -> 15 vs `goalflow_l3_circles`
+  (13 "safety-filter miss, obstacle in hit memory"); success +0 to +2.1, stalls down at L2-L4, exits 11/10 -> 4/2.
+  Options: (1) replay the 13 filter-miss collisions with memory-event tracing (~15 min; recommended), (2) circles + edge
+  critic only, (3) keep combined.
+- Item 7 (EMX shift check, GoalFlow at EMX, roof-mount shift) and item 9 (brake column, tracker birth rule, seed 190/399
+  render fix, Orin expansion budget). Item 7 is lower priority after (a)+filter (below).
 
-**Combined run finished 19:14 (COMPARISON.md built): collisions ROSE vs goalflow_l3_circles: 2 -> 15 (L0-L4: 0.2 /
-0.4 / 0.6 / 0.8 / 1.0% vs 0 / 0 / 0 / 0 / 0.4%), 13 of them "safety-filter miss (obstacle in hit memory)"; success +0 to
-+2.1 points, stalls down at L2-L4, exits 11 / 10 -> 4 / 2 at L0 / L1. Flagged to Can; the per-change test (seeds 0-99)
-did not show it. Needs Can's decision on the final config.**
-
-**Done today** (details in DEVIATIONS 2026-11-27): EMX baselines ((a) = EMX baseline); model or system (the filter
-provides the safety); lambda3 = 1.29 measured; beams-only (denser beams alone do not help); false-alarm diagnostic
-(remembered circles dominate); per-change runs ((a), (c), (d), (a2) accepted; lambda3 not; (a2) rerun after a guard
-bug); decisions (combined = (a2) + (c)); edge critic vectorised.
+**Results today (details in DEVIATIONS and the report folders):**
+- Combined run (`reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/COMPARISON.md`, McNemar + stall overlap
+  included): success vs (a) significantly lower at every level (p <= 1e-3); vs (c) not significant at L0 / L3 / L4.
+- L4 collisions of the circles run (seeds 93, 443): memory position drift, remembered circle 0.26-0.31 m off; the
+  filter saw 0.16-0.19 m clearance, the truth was -0.08 to -0.11 m; radius and lookup fine (`l4_collisions/`).
+- **(a)+filter** (`reports/lidar_demo/a_filter/`, seeds 0-499): success / collision / stalled % L0 94.8 / 0.0 / 4.4,
+  L1 96.2 / 0.0 / 3.6, L2 96.4 / 0.0 / 3.6, L3 95.2 / 0.0 / 4.8, L4 85.5 / 0.2 / 13.8 (vs (a) L4 93.1 / 2.3 / 4.4). The
+  safety transfers: collisions fall to ~0 for a cost of 0-2.3 points of success at L0-L3 and 7.6 at L4 (stalls). It
+  beats `goalflow_l3_combined` on both success and collisions at every level.
+- Latency, single worker (`l3_goalflow/latency/goalflow_l3_combined.json`, 12 episodes, 1,479 replans): 152 ms per
+  replan; rollout 86 ms (56%), flow sampling 33, safety filter 10, encoder 6, edge critic 6, scorer 4, raster 2.5,
+  circles + memory 0.9, goal selection 0.8, other 3.
+- EMX pitch check, roof mount (`reports/lidar_demo/mounting/pitch_check.md`): pitch 5-8 deg give the same hits and circle
+  rates (cones 34 / 21 / 15 / 11 / 8 returns at 10-30 m, circle 100 / 100 / 96 / 96 / 82%; bollards 100%); at 9 deg far
+  bollards lose returns (circle 95-98% at 15-25 m, 90% at 30 m). The 2D sim does not model vertical beam count, so this
+  only separates the top-beam cut-off; recommendation 7-8 deg stands.
 
 ## 6. Can's TODO
 - LiDAR optical centre x (from the rear axle), height, pitch.
@@ -101,3 +100,6 @@ roof-mount shift), item 9. Progress lines below are appended by the script as it
 
 - 11-27 19:14 item 2 McNemar + stall overlap: exit 0 (COMPARISON.md of combined and circles runs)
 - 11-27 19:14 item 3 L4 collisions diagnosed: exit 0 (reports/lidar_demo/l3_goalflow/l4_collisions/)
+- 11-27 19:45 (a)+filter run: exit 0 (reports/lidar_demo/a_filter/)
+- 11-27 19:50 item 4 latency profile: exit 0 (reports/lidar_demo/l3_goalflow/latency/)
+- 11-27 19:50 item 6 EMX pitch check: exit 0 (reports/lidar_demo/mounting/pitch_check.md)

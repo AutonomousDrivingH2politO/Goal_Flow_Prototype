@@ -1,0 +1,19 @@
+{
+ "planner": "goalflow_l3_combined",
+ "replans": 1479,
+ "episodes": 12,
+ "device": "mps",
+ "total_ms": 151.61562091094757,
+ "components_ms": {
+  "rollout": 85.51077123539632,
+  "sample": 33.10405671921766,
+  "safety_filter": 9.56149513358118,
+  "perceive": 6.069320677420687,
+  "edge_critic": 5.655972075637901,
+  "scorer": 4.397728789737543,
+  "other": 3.068145650484297,
+  "rasterize": 2.4949098812690744,
+  "circles_memory": 0.9134194268665558,
+  "goal_select": 0.839801321336351
+ }
+}

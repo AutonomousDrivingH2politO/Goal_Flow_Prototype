@@ -1,0 +1,39 @@
+start Fri Nov 27 19:14:18 CET 2026 head 70b2bf8
+Fri Nov 27 19:14:19 CET 2026 item 2 McNemar + stall overlap: exit 0 (COMPARISON.md of combined and circles runs)
+{"seed": 93, "outcome": "collision", "cause": "memory position drift (circle offset: the filter saw >= 0.12 m, the truth was < 0.12 m)", "last": {"scan": 104, "brake": false, "obstacle_ego": [1.61, -0.83], "path_true_clearance": -0.112, "circle": "memory", "centre_err": 0.31, "radius": 0.25, "true_radius": 0.25, "path_filter_clearance": 0.192}}
+{"seed": 443, "outcome": "collision", "cause": "memory position drift (circle offset: the filter saw >= 0.12 m, the truth was < 0.12 m)", "last": {"scan": 96, "brake": false, "obstacle_ego": [1.69, -0.84], "path_true_clearance": -0.081, "circle": "memory", "centre_err": 0.256, "radius": 0.25, "true_radius": 0.25, "path_filter_clearance": 0.155}}
+Fri Nov 27 19:14:51 CET 2026 item 3 L4 collisions diagnosed: exit 0 (reports/lidar_demo/l3_goalflow/l4_collisions/)
+Fri Nov 27 19:45:49 CET 2026 (a)+filter run: exit 0 (reports/lidar_demo/a_filter/)
+{
+ "planner": "goalflow_l3_combined",
+ "replans": 1479,
+ "episodes": 12,
+ "device": "mps",
+ "total_ms": 151.61562091094757,
+ "components_ms": {
+  "rollout": 85.51077123539632,
+  "sample": 33.10405671921766,
+  "safety_filter": 9.56149513358118,
+  "perceive": 6.069320677420687,
+  "edge_critic": 5.655972075637901,
+  "scorer": 4.397728789737543,
+  "other": 3.068145650484297,
+  "rasterize": 2.4949098812690744,
+  "circles_memory": 0.9134194268665558,
+  "goal_select": 0.839801321336351
+ }
+}
+Fri Nov 27 19:50:03 CET 2026 item 4 latency profile: exit 0 (reports/lidar_demo/l3_goalflow/latency/)
+| pitch | class | 10 m: hits / circle % | 15 m: hits / circle % | 20 m: hits / circle % | 25 m: hits / circle % | 30 m: hits / circle % |
+|---|---|---|---|---|---|---|
+| 5 | cone | 33.9 / 100% (n=30) | 20.6 / 100% (n=37) | 14.6 / 96% (n=25) | 11.1 / 96% (n=23) | 7.6 / 82% (n=11) |
+| 5 | bollard | 30.8 / 100% (n=119) | 20.5 / 100% (n=132) | 15.6 / 100% (n=94) | 12.3 / 100% (n=95) | 10.1 / 100% (n=58) |
+| 6 | cone | 34.1 / 100% (n=30) | 20.9 / 100% (n=37) | 14.8 / 96% (n=25) | 11.3 / 96% (n=23) | 8.2 / 82% (n=11) |
+| 6 | bollard | 30.9 / 100% (n=119) | 20.4 / 100% (n=132) | 15.4 / 100% (n=94) | 12.2 / 100% (n=95) | 10.3 / 100% (n=58) |
+| 7 | cone | 33.7 / 100% (n=30) | 20.8 / 100% (n=37) | 14.6 / 96% (n=25) | 11.2 / 96% (n=23) | 7.8 / 82% (n=11) |
+| 7 | bollard | 30.9 / 100% (n=119) | 20.4 / 100% (n=132) | 15.3 / 100% (n=94) | 12.3 / 100% (n=95) | 10.2 / 100% (n=58) |
+| 8 | cone | 34.1 / 100% (n=30) | 20.7 / 100% (n=37) | 14.7 / 96% (n=25) | 10.9 / 96% (n=23) | 8.3 / 82% (n=11) |
+| 8 | bollard | 31.0 / 100% (n=119) | 20.6 / 100% (n=132) | 15.6 / 100% (n=94) | 12.3 / 100% (n=95) | 10.0 / 100% (n=58) |
+| 9 | cone | 33.9 / 100% (n=30) | 21.0 / 100% (n=37) | 14.5 / 96% (n=25) | 11.1 / 96% (n=23) | 7.8 / 82% (n=11) |
+| 9 | bollard | 30.5 / 100% (n=119) | 19.4 / 98% (n=132) | 14.0 / 97% (n=94) | 10.3 / 95% (n=95) | 8.2 / 90% (n=58) |
+Fri Nov 27 19:50:43 CET 2026 item 6 EMX pitch check: exit 0 (reports/lidar_demo/mounting/pitch_check.md)

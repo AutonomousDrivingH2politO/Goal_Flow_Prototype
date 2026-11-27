@@ -1,0 +1,430 @@
+[
+ {
+  "seed": 93,
+  "outcome": "collision",
+  "obstacle": 12,
+  "cause": "memory position drift (circle offset: the filter saw >= 0.12 m, the truth was < 0.12 m)",
+  "last_scans": [
+   {
+    "scan": 90,
+    "brake": false,
+    "obstacle_ego": [
+     5.6,
+     -1.24
+    ],
+    "path_true_clearance": 0.34,
+    "circle": "scan",
+    "centre_err": 0.086,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.324
+   },
+   {
+    "scan": 91,
+    "brake": false,
+    "obstacle_ego": [
+     5.3,
+     -1.24
+    ],
+    "path_true_clearance": 0.234,
+    "circle": "scan",
+    "centre_err": 0.105,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.166
+   },
+   {
+    "scan": 92,
+    "brake": false,
+    "obstacle_ego": [
+     5.0,
+     -1.23
+    ],
+    "path_true_clearance": 0.215,
+    "circle": "scan",
+    "centre_err": 0.101,
+    "radius": 0.225,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.207
+   },
+   {
+    "scan": 93,
+    "brake": false,
+    "obstacle_ego": [
+     4.71,
+     -1.22
+    ],
+    "path_true_clearance": 0.22,
+    "circle": "scan",
+    "centre_err": 0.058,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.274
+   },
+   {
+    "scan": 94,
+    "brake": false,
+    "obstacle_ego": [
+     4.41,
+     -1.21
+    ],
+    "path_true_clearance": 0.143,
+    "circle": "scan",
+    "centre_err": 0.099,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.17
+   },
+   {
+    "scan": 95,
+    "brake": true,
+    "obstacle_ego": [
+     4.12,
+     -1.18
+    ],
+    "circle": "scan",
+    "centre_err": 0.059,
+    "radius": 0.25,
+    "true_radius": 0.25
+   },
+   {
+    "scan": 96,
+    "brake": false,
+    "obstacle_ego": [
+     3.84,
+     -1.14
+    ],
+    "path_true_clearance": 0.114,
+    "circle": "scan",
+    "centre_err": 0.088,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.135
+   },
+   {
+    "scan": 97,
+    "brake": false,
+    "obstacle_ego": [
+     3.58,
+     -1.12
+    ],
+    "path_true_clearance": 0.2,
+    "circle": "scan",
+    "centre_err": 0.121,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.144
+   },
+   {
+    "scan": 98,
+    "brake": false,
+    "obstacle_ego": [
+     3.3,
+     -1.1
+    ],
+    "path_true_clearance": 0.06,
+    "circle": "memory",
+    "centre_err": 0.131,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.161
+   },
+   {
+    "scan": 99,
+    "brake": false,
+    "obstacle_ego": [
+     3.01,
+     -1.07
+    ],
+    "path_true_clearance": -0.016,
+    "circle": "memory",
+    "centre_err": 0.219,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.202
+   },
+   {
+    "scan": 100,
+    "brake": false,
+    "obstacle_ego": [
+     2.73,
+     -1.03
+    ],
+    "path_true_clearance": -0.083,
+    "circle": "memory",
+    "centre_err": 0.301,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.215
+   },
+   {
+    "scan": 101,
+    "brake": false,
+    "obstacle_ego": [
+     2.45,
+     -0.97
+    ],
+    "path_true_clearance": -0.102,
+    "circle": "memory",
+    "centre_err": 0.342,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.227
+   },
+   {
+    "scan": 102,
+    "brake": false,
+    "obstacle_ego": [
+     2.17,
+     -0.92
+    ],
+    "path_true_clearance": -0.103,
+    "circle": "memory",
+    "centre_err": 0.32,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.19
+   },
+   {
+    "scan": 103,
+    "brake": false,
+    "obstacle_ego": [
+     1.89,
+     -0.87
+    ],
+    "path_true_clearance": -0.11,
+    "circle": "memory",
+    "centre_err": 0.32,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.202
+   },
+   {
+    "scan": 104,
+    "brake": false,
+    "obstacle_ego": [
+     1.61,
+     -0.83
+    ],
+    "path_true_clearance": -0.112,
+    "circle": "memory",
+    "centre_err": 0.31,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.192
+   }
+  ]
+ },
+ {
+  "seed": 443,
+  "outcome": "collision",
+  "obstacle": 12,
+  "cause": "memory position drift (circle offset: the filter saw >= 0.12 m, the truth was < 0.12 m)",
+  "last_scans": [
+   {
+    "scan": 82,
+    "brake": false,
+    "obstacle_ego": [
+     5.02,
+     -0.5
+    ],
+    "path_true_clearance": 0.343,
+    "circle": "scan",
+    "centre_err": 0.072,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.278
+   },
+   {
+    "scan": 83,
+    "brake": false,
+    "obstacle_ego": [
+     4.77,
+     -0.51
+    ],
+    "path_true_clearance": 0.687,
+    "circle": "scan",
+    "centre_err": 0.076,
+    "radius": 0.225,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.66
+   },
+   {
+    "scan": 84,
+    "brake": false,
+    "obstacle_ego": [
+     4.51,
+     -0.57
+    ],
+    "path_true_clearance": 0.336,
+    "circle": "scan",
+    "centre_err": 0.025,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.322
+   },
+   {
+    "scan": 85,
+    "brake": true,
+    "obstacle_ego": [
+     4.23,
+     -0.67
+    ],
+    "circle": "scan",
+    "centre_err": 0.052,
+    "radius": 0.25,
+    "true_radius": 0.25
+   },
+   {
+    "scan": 86,
+    "brake": false,
+    "obstacle_ego": [
+     3.96,
+     -0.77
+    ],
+    "path_true_clearance": 0.144,
+    "circle": "scan",
+    "centre_err": 0.005,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.139
+   },
+   {
+    "scan": 87,
+    "brake": true,
+    "obstacle_ego": [
+     3.7,
+     -0.82
+    ],
+    "circle": "scan",
+    "centre_err": 0.111,
+    "radius": 0.25,
+    "true_radius": 0.25
+   },
+   {
+    "scan": 88,
+    "brake": true,
+    "obstacle_ego": [
+     3.46,
+     -0.84
+    ],
+    "circle": "memory",
+    "centre_err": 0.109,
+    "radius": 0.25,
+    "true_radius": 0.25
+   },
+   {
+    "scan": 89,
+    "brake": false,
+    "obstacle_ego": [
+     3.26,
+     -0.85
+    ],
+    "path_true_clearance": 0.207,
+    "circle": "memory",
+    "centre_err": 0.093,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.239
+   },
+   {
+    "scan": 90,
+    "brake": false,
+    "obstacle_ego": [
+     3.05,
+     -0.88
+    ],
+    "path_true_clearance": 0.12,
+    "circle": "memory",
+    "centre_err": 0.111,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.191
+   },
+   {
+    "scan": 91,
+    "brake": false,
+    "obstacle_ego": [
+     2.84,
+     -0.9
+    ],
+    "path_true_clearance": 0.036,
+    "circle": "memory",
+    "centre_err": 0.148,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.124
+   },
+   {
+    "scan": 92,
+    "brake": false,
+    "obstacle_ego": [
+     2.63,
+     -0.9
+    ],
+    "path_true_clearance": 0.035,
+    "circle": "memory",
+    "centre_err": 0.138,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.121
+   },
+   {
+    "scan": 93,
+    "brake": false,
+    "obstacle_ego": [
+     2.4,
+     -0.89
+    ],
+    "path_true_clearance": 0.025,
+    "circle": "memory",
+    "centre_err": 0.149,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.155
+   },
+   {
+    "scan": 94,
+    "brake": false,
+    "obstacle_ego": [
+     2.17,
+     -0.89
+    ],
+    "path_true_clearance": -0.045,
+    "circle": "memory",
+    "centre_err": 0.21,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.146
+   },
+   {
+    "scan": 95,
+    "brake": false,
+    "obstacle_ego": [
+     1.94,
+     -0.87
+    ],
+    "path_true_clearance": -0.065,
+    "circle": "memory",
+    "centre_err": 0.218,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.137
+   },
+   {
+    "scan": 96,
+    "brake": false,
+    "obstacle_ego": [
+     1.69,
+     -0.84
+    ],
+    "path_true_clearance": -0.081,
+    "circle": "memory",
+    "centre_err": 0.256,
+    "radius": 0.25,
+    "true_radius": 0.25,
+    "path_filter_clearance": 0.155
+   }
+  ]
+ }
+]
