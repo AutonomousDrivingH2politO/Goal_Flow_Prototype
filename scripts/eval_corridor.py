@@ -78,7 +78,7 @@ def _scene(seed: int):
 
 
 _GF = None
-LAMBDA3 = None    # set from the spread replay (median best-vs-3rd goal-group gap), DEVIATIONS 2026-11-27
+LAMBDA3 = 1.29    # from the spread replay (median best-vs-3rd goal-group gap), DEVIATIONS 2026-11-27
 
 
 def make_planner(name: str):

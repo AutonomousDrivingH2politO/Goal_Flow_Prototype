@@ -682,6 +682,12 @@ values confirmed by Can before any per-change run):**
   seen again (gate 0.3 m), and a remembered circle is dropped when the current scan's free channel covers its
   footprint; real obstacles with offset centres -> centre averaging as above; phantoms -> no (a2), (a) as is.
   (a2) is tested alone like the others.
+- **lambda3 = 1.29** (written 2026-11-27 05:20, before any per-change run): median best-vs-3rd goal-group gap of the
+  pre-filter critic score over 38,431 scans (seeds 0-99, L0 / L2 / L4; per level 1.30 / 1.29 / 1.28; interquartile
+  1.06-1.43), from `model_or_system/scanlog_spread/scans.csv`, a deterministic rerun that reproduced all 300 episodes of
+  the filter-on run (which itself reproduced the full run's 300 rows). Within 0.5-3, so the per-change runs start.
+  Values for the per-change runs: (a) entry_scans = 2; (b) lambda3 = 1.29; (c) edge_w = 1.0, margin 0.12 m; (d) refine
+  8 steps, top 16, lr 0.03.
 - **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
   at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
