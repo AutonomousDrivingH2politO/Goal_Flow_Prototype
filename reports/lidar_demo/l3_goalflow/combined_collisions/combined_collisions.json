@@ -1,0 +1,1437 @@
+{
+ "counts": {
+  "re-anchored to an offset observation": 9,
+  "dropped by the free-ray rule": 3,
+  "drifted": 1
+ },
+ "rows": [
+  {
+   "level": "L0",
+   "seed": 262,
+   "outcome": "collision",
+   "obstacle": 3,
+   "last_scan": 133,
+   "events_near_obstacle": [
+    {
+     "k": 106,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 107,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 108,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 109,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 110,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 111,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 112,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 113,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 114,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 115,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 116,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 117,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 118,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 119,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 120,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 121,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 122,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 123,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 124,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": -0.225,
+     "new_err": 0.0
+    },
+    {
+     "k": 125,
+     "kind": "reanchor",
+     "old_err": 0.0,
+     "new_nearest_obstacle": 3,
+     "new_surface_dist": 0.068,
+     "new_err": 0.293
+    }
+   ],
+   "path_true_clearance": -0.104,
+   "circle": "memory",
+   "centre_err": 0.275,
+   "path_filter_clearance": 0.171,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L1",
+   "seed": 225,
+   "outcome": "collision",
+   "obstacle": 1,
+   "last_scan": 90,
+   "events_near_obstacle": [
+    {
+     "k": 69,
+     "kind": "reanchor",
+     "old_err": 0.013,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.221,
+     "new_err": 0.004
+    },
+    {
+     "k": 70,
+     "kind": "reanchor",
+     "old_err": 0.006,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.221,
+     "new_err": 0.004
+    },
+    {
+     "k": 71,
+     "kind": "reanchor",
+     "old_err": 0.004,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.222,
+     "new_err": 0.003
+    },
+    {
+     "k": 72,
+     "kind": "reanchor",
+     "old_err": 0.015,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.215,
+     "new_err": 0.01
+    },
+    {
+     "k": 73,
+     "kind": "reanchor",
+     "old_err": 0.015,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.215,
+     "new_err": 0.01
+    },
+    {
+     "k": 74,
+     "kind": "reanchor",
+     "old_err": 0.009,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.191,
+     "new_err": 0.034
+    },
+    {
+     "k": 75,
+     "kind": "reanchor",
+     "old_err": 0.034,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.223,
+     "new_err": 0.002
+    },
+    {
+     "k": 76,
+     "kind": "reanchor",
+     "old_err": 0.003,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.219,
+     "new_err": 0.006
+    },
+    {
+     "k": 77,
+     "kind": "reanchor",
+     "old_err": 0.007,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.218,
+     "new_err": 0.007
+    },
+    {
+     "k": 78,
+     "kind": "reanchor",
+     "old_err": 0.017,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": -0.222,
+     "new_err": 0.003
+    },
+    {
+     "k": 79,
+     "kind": "reanchor",
+     "old_err": 0.003,
+     "new_nearest_obstacle": 1,
+     "new_surface_dist": 0.059,
+     "new_err": 0.284
+    }
+   ],
+   "path_true_clearance": -0.041,
+   "circle": "memory",
+   "centre_err": 0.256,
+   "path_filter_clearance": 0.214,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L1",
+   "seed": 355,
+   "outcome": "collision",
+   "obstacle": 13,
+   "last_scan": 41,
+   "events_near_obstacle": [
+    {
+     "k": 24,
+     "kind": "reanchor",
+     "old_err": 0.003,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.241,
+     "new_err": 0.009
+    },
+    {
+     "k": 25,
+     "kind": "reanchor",
+     "old_err": 0.009,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.248,
+     "new_err": 0.002
+    },
+    {
+     "k": 26,
+     "kind": "reanchor",
+     "old_err": 0.007,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.242,
+     "new_err": 0.008
+    },
+    {
+     "k": 27,
+     "kind": "reanchor",
+     "old_err": 0.007,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.245,
+     "new_err": 0.005
+    },
+    {
+     "k": 28,
+     "kind": "reanchor",
+     "old_err": 0.007,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.247,
+     "new_err": 0.003
+    },
+    {
+     "k": 29,
+     "kind": "reanchor",
+     "old_err": 0.009,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.247,
+     "new_err": 0.003
+    },
+    {
+     "k": 30,
+     "kind": "reanchor",
+     "old_err": 0.001,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": -0.246,
+     "new_err": 0.004
+    },
+    {
+     "k": 31,
+     "kind": "reanchor",
+     "old_err": 0.007,
+     "new_nearest_obstacle": 13,
+     "new_surface_dist": 0.036,
+     "new_err": 0.286
+    }
+   ],
+   "path_true_clearance": -0.086,
+   "circle": "memory",
+   "centre_err": 0.227,
+   "path_filter_clearance": 0.133,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L2",
+   "seed": 130,
+   "outcome": "collision",
+   "obstacle": 5,
+   "last_scan": 77,
+   "events_near_obstacle": [
+    {
+     "k": 59,
+     "kind": "reanchor",
+     "old_err": 0.034,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.218,
+     "new_err": 0.007
+    },
+    {
+     "k": 60,
+     "kind": "reanchor",
+     "old_err": 0.01,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.22,
+     "new_err": 0.005
+    },
+    {
+     "k": 61,
+     "kind": "reanchor",
+     "old_err": 0.011,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.221,
+     "new_err": 0.004
+    },
+    {
+     "k": 62,
+     "kind": "reanchor",
+     "old_err": 0.009,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.216,
+     "new_err": 0.009
+    },
+    {
+     "k": 63,
+     "kind": "reanchor",
+     "old_err": 0.012,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.206,
+     "new_err": 0.019
+    },
+    {
+     "k": 64,
+     "kind": "reanchor",
+     "old_err": 0.016,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.215,
+     "new_err": 0.01
+    },
+    {
+     "k": 65,
+     "kind": "reanchor",
+     "old_err": 0.02,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.218,
+     "new_err": 0.007
+    },
+    {
+     "k": 66,
+     "kind": "reanchor",
+     "old_err": 0.011,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.21,
+     "new_err": 0.015
+    },
+    {
+     "k": 67,
+     "kind": "reanchor",
+     "old_err": 0.015,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.215,
+     "new_err": 0.01
+    },
+    {
+     "k": 68,
+     "kind": "reanchor",
+     "old_err": 0.016,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": -0.211,
+     "new_err": 0.014
+    },
+    {
+     "k": 69,
+     "kind": "reanchor",
+     "old_err": 0.016,
+     "new_nearest_obstacle": 5,
+     "new_surface_dist": 0.04,
+     "new_err": 0.265
+    }
+   ],
+   "path_true_clearance": -0.078,
+   "circle": "memory",
+   "centre_err": 0.228,
+   "path_filter_clearance": 0.149,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L2",
+   "seed": 185,
+   "outcome": "collision",
+   "obstacle": 14,
+   "last_scan": 56,
+   "events_near_obstacle": [
+    {
+     "k": 42,
+     "kind": "reanchor",
+     "old_err": 0.015,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.245,
+     "new_err": 0.005
+    },
+    {
+     "k": 43,
+     "kind": "reanchor",
+     "old_err": 0.006,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.239,
+     "new_err": 0.011
+    },
+    {
+     "k": 44,
+     "kind": "reanchor",
+     "old_err": 0.018,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.242,
+     "new_err": 0.008
+    },
+    {
+     "k": 45,
+     "kind": "reanchor",
+     "old_err": 0.005,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.243,
+     "new_err": 0.007
+    },
+    {
+     "k": 46,
+     "kind": "reanchor",
+     "old_err": 0.006,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.236,
+     "new_err": 0.014
+    },
+    {
+     "k": 47,
+     "kind": "reanchor",
+     "old_err": 0.024,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.229,
+     "new_err": 0.021
+    },
+    {
+     "k": 48,
+     "kind": "reanchor",
+     "old_err": 0.012,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.243,
+     "new_err": 0.007
+    },
+    {
+     "k": 49,
+     "kind": "reanchor",
+     "old_err": 0.016,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.23,
+     "new_err": 0.02
+    },
+    {
+     "k": 50,
+     "kind": "reanchor",
+     "old_err": 0.009,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": 0.03,
+     "new_err": 0.28
+    }
+   ],
+   "path_true_clearance": -0.087,
+   "circle": "memory",
+   "centre_err": 0.257,
+   "path_filter_clearance": 0.169,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L2",
+   "seed": 273,
+   "outcome": "collision",
+   "obstacle": 8,
+   "last_scan": 145,
+   "events_near_obstacle": [
+    {
+     "k": 124,
+     "kind": "reanchor",
+     "old_err": 0.016,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.219,
+     "new_err": 0.006
+    },
+    {
+     "k": 125,
+     "kind": "reanchor",
+     "old_err": 0.015,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.203,
+     "new_err": 0.022
+    },
+    {
+     "k": 126,
+     "kind": "reanchor",
+     "old_err": 0.019,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.196,
+     "new_err": 0.029
+    },
+    {
+     "k": 127,
+     "kind": "reanchor",
+     "old_err": 0.03,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.219,
+     "new_err": 0.006
+    },
+    {
+     "k": 128,
+     "kind": "reanchor",
+     "old_err": 0.014,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.216,
+     "new_err": 0.009
+    },
+    {
+     "k": 129,
+     "kind": "reanchor",
+     "old_err": 0.012,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.222,
+     "new_err": 0.003
+    },
+    {
+     "k": 130,
+     "kind": "reanchor",
+     "old_err": 0.025,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.219,
+     "new_err": 0.006
+    },
+    {
+     "k": 131,
+     "kind": "reanchor",
+     "old_err": 0.018,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.214,
+     "new_err": 0.011
+    },
+    {
+     "k": 132,
+     "kind": "reanchor",
+     "old_err": 0.008,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.201,
+     "new_err": 0.024
+    },
+    {
+     "k": 133,
+     "kind": "reanchor",
+     "old_err": 0.018,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.199,
+     "new_err": 0.026
+    },
+    {
+     "k": 134,
+     "kind": "reanchor",
+     "old_err": 0.022,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.211,
+     "new_err": 0.014
+    },
+    {
+     "k": 135,
+     "kind": "reanchor",
+     "old_err": 0.011,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.198,
+     "new_err": 0.027
+    },
+    {
+     "k": 136,
+     "kind": "reanchor",
+     "old_err": 0.021,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": 0.02,
+     "new_err": 0.245
+    }
+   ],
+   "path_true_clearance": -0.078,
+   "circle": "memory",
+   "centre_err": 0.253,
+   "path_filter_clearance": 0.174,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L3",
+   "seed": 167,
+   "outcome": "collision",
+   "obstacle": 11,
+   "last_scan": 135,
+   "events_near_obstacle": [
+    {
+     "k": 120,
+     "kind": "reanchor",
+     "old_err": 0.023,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.223,
+     "new_err": 0.027
+    },
+    {
+     "k": 121,
+     "kind": "reanchor",
+     "old_err": 0.034,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.17,
+     "new_err": 0.08
+    },
+    {
+     "k": 122,
+     "kind": "reanchor",
+     "old_err": 0.123,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.223,
+     "new_err": 0.027
+    },
+    {
+     "k": 123,
+     "kind": "reanchor",
+     "old_err": 0.038,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.238,
+     "new_err": 0.012
+    },
+    {
+     "k": 124,
+     "kind": "reanchor",
+     "old_err": 0.028,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.247,
+     "new_err": 0.003
+    },
+    {
+     "k": 125,
+     "kind": "reanchor",
+     "old_err": 0.022,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.225,
+     "new_err": 0.025
+    },
+    {
+     "k": 126,
+     "kind": "reanchor",
+     "old_err": 0.037,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.217,
+     "new_err": 0.033
+    },
+    {
+     "k": 127,
+     "kind": "reanchor",
+     "old_err": 0.047,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.236,
+     "new_err": 0.014
+    },
+    {
+     "k": 128,
+     "kind": "reanchor",
+     "old_err": 0.01,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": -0.214,
+     "new_err": 0.036
+    },
+    {
+     "k": 129,
+     "kind": "reanchor",
+     "old_err": 0.075,
+     "new_nearest_obstacle": 11,
+     "new_surface_dist": 0.064,
+     "new_err": 0.314
+    },
+    {
+     "k": 130,
+     "kind": "drop",
+     "old_err": 0.276
+    }
+   ],
+   "path_true_clearance": -0.25,
+   "cause": "dropped by the free-ray rule"
+  },
+  {
+   "level": "L3",
+   "seed": 215,
+   "outcome": "collision",
+   "obstacle": 8,
+   "last_scan": 135,
+   "events_near_obstacle": [
+    {
+     "k": 102,
+     "kind": "reanchor",
+     "old_err": 0.03,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.21,
+     "new_err": 0.015
+    },
+    {
+     "k": 103,
+     "kind": "reanchor",
+     "old_err": 0.017,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.222,
+     "new_err": 0.003
+    },
+    {
+     "k": 104,
+     "kind": "reanchor",
+     "old_err": 0.006,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.185,
+     "new_err": 0.04
+    },
+    {
+     "k": 105,
+     "kind": "reanchor",
+     "old_err": 0.06,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.171,
+     "new_err": 0.054
+    },
+    {
+     "k": 106,
+     "kind": "reanchor",
+     "old_err": 0.039,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.209,
+     "new_err": 0.016
+    },
+    {
+     "k": 107,
+     "kind": "reanchor",
+     "old_err": 0.021,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.195,
+     "new_err": 0.03
+    },
+    {
+     "k": 108,
+     "kind": "reanchor",
+     "old_err": 0.029,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.193,
+     "new_err": 0.032
+    },
+    {
+     "k": 109,
+     "kind": "reanchor",
+     "old_err": 0.019,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.19,
+     "new_err": 0.035
+    },
+    {
+     "k": 110,
+     "kind": "reanchor",
+     "old_err": 0.01,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.19,
+     "new_err": 0.035
+    },
+    {
+     "k": 111,
+     "kind": "reanchor",
+     "old_err": 0.034,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.193,
+     "new_err": 0.032
+    },
+    {
+     "k": 112,
+     "kind": "reanchor",
+     "old_err": 0.069,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.222,
+     "new_err": 0.003
+    },
+    {
+     "k": 113,
+     "kind": "reanchor",
+     "old_err": 0.044,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.2,
+     "new_err": 0.025
+    },
+    {
+     "k": 114,
+     "kind": "reanchor",
+     "old_err": 0.022,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.181,
+     "new_err": 0.044
+    },
+    {
+     "k": 115,
+     "kind": "reanchor",
+     "old_err": 0.062,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.217,
+     "new_err": 0.008
+    },
+    {
+     "k": 116,
+     "kind": "reanchor",
+     "old_err": 0.019,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.194,
+     "new_err": 0.031
+    },
+    {
+     "k": 117,
+     "kind": "reanchor",
+     "old_err": 0.055,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.158,
+     "new_err": 0.067
+    },
+    {
+     "k": 118,
+     "kind": "reanchor",
+     "old_err": 0.068,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.186,
+     "new_err": 0.039
+    },
+    {
+     "k": 119,
+     "kind": "reanchor",
+     "old_err": 0.018,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.22,
+     "new_err": 0.005
+    },
+    {
+     "k": 120,
+     "kind": "reanchor",
+     "old_err": 0.02,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.216,
+     "new_err": 0.009
+    },
+    {
+     "k": 121,
+     "kind": "reanchor",
+     "old_err": 0.03,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.159,
+     "new_err": 0.066
+    },
+    {
+     "k": 122,
+     "kind": "reanchor",
+     "old_err": 0.059,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.121,
+     "new_err": 0.104
+    },
+    {
+     "k": 124,
+     "kind": "reanchor",
+     "old_err": 0.08,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": 0.035,
+     "new_err": 0.26
+    },
+    {
+     "k": 125,
+     "kind": "reanchor",
+     "old_err": 0.249,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": 0.05,
+     "new_err": 0.275
+    },
+    {
+     "k": 126,
+     "kind": "reanchor",
+     "old_err": 0.271,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": 0.21,
+     "new_err": 0.435
+    },
+    {
+     "k": 127,
+     "kind": "reanchor",
+     "old_err": 0.442,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": 0.023,
+     "new_err": 0.248
+    }
+   ],
+   "path_true_clearance": -0.037,
+   "circle": "memory",
+   "centre_err": 0.23,
+   "path_filter_clearance": 0.164,
+   "cause": "drifted"
+  },
+  {
+   "level": "L3",
+   "seed": 369,
+   "outcome": "collision",
+   "obstacle": 8,
+   "last_scan": 112,
+   "events_near_obstacle": [
+    {
+     "k": 89,
+     "kind": "reanchor",
+     "old_err": 0.004,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.182,
+     "new_err": 0.043
+    },
+    {
+     "k": 90,
+     "kind": "reanchor",
+     "old_err": 0.054,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.166,
+     "new_err": 0.059
+    },
+    {
+     "k": 91,
+     "kind": "reanchor",
+     "old_err": 0.09,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.161,
+     "new_err": 0.064
+    },
+    {
+     "k": 92,
+     "kind": "reanchor",
+     "old_err": 0.044,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.214,
+     "new_err": 0.011
+    },
+    {
+     "k": 93,
+     "kind": "reanchor",
+     "old_err": 0.056,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.202,
+     "new_err": 0.023
+    },
+    {
+     "k": 94,
+     "kind": "reanchor",
+     "old_err": 0.011,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.217,
+     "new_err": 0.008
+    },
+    {
+     "k": 95,
+     "kind": "reanchor",
+     "old_err": 0.008,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.201,
+     "new_err": 0.024
+    },
+    {
+     "k": 96,
+     "kind": "reanchor",
+     "old_err": 0.003,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.183,
+     "new_err": 0.042
+    },
+    {
+     "k": 97,
+     "kind": "reanchor",
+     "old_err": 0.021,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.212,
+     "new_err": 0.013
+    },
+    {
+     "k": 98,
+     "kind": "reanchor",
+     "old_err": 0.025,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": -0.157,
+     "new_err": 0.068
+    },
+    {
+     "k": 99,
+     "kind": "reanchor",
+     "old_err": 0.069,
+     "new_nearest_obstacle": 8,
+     "new_surface_dist": 0.053,
+     "new_err": 0.278
+    }
+   ],
+   "path_true_clearance": -0.053,
+   "circle": "memory",
+   "centre_err": 0.294,
+   "path_filter_clearance": 0.24,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L4",
+   "seed": 93,
+   "outcome": "collision",
+   "obstacle": 12,
+   "last_scan": 103,
+   "events_near_obstacle": [
+    {
+     "k": 92,
+     "kind": "reanchor",
+     "old_err": 0.055,
+     "new_nearest_obstacle": 12,
+     "new_surface_dist": -0.214,
+     "new_err": 0.036
+    },
+    {
+     "k": 93,
+     "kind": "reanchor",
+     "old_err": 0.079,
+     "new_nearest_obstacle": 12,
+     "new_surface_dist": -0.151,
+     "new_err": 0.099
+    },
+    {
+     "k": 94,
+     "kind": "reanchor",
+     "old_err": 0.13,
+     "new_nearest_obstacle": 12,
+     "new_surface_dist": -0.157,
+     "new_err": 0.093
+    },
+    {
+     "k": 95,
+     "kind": "reanchor",
+     "old_err": 0.091,
+     "new_nearest_obstacle": 12,
+     "new_surface_dist": -0.199,
+     "new_err": 0.051
+    },
+    {
+     "k": 96,
+     "kind": "reanchor",
+     "old_err": 0.028,
+     "new_nearest_obstacle": 12,
+     "new_surface_dist": -0.174,
+     "new_err": 0.076
+    },
+    {
+     "k": 97,
+     "kind": "reanchor",
+     "old_err": 0.11,
+     "new_nearest_obstacle": 12,
+     "new_surface_dist": -0.092,
+     "new_err": 0.158
+    },
+    {
+     "k": 98,
+     "kind": "drop",
+     "old_err": 0.153
+    }
+   ],
+   "path_true_clearance": -0.107,
+   "cause": "dropped by the free-ray rule"
+  },
+  {
+   "level": "L4",
+   "seed": 105,
+   "outcome": "collision",
+   "obstacle": 6,
+   "last_scan": 93,
+   "events_near_obstacle": [
+    {
+     "k": 82,
+     "kind": "reanchor",
+     "old_err": 0.185,
+     "new_nearest_obstacle": 6,
+     "new_surface_dist": -0.148,
+     "new_err": 0.102
+    },
+    {
+     "k": 83,
+     "kind": "reanchor",
+     "old_err": 0.105,
+     "new_nearest_obstacle": 6,
+     "new_surface_dist": -0.201,
+     "new_err": 0.049
+    },
+    {
+     "k": 84,
+     "kind": "reanchor",
+     "old_err": 0.053,
+     "new_nearest_obstacle": 6,
+     "new_surface_dist": -0.166,
+     "new_err": 0.084
+    },
+    {
+     "k": 85,
+     "kind": "reanchor",
+     "old_err": 0.052,
+     "new_nearest_obstacle": 6,
+     "new_surface_dist": -0.199,
+     "new_err": 0.051
+    },
+    {
+     "k": 86,
+     "kind": "reanchor",
+     "old_err": 0.106,
+     "new_nearest_obstacle": 6,
+     "new_surface_dist": -0.208,
+     "new_err": 0.042
+    },
+    {
+     "k": 87,
+     "kind": "reanchor",
+     "old_err": 0.094,
+     "new_nearest_obstacle": 6,
+     "new_surface_dist": -0.081,
+     "new_err": 0.169
+    },
+    {
+     "k": 88,
+     "kind": "drop",
+     "old_err": 0.197
+    }
+   ],
+   "path_true_clearance": -0.095,
+   "cause": "dropped by the free-ray rule"
+  },
+  {
+   "level": "L4",
+   "seed": 185,
+   "outcome": "collision",
+   "obstacle": 14,
+   "last_scan": 66,
+   "events_near_obstacle": [
+    {
+     "k": 42,
+     "kind": "reanchor",
+     "old_err": 0.093,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.18,
+     "new_err": 0.07
+    },
+    {
+     "k": 43,
+     "kind": "reanchor",
+     "old_err": 0.039,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.179,
+     "new_err": 0.071
+    },
+    {
+     "k": 44,
+     "kind": "reanchor",
+     "old_err": 0.099,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.171,
+     "new_err": 0.079
+    },
+    {
+     "k": 45,
+     "kind": "reanchor",
+     "old_err": 0.087,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.094,
+     "new_err": 0.156
+    },
+    {
+     "k": 46,
+     "kind": "reanchor",
+     "old_err": 0.19,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.223,
+     "new_err": 0.027
+    },
+    {
+     "k": 47,
+     "kind": "reanchor",
+     "old_err": 0.02,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.223,
+     "new_err": 0.027
+    },
+    {
+     "k": 48,
+     "kind": "reanchor",
+     "old_err": 0.057,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.128,
+     "new_err": 0.122
+    },
+    {
+     "k": 49,
+     "kind": "reanchor",
+     "old_err": 0.12,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.126,
+     "new_err": 0.124
+    },
+    {
+     "k": 50,
+     "kind": "reanchor",
+     "old_err": 0.092,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.221,
+     "new_err": 0.029
+    },
+    {
+     "k": 51,
+     "kind": "reanchor",
+     "old_err": 0.025,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.225,
+     "new_err": 0.025
+    },
+    {
+     "k": 52,
+     "kind": "reanchor",
+     "old_err": 0.045,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.228,
+     "new_err": 0.022
+    },
+    {
+     "k": 53,
+     "kind": "reanchor",
+     "old_err": 0.026,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.22,
+     "new_err": 0.03
+    },
+    {
+     "k": 54,
+     "kind": "reanchor",
+     "old_err": 0.05,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.122,
+     "new_err": 0.128
+    },
+    {
+     "k": 55,
+     "kind": "reanchor",
+     "old_err": 0.173,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.248,
+     "new_err": 0.002
+    },
+    {
+     "k": 56,
+     "kind": "reanchor",
+     "old_err": 0.029,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.161,
+     "new_err": 0.089
+    },
+    {
+     "k": 57,
+     "kind": "reanchor",
+     "old_err": 0.143,
+     "new_nearest_obstacle": 14,
+     "new_surface_dist": -0.01,
+     "new_err": 0.24
+    }
+   ],
+   "path_true_clearance": -0.08,
+   "circle": "memory",
+   "centre_err": 0.289,
+   "path_filter_clearance": 0.207,
+   "cause": "re-anchored to an offset observation"
+  },
+  {
+   "level": "L4",
+   "seed": 225,
+   "outcome": "collision",
+   "obstacle": 7,
+   "last_scan": 137,
+   "events_near_obstacle": [
+    {
+     "k": 124,
+     "kind": "reanchor",
+     "old_err": 0.093,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.09,
+     "new_err": 0.135
+    },
+    {
+     "k": 125,
+     "kind": "reanchor",
+     "old_err": 0.122,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.164,
+     "new_err": 0.061
+    },
+    {
+     "k": 126,
+     "kind": "reanchor",
+     "old_err": 0.041,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.13,
+     "new_err": 0.095
+    },
+    {
+     "k": 127,
+     "kind": "reanchor",
+     "old_err": 0.196,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.157,
+     "new_err": 0.068
+    },
+    {
+     "k": 128,
+     "kind": "reanchor",
+     "old_err": 0.086,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.193,
+     "new_err": 0.032
+    },
+    {
+     "k": 129,
+     "kind": "reanchor",
+     "old_err": 0.084,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.177,
+     "new_err": 0.048
+    },
+    {
+     "k": 130,
+     "kind": "reanchor",
+     "old_err": 0.078,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.207,
+     "new_err": 0.018
+    },
+    {
+     "k": 131,
+     "kind": "reanchor",
+     "old_err": 0.054,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": -0.191,
+     "new_err": 0.034
+    },
+    {
+     "k": 132,
+     "kind": "reanchor",
+     "old_err": 0.074,
+     "new_nearest_obstacle": 7,
+     "new_surface_dist": 0.059,
+     "new_err": 0.284
+    }
+   ],
+   "path_true_clearance": 0.001,
+   "circle": "memory",
+   "centre_err": 0.238,
+   "path_filter_clearance": 0.163,
+   "cause": "re-anchored to an offset observation"
+  }
+ ]
+}

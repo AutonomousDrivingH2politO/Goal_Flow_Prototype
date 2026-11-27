@@ -832,6 +832,48 @@ filter's and transfers; if its stalls rise sharply, the filter's false alarms (r
 classical planner the same way; either way the result informs whether GoalFlow-specific work (item 7) is worth it.
 No change to (a) or the filter is made on the basis of this run without Can.
 
+### Combined run, chain results and decisions (2026-11-27 evening)
+
+**Combined run** (`goalflow_l3_combined` = circles + (a2) memory fix + (c) edge critic; seeds 0-499 x L0-L4): success
+93.3 / 91.6 / 89.1 / 87.8 / 80.5%, collisions 0.2 / 0.4 / 0.6 / 0.8 / 1.0% (15 vs 2 for `goalflow_l3_circles`; 13
+"safety-filter miss, obstacle in hit memory"), stalls down at L2-L4, exits at L0 / L1 11 / 10 -> 4 / 2. **Decision
+(Can): goalflow_l3_combined is not the final config.**
+
+**Replay of the 13 filter-miss collisions** (`scripts/diagnose_combined_collisions.py`, all reproduced;
+`reports/lidar_demo/l3_goalflow/combined_collisions/`, one render per cause): **9 re-anchored to an offset observation**
+(the memory fix replaced the remembered centre with a current circle within 0.3 m that was farther from the truth;
+remembered centre then 0.23-0.29 m off, the filter saw 0.13-0.24 m clearance, the truth was -0.10 to 0.00 m; also at
+L0, so near-field partial clusters, not only range noise), **3 dropped by the free-ray rule** (L3 / L4), **1 drifted**;
+none re-anchored to a different obstacle or a noise cluster. So the memory fix's replacement step is the main cause:
+the running mean of sightings (old behaviour) is a better centre than the latest near-field observation.
+
+**Recorded (Can):**
+- **The per-change screening (300 episodes) cannot detect collision-rate changes around 0.5%; it only rules out large
+  harm.** (A 0.5% rate means ~1.5 expected collisions in 300 episodes.)
+- **(a)+filter beats goalflow_l3_combined on success and collisions at every level** ((a)+filter L0-L4: 94.8 / 0.0,
+  96.2 / 0.0, 96.4 / 0.0, 95.2 / 0.0, 85.5 / 0.2 % success / collision; (a) alone at L4 93.1 / 2.3). So the safety
+  advantage is the filter + memory, not the network. **The recommended planner for the car is the corridor-lattice
+  planner + this safety layer.** GoalFlow continues as a research track for real data.
+
+**juno_bangbang (item 5; seeds 0-99, L0 / L2 / L4; success % / collisions / stalls, vs constant 3 m/s on the same seeds):**
+GoalFlow combined 47.9 / 12 / 38, 51.0 / 9 / 37, 38.5 / 14 / 45 (vs 95.8 / 0 / 4, 93.8 / 0 / 6, 84.4 / 1 / 14);
+(b) 97.9 / 0 / 2, 96.9 / 0 / 3, 82.3 / 0 / 17; (a) 96.9 / 0 / 3, 99.0 / 0 / 1, 90.6 / 1 / 7; (c) 96.9 / 0 / 3, 99.0 / 0
+/ 1, 79.2 / 0 / 20. The baselines are unaffected (or better); **GoalFlow collapses**: 35 of its 40 collisions are
+"no safe candidate" (braking, but too late with the 0.3 s brake delay), stalls 120 (61 truly blocked). Untested
+hypotheses: the model was trained at 3 m/s only (ego speed 1.6-2.4 m/s is out of distribution, and its rollouts use the
+current speed), and its "no safe candidate" decisions come late, which the brake delay turns into contact. A separating
+test (e.g. zero brake delay, or the speed input fixed at 3 m/s) needs Can's approval. Another point for the
+corridor-lattice planner + safety layer on the car.
+
+**Scene overlap (item 8):** no dev scene (0-499) is a near-copy of a training scene (15,000 scenes, 100000+); nearest
+symmetric chamfer distance min 0.36 m, 5th percentile 0.81 m, median 1.35 m (sanity: a training scene finds itself at
+0). The closest pairs have 6-9 obstacles about 0.4-0.5 m apart on average; no memorisation concern.
+
+**Queue changes (Can):** item 7 drops "GoalFlow at EMX"; the EMX shift and roof-mount checks will be done for
+(a)+filter (waiting for Can). Item 9 drops the tracker birth rule. **Planned, not approved:** after the replay, freeze
+both final configs (GoalFlow and (a)+filter) and run each once on the fresh test seeds (400000+, all levels) for the
+final numbers.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

@@ -37,3 +37,63 @@ Fri Nov 27 19:50:03 CET 2026 item 4 latency profile: exit 0 (reports/lidar_demo/
 | 9 | cone | 33.9 / 100% (n=30) | 21.0 / 100% (n=37) | 14.5 / 96% (n=25) | 11.1 / 96% (n=23) | 7.8 / 82% (n=11) |
 | 9 | bollard | 30.5 / 100% (n=119) | 19.4 / 98% (n=132) | 14.0 / 97% (n=94) | 10.3 / 95% (n=95) | 8.2 / 90% (n=58) |
 Fri Nov 27 19:50:43 CET 2026 item 6 EMX pitch check: exit 0 (reports/lidar_demo/mounting/pitch_check.md)
+Fri Nov 27 20:46:58 CET 2026 item 5 juno_bangbang: GoalFlow exit 0, baselines last exit 0 (reports/lidar_demo/juno/)
+{
+ "dev_scenes": 500,
+ "train_scenes": 15000,
+ "sanity_self_chamfer": 0.0,
+ "near_copies": [],
+ "chamfer_min": 0.363,
+ "chamfer_p5": 0.8109000000000001,
+ "chamfer_median": 1.345,
+ "closest": [
+  {
+   "seed": 334,
+   "n": 6,
+   "nearest_train_seed": 103415,
+   "n_train": 7,
+   "chamfer": 0.363,
+   "classes_match": true,
+   "near_copy": false
+  },
+  {
+   "seed": 376,
+   "n": 7,
+   "nearest_train_seed": 113617,
+   "n_train": 7,
+   "chamfer": 0.442,
+   "classes_match": true,
+   "near_copy": false
+  },
+  {
+   "seed": 290,
+   "n": 6,
+   "nearest_train_seed": 109216,
+   "n_train": 6,
+   "chamfer": 0.45,
+   "classes_match": true,
+   "near_copy": false
+  },
+  {
+   "seed": 480,
+   "n": 9,
+   "nearest_train_seed": 112716,
+   "n_train": 8,
+   "chamfer": 0.507,
+   "classes_match": true,
+   "near_copy": false
+  },
+  {
+   "seed": 227,
+   "n": 7,
+   "nearest_train_seed": 109175,
+   "n_train": 6,
+   "chamfer": 0.516,
+   "classes_match": true,
+   "near_copy": false
+  }
+ ]
+}
+Fri Nov 27 20:52:13 CET 2026 item 8 scene overlap: exit 0 (reports/lidar_demo/scene_overlap/)
+done Fri Nov 27 20:52:13 CET 2026
+Fri Nov 27 20:52:13 CET 2026 chain done

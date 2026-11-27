@@ -38,19 +38,22 @@ Headline: GoalFlow is the safest planner at every level and matches (c) on succe
 success gap is stalls (L0-L1 mostly truly blocked, L2-L4 mostly filter false alarms). Door flips at L0-L2 trigger
 lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 
-## 5. Queue (updated 2026-11-27 20:40; one run at a time)
+## 5. Queue (updated 2026-11-27 21:10; nothing running, nothing approved)
 
-**Running (approved chain, `scripts/run_chain_after_combined.sh`, log `reports/lidar_demo/chain_after_combined.log`):**
-item 5 `juno_bangbang` (combined GoalFlow done; baselines (b) -> (a) -> (c) running, seeds 0-99 x L0/L2/L4, output
-`reports/lidar_demo/juno/`), then item 8 scene overlap. Chain end ~21:15. Each item appends a line at the end of this file.
+**Chain finished 20:52.** Replay of the 13 combined-run filter-miss collisions done (9 re-anchored to an offset
+observation, 3 dropped by the free-ray rule, 1 drifted; `reports/lidar_demo/l3_goalflow/combined_collisions/`).
 
-**Waiting for Can:**
-- **Final GoalFlow config.** The combined run (memory fix + edge critic) raised collisions 2 -> 15 vs `goalflow_l3_circles`
-  (13 "safety-filter miss, obstacle in hit memory"); success +0 to +2.1, stalls down at L2-L4, exits 11/10 -> 4/2.
-  Options: (1) replay the 13 filter-miss collisions with memory-event tracing (~15 min; recommended), (2) circles + edge
-  critic only, (3) keep combined.
-- Item 7 (EMX shift check, GoalFlow at EMX, roof-mount shift) and item 9 (brake column, tracker birth rule, seed 190/399
-  render fix, Orin expansion budget). Item 7 is lower priority after (a)+filter (below).
+**Decided (Can):** `goalflow_l3_combined` is not the final config; final GoalFlow config decided after the replay.
+Recommended planner for the car: corridor-lattice planner + the safety layer ((a)+filter). GoalFlow = research track.
+
+**Waiting for Can (nothing starts without approval):**
+- Final GoalFlow config after the replay (e.g. circles + edge critic, or the memory fix without re-anchoring).
+- Freeze both final configs (GoalFlow and (a)+filter) and run each once on the fresh test seeds 400000+, all levels
+  (planned, not approved).
+- GoalFlow's juno_bangbang collapse (35 of 40 collisions "no safe candidate"): a separating test (zero brake delay or
+  speed input fixed at 3 m/s) if wanted.
+- Item 7 for (a)+filter: EMX shift check, roof-mount check ("GoalFlow at EMX" dropped).
+- Item 9: brake-rate column, seed 190/399 render fix, Orin expansion budget (tracker birth rule dropped).
 
 **Results today (details in DEVIATIONS and the report folders):**
 - Combined run (`reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/COMPARISON.md`, McNemar + stall overlap
@@ -103,3 +106,6 @@ roof-mount shift), item 9. Progress lines below are appended by the script as it
 - 11-27 19:45 (a)+filter run: exit 0 (reports/lidar_demo/a_filter/)
 - 11-27 19:50 item 4 latency profile: exit 0 (reports/lidar_demo/l3_goalflow/latency/)
 - 11-27 19:50 item 6 EMX pitch check: exit 0 (reports/lidar_demo/mounting/pitch_check.md)
+- 11-27 20:46 item 5 juno_bangbang: GoalFlow exit 0, baselines last exit 0 (reports/lidar_demo/juno/)
+- 11-27 20:52 item 8 scene overlap: exit 0 (reports/lidar_demo/scene_overlap/)
+- 11-27 20:52 chain done
