@@ -537,23 +537,24 @@ front at 2.24 m from the rear axle, assuming symmetric 0.6375 m overhangs, still
 | mount_x [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] | 0.40 m cone invisible within [m from sensor / past bumper] | lowest beam hits ground [m from sensor / past bumper] | 0.40 m cone hit up to | 1.10 m bollard hit up to |
 |---|---|---|---|---|---|---|---|
 | 1.60 (front axle) | 10 | -22 / -2 | +0.86 | 1.73 / +1.10 | 2.72 / +2.09 | 31.5 m | 31.5 m |
-| 1.60 | 8 | -20 / +0 | +0.86 | 1.92 / +1.29 | 3.02 / +2.38 | max range (200 m @10%) | max range (200 m @10%) |
-| 1.60 | 7 | -19 / +1 | +0.86 | 2.03 / +1.40 | 3.19 / +2.56 | max range (200 m @10%) | max range (200 m @10%) |
-| 1.60 | 4 | -16 / +4 | +0.86 | 2.44 / +1.80 | 3.84 / +3.20 | max range (200 m @10%) | max range (200 m @10%) |
-| 1.60 | 0 | -12 / +8 | +0.86 | 3.29 / +2.66 | 5.18 / +4.54 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.60 | 8 | -20 / +0 | +0.86 | 1.92 / +1.29 | 3.02 / +2.38 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.60 | 7 | -19 / +1 | +0.86 | 2.03 / +1.40 | 3.19 / +2.56 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.60 | 4 | -16 / +4 | +0.86 | 2.44 / +1.80 | 3.84 / +3.20 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.60 | 0 | -12 / +8 | +0.86 | 3.29 / +2.66 | 5.18 / +4.54 | beyond sim max range (40 m) | beyond sim max range (40 m) |
 | 1.00 | 10 | -22 / -2 | +0.26 | 1.73 / +0.50 | 2.72 / +1.49 | 31.5 m | 31.5 m |
-| 1.00 | 8 | -20 / +0 | +0.26 | 1.92 / +0.69 | 3.02 / +1.78 | max range (200 m @10%) | max range (200 m @10%) |
-| 1.00 | 7 | -19 / +1 | +0.26 | 2.03 / +0.80 | 3.19 / +1.96 | max range (200 m @10%) | max range (200 m @10%) |
-| 1.00 | 4 | -16 / +4 | +0.26 | 2.44 / +1.20 | 3.84 / +2.60 | max range (200 m @10%) | max range (200 m @10%) |
-| 1.00 | 0 | -12 / +8 | +0.26 | 3.29 / +2.06 | 5.18 / +3.94 | max range (200 m @10%) | max range (200 m @10%) |
+| 1.00 | 8 | -20 / +0 | +0.26 | 1.92 / +0.69 | 3.02 / +1.78 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 7 | -19 / +1 | +0.26 | 2.03 / +0.80 | 3.19 / +1.96 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 4 | -16 / +4 | +0.26 | 2.44 / +1.20 | 3.84 / +2.60 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 0 | -12 / +8 | +0.26 | 3.29 / +2.06 | 5.18 / +3.94 | beyond sim max range (40 m) | beyond sim max range (40 m) |
 | 0.50 | 10 | -22 / -2 | -0.24 | 1.73 / -0.00 | 2.72 / +0.99 | 31.5 m | 31.5 m |
-| 0.50 | 8 | -20 / +0 | -0.24 | 1.92 / +0.19 | 3.02 / +1.28 | max range (200 m @10%) | max range (200 m @10%) |
-| 0.50 | 7 | -19 / +1 | -0.24 | 2.03 / +0.30 | 3.19 / +1.46 | max range (200 m @10%) | max range (200 m @10%) |
-| 0.50 | 4 | -16 / +4 | -0.24 | 2.44 / +0.70 | 3.84 / +2.10 | max range (200 m @10%) | max range (200 m @10%) |
-| 0.50 | 0 | -12 / +8 | -0.24 | 3.29 / +1.56 | 5.18 / +3.44 | max range (200 m @10%) | max range (200 m @10%) |
+| 0.50 | 8 | -20 / +0 | -0.24 | 1.92 / +0.19 | 3.02 / +1.28 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 7 | -19 / +1 | -0.24 | 2.03 / +0.30 | 3.19 / +1.46 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 4 | -16 / +4 | -0.24 | 2.44 / +0.70 | 3.84 / +2.10 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 0 | -12 / +8 | -0.24 | 3.29 / +1.56 | 5.18 / +3.44 | beyond sim max range (40 m) | beyond sim max range (40 m) |
 
 Far coverage (geometric; height 1.1 m): at pitch <= 8 deg the top beam is at or above the horizontal, so cones and
-bollards are hit at any range (up to the sensor's 200 m @ 10% and beam density); above 8 deg every beam points down
+bollards are hit beyond the simulator's 40 m max range (real reach is limited by the EMX's rated range on
+low-reflectivity targets, 200 m @ 10% NIST, and by beam density); above 8 deg every beam points down
 and nothing standing on the ground is hit beyond where the top beam meets the ground (1.1 m / tan(pitch - 8 deg): 31.5
 m at 10 deg). Every pitch below 8 deg leaves some beams above the horizontal (+1 / +4 / +8 deg at 7 / 4 / 0 deg pitch).
 **Far range needed:** a gap must be seen ~10 m before the swerve at 3 m/s, plus planning, so ~15-20 m; geometrically
@@ -582,54 +583,32 @@ and `roof` (1.05 m, 1.20 m, 7 deg; provisional until measured). Sim, raster and 
 sensor's vertical plane: roof edge 3.5 cm below the optical centre just ahead of it, windshield sloping 20 deg below
 the horizontal (from the photo) over 0.6 m, a mid-hood point, the nose top at 0.55 m height at the body front
 (`placeholder_body_profile`). Beams below its clearance angle hit the car; with a profile set, the simulator clips the
-lowest beam there (`LidarConfig.body_clearance_rad`; the `roof` preset sets it, `front_axle` does not). Roof preset:
+lowest beam there (`LidarConfig.body_clearance_rad`; the `roof` preset sets it, `front_axle` does not). Removing beams
+that hit the car is a simulator simplification: the real EMX returns points on the glass and hood, so AD-SEM needs a
+body crop box that drops them (car bring-up item, not simulation work). Roof preset:
 clearance -22.9 deg, so the steepest usable pitch is ~10.9 deg (lowest beam = -12 deg - pitch). It depends on the
 unmeasured windshield length: 0.4 / 0.6 / 0.9 / 1.2 m of glass give -24.3 / -22.9 / -21.9 / -21.5 deg, i.e. a steepest
 pitch of 12.3 / 10.9 / 9.9 / 9.5 deg; a long 20 deg windshield tends to ~8 deg.
 
 **Roof mounting table (analytic; blind zone 1.5 m; -12/+8 deg about the pitched axis; placeholder body profile):**
 
-| mount_x [m] | height [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] (front 2.35 / 2.445) | 0.40 m cone invisible past bumper [m] (2.35 / 2.445) | lowest beams hit windshield/hood | cone & bollard hit up to | beams on a cone at 20 m |
-|---|---|---|---|---|---|---|---|---|
-| 1.00 | 1.15 | 5 | -17 / +3 | +0.15 / +0.06 | +1.10 / +1.01 | no | max range | 12 |
-| 1.00 | 1.15 | 6 | -18 / +2 | +0.15 / +0.06 | +0.96 / +0.86 | no | max range | 12 |
-| 1.00 | 1.15 | 7 | -19 / +1 | +0.15 / +0.06 | +0.83 / +0.73 | no | max range | 12 |
-| 1.00 | 1.15 | 8 | -20 / +0 | +0.15 / +0.06 | +0.71 / +0.62 | no | max range | 12 |
-| 1.00 | 1.15 | 9 | -21 / -1 | +0.15 / +0.06 | +0.60 / +0.51 | no | 65.9 m | 12 |
-| 1.00 | 1.20 | 5 | -17 / +3 | +0.15 / +0.06 | +1.27 / +1.17 | no | max range | 12 |
-| 1.00 | 1.20 | 6 | -18 / +2 | +0.15 / +0.06 | +1.11 / +1.02 | no | max range | 12 |
-| 1.00 | 1.20 | 7 | -19 / +1 | +0.15 / +0.06 | +0.97 / +0.88 | no | max range | 12 |
-| 1.00 | 1.20 | 8 | -20 / +0 | +0.15 / +0.06 | +0.85 / +0.75 | no | max range | 12 |
-| 1.00 | 1.20 | 9 | -21 / -1 | +0.15 / +0.06 | +0.73 / +0.64 | no | 68.7 m | 12 |
-| 1.00 | 1.25 | 5 | -17 / +3 | +0.15 / +0.06 | +1.43 / +1.34 | no | max range | 12 |
-| 1.00 | 1.25 | 6 | -18 / +2 | +0.15 / +0.06 | +1.27 / +1.17 | no | max range | 12 |
-| 1.00 | 1.25 | 7 | -19 / +1 | +0.15 / +0.06 | +1.12 / +1.02 | no | max range | 12 |
-| 1.00 | 1.25 | 8 | -20 / +0 | +0.15 / +0.06 | +0.99 / +0.89 | no | max range | 12 |
-| 1.00 | 1.25 | 9 | -21 / -1 | +0.15 / +0.06 | +0.86 / +0.77 | no | 71.6 m | 12 |
-| 1.10 | 1.15 | 5 | -17 / +3 | +0.25 / +0.16 | +1.20 / +1.11 | no | max range | 12 |
-| 1.10 | 1.15 | 6 | -18 / +2 | +0.25 / +0.16 | +1.06 / +0.96 | no | max range | 12 |
-| 1.10 | 1.15 | 7 | -19 / +1 | +0.25 / +0.16 | +0.93 / +0.83 | no | max range | 12 |
-| 1.10 | 1.15 | 8 | -20 / +0 | +0.25 / +0.16 | +0.81 / +0.72 | no | max range | 12 |
-| 1.10 | 1.15 | 9 | -21 / -1 | +0.25 / +0.16 | +0.70 / +0.61 | no | 65.9 m | 12 |
-| 1.10 | 1.20 | 5 | -17 / +3 | +0.25 / +0.16 | +1.37 / +1.27 | no | max range | 12 |
-| 1.10 | 1.20 | 6 | -18 / +2 | +0.25 / +0.16 | +1.21 / +1.12 | no | max range | 12 |
-| 1.10 | 1.20 | 7 | -19 / +1 | +0.25 / +0.16 | +1.07 / +0.98 | no | max range | 12 |
-| 1.10 | 1.20 | 8 | -20 / +0 | +0.25 / +0.16 | +0.95 / +0.85 | no | max range | 12 |
-| 1.10 | 1.20 | 9 | -21 / -1 | +0.25 / +0.16 | +0.83 / +0.74 | no | 68.7 m | 12 |
-| 1.10 | 1.25 | 5 | -17 / +3 | +0.25 / +0.16 | +1.53 / +1.44 | no | max range | 12 |
-| 1.10 | 1.25 | 6 | -18 / +2 | +0.25 / +0.16 | +1.37 / +1.27 | no | max range | 12 |
-| 1.10 | 1.25 | 7 | -19 / +1 | +0.25 / +0.16 | +1.22 / +1.12 | no | max range | 12 |
-| 1.10 | 1.25 | 8 | -20 / +0 | +0.25 / +0.16 | +1.09 / +0.99 | no | max range | 12 |
-| 1.10 | 1.25 | 9 | -21 / -1 | +0.25 / +0.16 | +0.96 / +0.87 | no | 71.6 m | 12 |
+Summary (full table: `reports/lidar_demo/mounting/roof_table.csv`, 30 rows; mount_x 1.0 / 1.1 m, height 1.15 /
+1.20 / 1.25 m, pitch 5-9 deg, body front 2.35 / 2.445 m): blind zone past the bumper 0.06-0.25 m; 0.40 m cone
+invisible past the bumper 0.5-1.5 m (smaller with more pitch, larger with more height; ~1.0 m at 7 deg); with the
+placeholder windshield no lowest beam hits the car in any row; cones and bollards are hit beyond the sim's 40 m max
+range up to 8 deg pitch and up to 66-72 m at 9 deg (geometric); 12 vertical beams on a cone at 20 m.
 
 Beams on a cone at 20 m: vertical count at 0.1 deg spacing (12 for every row; the 2D simulator models one row).
-**Recommended pitch:** 7-8 deg. 8 deg is the steepest that keeps the top beam at the horizontal (unlimited far range)
+**Recommended pitch:** 7-8 deg. 8 deg is the steepest that keeps the top beam at the horizontal (far reach beyond the sim's 40 m, limited in reality by
+the EMX's rated range on dark targets)
 and still clears a 20 deg windshield of any length, but with no margin against an unmeasured steeper glass or mounting
 tolerance; 7 deg leaves 1 deg. Final choice after the measurement and the simulated pitch check.
 
-**All results so far use the front-axle mount (1.60 m, 1.10 m, 7 deg).** The final comparison and any retraining will
-use the measured roof mount: it moves the blind area and the cone-invisible zone in GoalFlow's input, so the
-front-axle numbers do not transfer as they are.
+**All results so far use the front-axle mount (1.60 m, 1.10 m, 7 deg).** The final comparison uses the measured roof
+mount: it moves the blind area and the cone-invisible zone in GoalFlow's input, so the front-axle numbers do not
+transfer as they are. Before any retraining, a roof-mount shift check (current model, `roof` preset, validation seeds
+250000+, same protocol as the EMX shift check, `scripts/emx_shift_check.py`); retrain only if it degrades. Queued after
+the EMX shift check.
 
 **Measurements needed (Can):** LiDAR optical-centre position (x from the rear axle) and height, and its pitch;
 windshield top edge and base (x, height); nose top (x, height); front and rear overhang. At first power-on: check the
