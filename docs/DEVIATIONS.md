@@ -548,6 +548,11 @@ within r + 0.15 m, occluded = 0; bollard at 2-5 / 8-12 / 18-22 m; cone likewise)
 5.3; L4 17.8 / 6.2 / 2.7 and 19.1 / 7.1 / 3.2; EMX 82.8 / 29.0 / 13.9 and 86.3 / 33.1 / 15.1; emx_L2art 74.9 / 26.0 /
 12.6 and 76.2 / 29.6 / 13.5; emx_L4art 49.2 / 16.9 / 7.8 and 47.6 / 19.4 / 8.1.
 
+**Beams-only result (2026-11-27; `reports/lidar_demo/emx_art/README.md`):** with the same artefacts the denser beam
+pattern does not help the classical baselines ((a): L2 98.7 vs emx_L2art 96.9, L4 93.1 vs emx_L4art 91.6; (c): 95.0 vs
+95.6, 78.0 vs 78.6). EMX scoring like L1-L2 comes from its assumed L1 artefacts, so the EMX headline depends on the
+real dropout / clutter / edge-noise / class-flip rates (to be measured from Juno recordings).
+
 **EMX baselines (2026-11-27, seeds 0-499; `reports/lidar_demo/emx_baselines/`):** success / collision / stalled % /
 exits: (b) 97.7 / 0.0 / 1.9 / 2, (a) 98.7 / 0.0 / 1.0 / 1, (c) 97.9 / 0.0 / 1.9 / 1; **EMX baseline = (a)** by the
 rule (reviewed). These use the **front-axle mount (1.60 m, 1.10 m, 7 deg) and constant 3 m/s**; the roof-mount and
@@ -688,6 +693,18 @@ values confirmed by Can before any per-change run):**
   the filter-on run (which itself reproduced the full run's 300 rows). Within 0.5-3, so the per-change runs start.
   Values for the per-change runs: (a) entry_scans = 2; (b) lambda3 = 1.29; (c) edge_w = 1.0, margin 0.12 m; (d) refine
   8 steps, top 16, lr 0.03.
+- **False-alarm diagnostic result (2026-11-27 06:05; `reports/lidar_demo/l3_goalflow/false_alarms/SUMMARY.md`; 139
+  episodes, all reproduced):** blocking circles at L2 / L3 / L4: remembered near-field 18 / 30 / 53, phantom 10 / 15 /
+  31, real 1 / 3 / 5, class-flipped 0 / 0 / 1. Remembered circles dominate (103 of 170 over all levels; centre error
+  median 0.08 / 0.14 / 0.23 m single vs 0.02 / 0.10 m for a 3-scan mean of current observations), so **(a2) = the
+  memory fix** (not centre averaging). **Visibility guard added to the drop rule** (necessary, flagged to Can): the
+  free channel clears cells along each ray regardless of obstacle height, so a near-field cone below the lowest beam
+  looks "free"; a remembered circle is therefore dropped only where the lowest beam would hit an obstacle of its class
+  (distance from the sensor >= (mount height - class height) / tan(lowest beam), outside the blind zone, fully inside
+  the FOV, every ray across its angular span returning beyond it). Without the guard the rule would delete exactly the
+  near-field cone memories the memory exists for. Replacement: the nearest current circle within 0.3 m (odom frame)
+  replaces the remembered centre and radius. `mem_fix=True`, variant `goalflow_l3_circles_memfix`, tested alone on
+  seeds 0-99 at L0 / L2 / L4 after the four (`scripts/run_memfix.sh`), same acceptance rule.
 - **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
   at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most

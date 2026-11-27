@@ -63,7 +63,8 @@ class GoalFlowPlanner:
                  visibility_gate: bool = False, memory_obs_range: float = 4.0, exact_filter: bool = False,
                  safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0,
                  circle_filter: bool = False, circle_gate: float = 0.6, filter_off: bool = False,
-                 log_scans: bool = False, entry_scans: int = 1, lambda3: float = 0.0, edge_w: float = 0.0):
+                 log_scans: bool = False, entry_scans: int = 1, lambda3: float = 0.0, edge_w: float = 0.0,
+                 mem_fix: bool = False):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
@@ -85,6 +86,12 @@ class GoalFlowPlanner:
         # circles exempt; lambda3: consistency with the previous chosen path; edge_w: track-edge hinge critic;
         # refine_steps with the circle filter: refinement against the circles.
         self.entry_scans, self.lambda3, self.edge_w = entry_scans, lambda3, edge_w
+        # (a2) memory fix: a remembered circle's centre is replaced by the matching current circle (gate 0.3 m), and a
+        # remembered circle is dropped when this scan's free rays cover its footprint, only where the lowest beam
+        # would hit an obstacle of its class (else the free channel passes over a near-field cone it cannot see)
+        self.mem_fix = mem_fix
+        from ..sim.config import LidarConfig
+        self.lidar = LidarConfig()                       # mount for the visibility guard (eval sets the run's mount)
         from ..sim.config import VehicleConfig
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
@@ -163,11 +170,14 @@ class GoalFlowPlanner:
         C, R, _ = cluster_obstacles(obs, self._ccfg, self._scfg)
         C = np.asarray(C, float).reshape(-1, 2)
         sx, sy = obs.sensor_xy
+        used = np.zeros(len(C), bool)
+        if self.mem_fix and self.circ:
+            self._mem_fix(obs, C, R, pose, used)
         if len(C):
             near = np.hypot(C[:, 0] - sx, C[:, 1] - sy) <= (self.memory_obs_range or 1e9)
             W = from_frame(C, pose)
-            for (x, y), r, nr in zip(W, R, near):
-                if not nr:
+            for (x, y), r, nr, u in zip(W, R, near, used):
+                if not nr or u:
                     continue
                 best, bd = None, self.circle_gate
                 for m in self.circ:
@@ -202,6 +212,45 @@ class GoalFlowPlanner:
             self.prev_C = np.zeros((0, 2))
         self.n_cur = len(cur)
         return np.concatenate([cur, rem]) if len(rem) else cur
+
+    def _mem_fix(self, obs, C, R, pose, used):
+        """(a2): re-observed remembered circles take the current centre (gate 0.3 m); unseen ones are dropped when the
+        free rays of this scan pass beyond them across their whole angular span, where they would be visible."""
+        import math
+        from ..sim.geometry import from_frame, to_frame
+        A = np.array(self.circ, float)
+        loc = to_frame(A[:, :2], pose)
+        W = from_frame(C, pose) if len(C) else np.zeros((0, 2))
+        sx, sy = obs.sensor_xy
+        ang, rng = obs.ray_angles, obs.scan_ranges
+        lo = -self.lidar.elev_range[0]                   # lowest beam below the horizontal (rad)
+        keep = np.ones(len(A), bool)
+        for i in range(len(A)):
+            if len(C):
+                d = np.hypot(W[:, 0] - A[i, 0], W[:, 1] - A[i, 1])
+                j = int(d.argmin())
+                if d[j] <= 0.3:
+                    self.circ[i][0], self.circ[i][1] = float(W[j, 0]), float(W[j, 1])
+                    self.circ[i][2] = float(R[j])
+                    self.circ[i][3] += 1
+                    used[j] = True
+                    continue
+            r = A[i, 2]
+            dx, dy = loc[i, 0] - sx, loc[i, 1] - sy
+            dist = math.hypot(dx, dy)
+            h_obj = self._scfg.bollard_height if abs(r - self._scfg.bollard_radius) < 1e-6 else self._scfg.cone_height
+            reach = (self.lidar.mount_height - h_obj) / math.tan(lo) if lo > 0 else 0.0
+            if dist - r <= obs.blind_zone or dist < reach:
+                continue                                  # inside the blind zone or below the lowest beam: keep
+            half = math.asin(min(1.0, r / dist))
+            b = math.atan2(dy, dx)
+            m = np.abs(ang - b) <= half
+            if not m.any() or b - half < ang[0] or b + half > ang[-1]:
+                continue                                  # (partly) outside the field of view: keep
+            rr = rng[m]
+            if np.all(np.isfinite(rr) & (rr > dist + r)):
+                keep[i] = False                           # free rays pass beyond its whole footprint
+        self.circ = [c for c, k in zip(self.circ, keep) if k]
 
     @torch.no_grad()
     def plan(self, obs, scene, true_pose, state):

@@ -54,6 +54,7 @@ LABELS = {
     "goalflow_l3_circles_lambda3": "goalflow_l3_circles + lambda3 consistency (change b)",
     "goalflow_l3_circles_edge": "goalflow_l3_circles + track-edge critic 1.0 (change c)",
     "goalflow_l3_circles_refine": "goalflow_l3_circles + refinement against circles (change d)",
+    "goalflow_l3_circles_memfix": "goalflow_l3_circles + memory fix: re-observation replaces, free rays drop (a2)",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -98,7 +99,8 @@ def make_planner(name: str):
                    "goalflow_l3_circles_entry2": dict(circle_filter=True, safety_margin=0.12, entry_scans=2),
                    "goalflow_l3_circles_lambda3": dict(circle_filter=True, safety_margin=0.12, lambda3=LAMBDA3),
                    "goalflow_l3_circles_edge": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0),
-                   "goalflow_l3_circles_refine": dict(circle_filter=True, safety_margin=0.12, refine_steps=8)}
+                   "goalflow_l3_circles_refine": dict(circle_filter=True, safety_margin=0.12, refine_steps=8),
+                   "goalflow_l3_circles_memfix": dict(circle_filter=True, safety_margin=0.12, mem_fix=True)}
     if name == "goalflow_l3_circles_lambda3":
         assert LAMBDA3 is not None, "lambda3 not set yet (spread replay)"
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
@@ -194,6 +196,8 @@ def run_one(job: tuple) -> dict:
     speed_mode = job[4] if len(job) > 4 else "constant"
     scene = _scene(seed)
     P = make_planner(name)
+    if hasattr(P, "lidar"):
+        P.lidar = LidarConfig.with_mount(mount)          # GoalFlow's visibility guard uses the run's mount
     gf = name.startswith("goalflow")
     from gfsem.sim.config import ControllerConfig
     simcfg = SimConfig(lidar=LidarConfig.with_mount(mount), control=ControllerConfig(speed_mode=speed_mode))
