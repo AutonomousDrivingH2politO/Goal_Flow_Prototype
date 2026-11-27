@@ -135,6 +135,9 @@ class LidarConfig:
     edge_range: float = 25.0              # road-edge points (segmentation + ground intensity)
     edge_spacing: float = 0.5
     clutter_band: tuple[float, float] = (-0.3, 1.2)  # |d| - W/2 band where clutter appears
+    # body profile below/ahead of the sensor in its vertical plane, (x from the rear axle, height) [m]; None = no
+    # self-occlusion (all runs so far). Beams steeper than the profile's clearance angle hit the car.
+    body_profile: tuple | None = None
 
     @property
     def n_rays(self) -> int:
@@ -148,9 +151,58 @@ class LidarConfig:
 
     @property
     def elev_range(self) -> tuple[float, float]:
-        """Absolute beam elevation range (radians, positive up)."""
-        return (math.radians(self.v_min_deg - self.pitch_deg),
-                math.radians(self.v_max_deg - self.pitch_deg))
+        """Absolute beam elevation range (radians, positive up); the lower bound is clipped to the body clearance
+        angle when a body profile is set (beams below it hit the car)."""
+        lo = math.radians(self.v_min_deg - self.pitch_deg)
+        clr = self.body_clearance_rad
+        return (max(lo, clr) if clr is not None else lo, math.radians(self.v_max_deg - self.pitch_deg))
+
+    @property
+    def body_clearance_rad(self) -> float | None:
+        """Steepest downward beam elevation that still clears the body profile (radians), or None."""
+        return body_clearance(self.mount_x, self.mount_height, self.body_profile)
+
+    @classmethod
+    def with_mount(cls, name: str, **kw) -> "LidarConfig":
+        """A LiDAR config at a named mount (LIDAR_MOUNTS); other fields default or from ``kw``."""
+        return cls(**{**LIDAR_MOUNTS[name], **kw})
+
+
+def body_clearance(sx: float, sz: float, profile, n: int = 200) -> float | None:
+    """Max elevation angle (radians) from the sensor (sx, sz) to the body polyline ``profile`` [(x, z), ...]
+    ahead of it: beams below this angle hit the car."""
+    if not profile:
+        return None
+    import numpy as np
+    P = np.asarray(profile, float)
+    best = -math.pi / 2
+    for a, b in zip(P[:-1], P[1:]):
+        t = np.linspace(0, 1, n)[:, None]
+        Q = a + t * (b - a)
+        ahead = Q[:, 0] > sx + 1e-6
+        if ahead.any():
+            best = max(best, float(np.max(np.arctan2(Q[ahead, 1] - sz, Q[ahead, 0] - sx))))
+    return best
+
+
+def placeholder_body_profile(sx: float, sz: float, body_front: float, edge_below: float = 0.035,
+                             glass_len: float = 0.60, glass_slope_deg: float = 20.0, nose_top_z: float = 0.55):
+    """ASSUMED windshield/hood profile until measured (DEVIATIONS): roof edge just ahead of / under the sensor
+    (``edge_below`` m below the optical centre), windshield sloping ``glass_slope_deg`` below the horizontal over
+    ``glass_len`` m (from the side photo), then a mid-hood point and the nose top at ``body_front``."""
+    ze = sz - edge_below
+    xb, zb = sx + glass_len, ze - glass_len * math.tan(math.radians(glass_slope_deg))
+    xm, zm = 0.5 * (xb + body_front), 0.5 * (zb + nose_top_z) + 0.03
+    return ((sx + 0.01, ze), (xb, zb), (xm, zm), (body_front, nose_top_z))
+
+
+# LiDAR mounts: mount_x from the rear axle, optical-centre height, pitch down. "front_axle" = every run so far;
+# "roof" = EMX on the roof at the base of the ZED support (top edge of the windshield), provisional until measured.
+LIDAR_MOUNTS = {
+    "front_axle": dict(mount_x=1.60, mount_height=1.10, pitch_deg=7.0),
+    "roof": dict(mount_x=1.05, mount_height=1.20, pitch_deg=7.0,
+                 body_profile=placeholder_body_profile(1.05, 1.20, 2.35)),
+}
 
 
 @dataclass(frozen=True)
@@ -165,6 +217,7 @@ class NoiseLevel:
     p_mis: float                 # class label flip probability
     drift_xy: float              # odom drift per replan, m (1 sigma)
     drift_yaw_deg: float         # odom drift per replan, deg (1 sigma)
+    h_step_deg: float | None = None   # horizontal ray step override (None = LidarConfig.h_step_deg, 0.2 deg)
 
 
 NOISE_LEVELS: dict[str, NoiseLevel] = {
@@ -173,7 +226,16 @@ NOISE_LEVELS: dict[str, NoiseLevel] = {
     "L2": NoiseLevel("L2", 0.05, 0.10, 0.15, 1.5, 0.15, 0.6, 0.08, 0.010, 0.10),
     "L3": NoiseLevel("L3", 0.08, 0.20, 0.30, 3.0, 0.25, 1.0, 0.12, 0.020, 0.20),
     "L4": NoiseLevel("L4", 0.12, 0.30, 0.45, 5.0, 0.40, 1.5, 0.20, 0.040, 0.40),
+    # Realistic RoboSense EMX (2026-11-26): range accuracy 5 cm @1 sigma and 0.08 deg horizontal resolution from the
+    # EMX user guide (Table 1); dropout, clutter, edge noise, class flips, drift and bearing jitter are not in the
+    # spec and use the L1 values (assumptions, DEVIATIONS). Not part of the L0-L4 ladder.
+    "EMX": NoiseLevel("EMX", 0.05, 0.05, 0.05, 0.5, 0.10, 0.3, 0.05, 0.005, 0.05, h_step_deg=0.08),
+    # beams-only comparison (2026-11-27): EMX beam pattern (0.08 deg) and range noise (0.05 m) with the L2 / L4
+    # artefacts (bearing jitter, dropout, clutter, edge noise/dropouts, class flips, drift), vs L2 / L4 themselves.
+    "emx_L2art": NoiseLevel("emx_L2art", 0.05, 0.10, 0.15, 1.5, 0.15, 0.6, 0.08, 0.010, 0.10, h_step_deg=0.08),
+    "emx_L4art": NoiseLevel("emx_L4art", 0.05, 0.30, 0.45, 5.0, 0.40, 1.5, 0.20, 0.040, 0.40, h_step_deg=0.08),
 }
+LADDER = ("L0", "L1", "L2", "L3", "L4")        # the robustness / stress levels (EMX is separate)
 
 
 @dataclass(frozen=True)
@@ -184,6 +246,29 @@ class ControllerConfig:
     timeout: float = 40.0        # s
     stop_speed: float = 0.05     # m/s, below this the car counts as stopped
     stop_hold: float = 1.0       # s stopped -> episode ends
+    # speed mode: "constant" (every result so far: the planner's speed, 3 m/s, accel/brake limits of the vehicle) or
+    # "juno_bangbang" (Juno's real controller: ICE valve open below v_lo, closed above v_hi, coasting in between;
+    # never brakes; the planner's brake command uses the real brake). Juno values are ASSUMED placeholders until
+    # measured (DEVIATIONS 2026-11-27).
+    speed_mode: str = "constant"
+    juno: "JunoSpeedConfig" = field(default_factory=lambda: JunoSpeedConfig())
+
+
+@dataclass(frozen=True)
+class JunoSpeedConfig:
+    v_lo: float = 1.67           # m/s (6 km/h): valve opens
+    v_hi: float = 2.22           # m/s (8 km/h): valve closes
+    a_open: float = 1.0          # m/s^2 valve open (assumed)
+    d_coast: float = 0.1         # m/s^2 coasting, valve closed (assumed)
+    valve_delay: float = 0.2     # s command to valve (assumed)
+    d_brake: float = 3.0         # m/s^2 brake (assumed)
+    brake_delay: float = 0.3     # s brake command to braking (assumed)
+
+    def stopping_distance(self, v: float | None = None, latency: float = 0.0) -> float:
+        """Distance from the brake decision to standstill from ``v`` (default v_hi): latency + brake delay at constant
+        speed, then constant deceleration."""
+        v = self.v_hi if v is None else v
+        return v * (latency + self.brake_delay) + v * v / (2 * self.d_brake)
 
 
 @dataclass(frozen=True)

@@ -21,7 +21,8 @@ def run(seeds=SEEDS, levels=LEVELS):
     for s in seeds:
         sc = generate_scene(s)
         for lv in levels:
-            r = run_episode(sc, CorridorObserved(LatticeCorridorPlanner(mode="observed"), "observed"), lv)
+            r = run_episode(sc, CorridorObserved(LatticeCorridorPlanner(mode="observed"), "observed"), lv,
+                            drift_per_distance=False)          # the 50e9ad9 reference used the time-based drift
             out[f"{s}/{lv}"] = {k: (round(float(getattr(r, k)), 9) if k in ("time", "min_clearance") else getattr(r, k))
                                 for k in FIELDS}
     return out

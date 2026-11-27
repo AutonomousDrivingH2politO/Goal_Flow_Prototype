@@ -25,6 +25,30 @@ class VehicleState:
         return VehicleState(self.x, self.y, self.yaw, self.v, self.steer)
 
 
+class JunoSpeed:
+    """Juno's speed control (``ControllerConfig.speed_mode == "juno_bangbang"``): bang-bang on the ICE valve with
+    hysteresis between v_lo and v_hi, valve and brake commands delayed (FIFO of dt steps). The planner's brake command
+    closes the valve and applies the brake (each after its delay); releasing it resumes the bang-bang."""
+
+    def __init__(self, cfg, dt: float):
+        self.c, self.dt = cfg, dt
+        self.valve = [False] * max(1, round(cfg.valve_delay / dt))     # pending commands, oldest first
+        self.brk = [False] * max(1, round(cfg.brake_delay / dt))
+        self.want_open = False
+
+    def target(self, v: float, brake_cmd: bool) -> float:
+        c = self.c
+        if v >= c.v_hi:
+            self.want_open = False
+        elif v <= c.v_lo:
+            self.want_open = True
+        self.valve.append(self.want_open and not brake_cmd)
+        self.brk.append(brake_cmd)
+        valve_on, brake_on = self.valve.pop(0), self.brk.pop(0)
+        a = -c.d_brake if brake_on else (c.a_open if valve_on else -c.d_coast)
+        return max(0.0, v + a * self.dt)
+
+
 def step(st: VehicleState, v_cmd: float, steer_cmd: float, dt: float, veh: VehicleConfig) -> VehicleState:
     """Rate-limited steering, accel-limited speed, then exact-enough Euler integration."""
     ds_max = math.radians(veh.max_steer_rate_deg) * dt

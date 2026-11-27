@@ -88,16 +88,19 @@ class ObstacleTracker:
         self.R = np.zeros(0)
         self.seen = np.zeros(0, int)
         self.missed = np.zeros(0, int)
+        self.sensor_x = 1.60
 
-    def in_view(self, loc: np.ndarray, sensor_x: float = 1.6) -> np.ndarray:
+    def in_view(self, loc: np.ndarray, sensor_x: float | None = None) -> np.ndarray:
+        sensor_x = self.sensor_x if sensor_x is None else sensor_x
         ang = np.arctan2(loc[:, 1], loc[:, 0] - sensor_x)
         rng = np.hypot(loc[:, 0] - sensor_x, loc[:, 1])
         return (np.abs(ang) <= math.radians(self.cfg.fov_deg / 2)) & (rng <= self.cfg.view_range) & (loc[:, 0] > sensor_x)
 
-    def update(self, centres: np.ndarray, radii: np.ndarray, pose_odom: np.ndarray):
+    def update(self, centres: np.ndarray, radii: np.ndarray, pose_odom: np.ndarray, sensor_x: float = 1.60):
         """Associate this scan's clusters (ego frame); returns tracked (centres, radii) in the ego frame:
         every current detection (smoothed if it matches a track) plus persisting confirmed tracks."""
         cfg = self.cfg
+        self.sensor_x = sensor_x                   # the LiDAR mount (obs.sensor_xy), for the field-of-view test
         Cm = from_frame(np.asarray(centres, float).reshape(-1, 2), pose_odom) if len(centres) else np.zeros((0, 2))
         Rm = np.asarray(radii, float).reshape(-1)
         nT = len(self.C)

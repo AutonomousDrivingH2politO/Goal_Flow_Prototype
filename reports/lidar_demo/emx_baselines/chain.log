@@ -1,0 +1,8 @@
+start Fri Nov 27 03:13:10 CET 2026 head 8e101c4
+config b (observed_l3) start Fri Nov 27 03:13:10 CET 2026
+config b exit 0 end Fri Nov 27 03:20:57 CET 2026
+config a (observed_stubfix) start Fri Nov 27 03:20:57 CET 2026
+config a exit 0 end Fri Nov 27 03:28:44 CET 2026
+config c (observed_l3_noedge) start Fri Nov 27 03:28:44 CET 2026
+config c exit 0 end Fri Nov 27 03:36:27 CET 2026
+done Fri Nov 27 03:36:27 CET 2026

@@ -1,0 +1,8 @@
+start Fri Nov 27 03:36:29 CET 2026 head 8a6db41
+goalflow_l3_circles_scanlog start Fri Nov 27 03:36:29 CET 2026
+goalflow_l3_circles_scanlog exit 0 end Fri Nov 27 04:11:28 CET 2026
+goalflow_l3_circles_filteroff start Fri Nov 27 04:11:28 CET 2026
+goalflow_l3_circles_filteroff exit 0 end Fri Nov 27 04:41:50 CET 2026
+done Fri Nov 27 04:41:50 CET 2026
+spread replay start Fri Nov 27 04:42:37 CET 2026 head 11f432a
+spread replay exit 0 end Fri Nov 27 05:16:57 CET 2026

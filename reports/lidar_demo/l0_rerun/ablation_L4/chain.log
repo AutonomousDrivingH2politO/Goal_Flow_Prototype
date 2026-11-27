@@ -1,0 +1,10 @@
+start Wed Nov 25 18:17:41 CET 2026 head 7381381
+observed_l3_nocache start Wed Nov 25 18:17:41 CET 2026
+observed_l3_nocache exit 0 end Wed Nov 25 18:32:48 CET 2026
+observed_l3_nohold start Wed Nov 25 18:32:48 CET 2026
+--- observed_l3_nocache_nohold: skipped by decision (cache never fires at L4); placeholder summary.md marks it
+observed_l3_nohold exit 0 end Wed Nov 25 18:45:47 CET 2026
+observed_l3_nocache_nohold already done, skipped
+observed_l3_nohyst start Wed Nov 25 18:45:47 CET 2026
+observed_l3_nohyst exit 0 end Wed Nov 25 19:01:02 CET 2026
+done Wed Nov 25 19:01:02 CET 2026

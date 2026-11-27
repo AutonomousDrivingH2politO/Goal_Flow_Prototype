@@ -82,6 +82,93 @@ def hits_distance(hits: torch.Tensor) -> torch.Tensor:
     return torch.from_numpy(out).to(hits.device)
 
 
+def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 0.12,
+                             max_step: float = 0.2) -> torch.Tensor:
+    """(B, M) bool: exact check. Juno's box along each executed path (poses densified to <= ``max_step`` m, headings
+    forward-filled) vs every hit point (points[b]: (N_b, 2) ego frame; current hits plus remembered stored points), or
+    every circle (points[b]: (N_b, 3) with the radius in the third column; distance to the circle surface): flagged
+    if the box-to-point distance is below ``margin``. No cells, no circle cover."""
+    from ..sim.config import VehicleConfig
+    veh = VehicleConfig.from_yaml()
+    x0, x1 = veh.body_x
+    h = veh.width / 2
+    B, M, T, _ = paths.shape
+    P = torch.cat([torch.zeros_like(paths[:, :, :1]), paths], 2)
+    seg = (P[:, :, 1:] - P[:, :, :-1]).norm(dim=-1)
+    f = int(min(max(math.ceil(float(seg.max()) / max_step), 1), 12))
+    w = torch.arange(f + 1, device=paths.device, dtype=paths.dtype)[:-1] / f
+    Q = (P[:, :, :-1, None] * (1 - w[:, None]) + P[:, :, 1:, None] * w[:, None]).flatten(2, 3)
+    Q = torch.cat([Q, P[:, :, -1:]], 2)                                            # (B, M, K, 2)
+    d = torch.diff(Q, dim=2)
+    yaw = torch.atan2(d[..., 1], d[..., 0])
+    yaw = torch.where(d.norm(dim=-1) > 1e-4, yaw, torch.full_like(yaw, float("nan")))
+    yaw = torch.cat([torch.zeros_like(yaw[..., :1]), yaw], 2)
+    for k in range(1, yaw.shape[2]):
+        yaw[..., k] = torch.where(torch.isnan(yaw[..., k]), yaw[..., k - 1], yaw[..., k])
+    out = torch.zeros(B, M, dtype=torch.bool, device=paths.device)
+    reach = math.hypot(max(abs(x0), abs(x1)), h) + margin + 0.5          # + max obstacle radius
+    for b in range(B):
+        pts = points[b]
+        if pts is None or len(pts) == 0:
+            continue
+        pts = torch.as_tensor(pts, dtype=paths.dtype, device=paths.device)
+        rad = pts[:, 2] if pts.shape[1] > 2 else torch.zeros(len(pts), dtype=paths.dtype, device=paths.device)
+        pts = pts[:, :2]
+        q, c, s_ = Q[b], torch.cos(yaw[b]), torch.sin(yaw[b])                     # (M, K, 2), (M, K)
+        near = ((q[:, :, None, :] - pts[None, None]).norm(dim=-1) <= reach + max(abs(x0), abs(x1)))
+        if not near.any():
+            continue
+        dx = pts[None, None, :, 0] - q[..., 0:1]
+        dy = pts[None, None, :, 1] - q[..., 1:2]
+        lx, ly = c[..., None] * dx + s_[..., None] * dy, -s_[..., None] * dx + c[..., None] * dy
+        dist = torch.hypot(lx - lx.clamp(x0, x1), ly - ly.clamp(-h, h)) - rad      # to the point / circle surface
+        out[b] = ((dist < margin) & near).flatten(1).any(1)
+    return out
+
+
+def observed_min_distance(paths: torch.Tensor, points, margin: float = 0.12, max_step: float = 0.2) -> torch.Tensor:
+    """(M,) minimum distance from Juno's box along each executed path (M, T, 2; ego frame; densified to <= ``max_step``,
+    headings forward-filled, as in ``observed_collision_exact``) to a point set (N, 2); +inf without points.
+
+    Exact below ``margin`` (all the edge critic uses): points outside the bounding box of every densified reference pose
+    (and the start), expanded by the box reach + ``margin``, cannot come within ``margin`` of the box and are skipped,
+    so beyond ``margin`` the returned value may be larger than the true distance (the critic is 0 either way). All
+    candidates and steps are computed in one batched operation (heading forward-fill by cummax, no loops)."""
+    from ..sim.config import VehicleConfig
+    veh = VehicleConfig.from_yaml()
+    x0, x1 = veh.body_x
+    h = veh.width / 2
+    M = paths.shape[0]
+    inf = torch.full((M,), float("inf"), dtype=paths.dtype, device=paths.device)
+    if points is None or len(points) == 0:
+        return inf
+    pts = np.asarray(points.cpu() if torch.is_tensor(points) else points, float).reshape(-1, 2)
+    Pc = paths.detach().cpu().numpy().reshape(-1, 2)
+    reach = math.hypot(max(abs(x0), abs(x1)), h) + margin + 1e-6
+    lo, hi = np.minimum(Pc.min(0), 0.0) - reach, np.maximum(Pc.max(0), 0.0) + reach
+    pts = pts[np.all((pts >= lo) & (pts <= hi), 1)]
+    if not len(pts):
+        return inf
+    pts = torch.as_tensor(pts, dtype=paths.dtype, device=paths.device)
+    P = torch.cat([torch.zeros_like(paths[:, :1]), paths], 1)
+    seg = (P[:, 1:] - P[:, :-1]).norm(dim=-1)
+    f = int(min(max(math.ceil(float(seg.max()) / max_step), 1), 12))
+    w = torch.arange(f + 1, device=paths.device, dtype=paths.dtype)[:-1] / f
+    Q = (P[:, :-1, None] * (1 - w[:, None]) + P[:, 1:, None] * w[:, None]).flatten(1, 2)
+    Q = torch.cat([Q, P[:, -1:]], 1)                                                # (M, K, 2)
+    d = torch.diff(Q, dim=1)
+    raw = torch.atan2(d[..., 1], d[..., 0])
+    valid = torch.cat([torch.ones_like(raw[:, :1], dtype=torch.bool), d.norm(dim=-1) > 1e-4], 1)
+    Y = torch.cat([torch.zeros_like(raw[:, :1]), raw], 1)
+    k = torch.arange(Y.shape[1], device=paths.device)[None].expand(M, -1)
+    yaw = Y.gather(1, torch.cummax(torch.where(valid, k, torch.zeros_like(k)), dim=1).values)   # forward fill
+    c, s_ = torch.cos(yaw), torch.sin(yaw)
+    dx = pts[None, None, :, 0] - Q[..., 0:1]
+    dy = pts[None, None, :, 1] - Q[..., 1:2]
+    lx, ly = c[..., None] * dx + s_[..., None] * dy, -s_[..., None] * dx + c[..., None] * dy
+    return torch.hypot(lx - lx.clamp(x0, x1), ly - ly.clamp(-h, h)).flatten(1).min(1).values
+
+
 def observed_collision(paths: torch.Tensor, hits: torch.Tensor, nx: int = 8, ny: int = 4,
                        max_step: float = 0.2, cell_slack: float = 0.1, dist: torch.Tensor | None = None) -> torch.Tensor:
     """(B, M) bool: does Juno's footprint along an executed path (B, M, T, 2; ego frame) come within reach of
@@ -186,13 +273,56 @@ class GoalFlow(nn.Module):
         x = euler_sample(lambda x, t: self.velocity(x, t, env, g_tok), x0, n_steps)
         return self.norm.inverse(x).view(B, M, self.cfg.T, 2)
 
+    def _refine(self, S_raw_b, f_b, pts, margin, steps, top, lr, v0, st0, roll):
+        """Gradient steps on the top raw candidates away from the hit points; returns (executed, raw) of the
+        best-ranked refined candidate that passes the exact filter, or None."""
+        from ..sim.config import VehicleConfig
+        if pts is None or len(pts) == 0:
+            return None
+        veh = VehicleConfig.from_yaml()
+        x0, x1 = veh.body_x
+        h = veh.width / 2
+        P = torch.as_tensor(pts, dtype=S_raw_b.dtype, device=S_raw_b.device)
+        rad = P[:, 2] if P.shape[1] > 2 else torch.zeros(len(P), dtype=P.dtype, device=P.device)   # circles: surface
+        idx = torch.argsort(torch.where(f_b > -1e8, f_b, f_b), descending=True)[:top]
+        w0 = S_raw_b[idx].detach()
+        w = w0.clone().requires_grad_(True)
+        opt = torch.optim.Adam([w], lr=lr)
+        with torch.enable_grad():
+            for _ in range(steps):
+                Q = torch.cat([torch.zeros_like(w[:, :1]), w], 1)
+                Q = torch.cat([Q[:, :1], torch.stack([0.5 * (Q[:, 1:] + Q[:, :-1]), Q[:, 1:]], 2).flatten(1, 2)], 1)
+                d = torch.diff(Q, dim=1)
+                yaw = torch.atan2(d[..., 1], d[..., 0] + 1e-6)
+                yaw = torch.cat([yaw[:, :1], yaw], 1)
+                c, s_ = torch.cos(yaw)[..., None], torch.sin(yaw)[..., None]
+                dx = P[None, None, :, 0] - Q[..., 0:1]
+                dy = P[None, None, :, 1] - Q[..., 1:2]
+                lx, ly = c * dx + s_ * dy, -s_ * dx + c * dy
+                dist = torch.sqrt((lx - lx.clamp(x0, x1)) ** 2 + (ly - ly.clamp(-h, h)) ** 2 + 1e-9) - rad
+                loss = torch.relu(margin + 0.08 - dist).pow(2).sum() + 0.5 * (w - w0).pow(2).sum(-1).mean()
+                opt.zero_grad()
+                loss.backward()
+                opt.step()
+        wr = w.detach()
+        ex = rollout(wr, v0.repeat(len(wr)), st0.repeat(len(wr)), roll) if roll is not None else wr
+        ok = ~observed_collision_exact(ex[None], [P], margin=margin)[0]
+        if not ok.any():
+            return None
+        i = int(torch.nonzero(ok)[0])                    # best-ranked refined candidate that passes
+        return ex[i], wr[i]
+
     @torch.no_grad()
     def plan(self, bev, ego, M: int = 128, n_steps: int = 1, lambdas=(1.0, 0.5, 0.0), w=(1.0, 1.0),
              prev_path: torch.Tensor | None = None, shadow_M: int = 16, shadow_thresh: float = 1.5,
              use_scorer: bool = True, use_dac: bool = True, use_goal: bool = True,
              roll: RolloutConfig | None = RolloutConfig(), goal_K: int = 1, goal_sep: float = 1.5,
              goal_floor: float = 3.0, l4: float = 1.0, safety: bool = False,
-             route_goals: torch.Tensor | None = None, safety_slack: float = 0.1):
+             route_goals: torch.Tensor | None = None, safety_slack: float = 0.1,
+             safety_hits: torch.Tensor | None = None, safety_points: list | None = None,
+             safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0, refine_top: int = 16,
+             edge_points: list | None = None, edge_w: float = 0.0,
+             refine_lr: float = 0.03):
         """Full GoalFlow (M3). Flags give the paper's ablations:
         M0: use_goal=False -> mean of goal-free samples; M1: use_dac=False, use_scorer=False (mean of
         goal-conditioned samples); M2: use_scorer=False; M3: all on.
@@ -203,7 +333,12 @@ class GoalFlow(nn.Module):
         ``route_goals`` (B, K) vocabulary indices: use these K goals instead of NMS (route-based selection,
         computed outside, e.g. from the observed corridor planner's routes).
         ``safety``: drop candidates whose executed footprint touches an observed hit cell (keep all if
-        none survive; ``no_safe`` reports it)."""
+        none survive; ``no_safe`` reports it).
+        ``goal_jitter`` > 0 (tight-gap variant a): each NMS goal also shifted +-goal_jitter m sideways (normal to its
+        heading), each copy with its parent's score; M split over all goals.
+        ``refine_steps`` > 0 (tight-gap variant b; exact filter only): if no candidate is safe, the ``refine_top``
+        best-scored raw candidates get a few gradient steps pushing Juno's box away from the hit points (hinge at the
+        margin + 0.08 m, pull to the original path), are rolled out again and re-checked by the same exact filter."""
         F_bev, F_ego, _ = self.perceive(bev, ego)
         dis, dac = self.scorer(F_bev, F_ego)
         vocab = self.scorer.vocab
@@ -230,6 +365,16 @@ class GoalFlow(nn.Module):
             G, G_score = vocab[route_goals], score.gather(1, route_goals)
         elif goal_K > 1 and use_scorer:
             G, G_score = diverse_goals(score, vocab, goal_K, goal_sep, goal_floor)      # (B, K, 3), (B, K)
+        if goal_jitter > 0 and goal_K > 1 and use_scorer:
+            nrm = torch.stack([-torch.sin(G[..., 2]), torch.cos(G[..., 2])], -1)          # (B, K, 2)
+            Gs = [G]
+            for sgn in (1.0, -1.0):
+                Gj = G.clone()
+                Gj[..., :2] = G[..., :2] + sgn * goal_jitter * nrm
+                Gs.append(Gj)
+            G = torch.stack(Gs, 2).flatten(1, 2)                                            # (B, 3K, 3)
+            G_score = G_score.repeat_interleave(3, 1)
+            goal_K = G.shape[1]
         if goal_K > 1 and use_scorer:
             Mk = M // goal_K
             S_raw = torch.cat([self.sample(F_bev, F_ego, G[:, k], Mk, n_steps) for k in range(goal_K)], 1)
@@ -252,14 +397,43 @@ class GoalFlow(nn.Module):
         if goal_K > 1:                                            # prefer the better-scored route
             f = f + l4 * minmax(G_score[ar[:, None], goal_of])
         if l3 > 0 and prev_path is not None:
-            f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
+            # consistency: mean distance of each candidate's points to the nearest point of the previous chosen path
+            # (prev_path (B, K, 2) in the current ego frame, any K), min-max normalised: a full door flip costs l3
+            if isinstance(prev_path, (list, tuple)):
+                for b, pp in enumerate(prev_path):
+                    if pp is not None and len(pp):
+                        pp = torch.as_tensor(pp, dtype=S.dtype, device=S.device)
+                        dd = (S[b, :, :, None] - pp[None, None]).norm(dim=-1).min(-1).values.mean(-1)
+                        f[b] = f[b] - l3 * minmax(dd[None])[0]
+            else:
+                f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
+        if edge_w > 0 and edge_points is not None:
+            # track-edge critic: hinge below the 0.12 m filter margin, not normalised (zero when clear)
+            for b, ep in enumerate(edge_points):
+                d = observed_min_distance(S[b], ep, margin=safety_margin)
+                f[b] = f[b] - edge_w * ((safety_margin - d) / safety_margin).clamp(0, 1)
+        out["scores_raw"] = f.clone()                             # before the safety mask (top-ranked = argmax)
         if safety:                                                # observed hits only (no privileged input)
-            safe = ~observed_collision(S, bev[:, 0], cell_slack=safety_slack)
+            if safety_points is not None:                         # exact box-to-point check (margin in m)
+                safe = ~observed_collision_exact(S, safety_points, margin=safety_margin)
+            else:
+                hits = bev[:, 0] if safety_hits is None else safety_hits     # (B, H, W); default: this scan only
+                safe = ~observed_collision(S, hits, cell_slack=safety_slack)
             any_safe = safe.any(1, keepdim=True)
             f = torch.where(safe | ~any_safe, f, torch.full_like(f, -1e9))
             out.update(safe=safe, no_safe=~any_safe[:, 0])
         best = f.argmax(1)
         traj = S[ar, best]
+        traj_raw_sel = S_raw[ar, best]
+        if safety and refine_steps > 0 and safety_points is not None:
+            out["refined"] = torch.zeros(B, dtype=torch.bool, device=bev.device)
+            for b in torch.nonzero(out["no_safe"]).flatten().tolist():
+                res = self._refine(S_raw[b], f[b], safety_points[b], safety_margin, refine_steps, refine_top,
+                                   refine_lr, v0[b], st0[b], roll)
+                if res is not None:
+                    traj[b], traj_raw_sel[b] = res
+                    out["no_safe"][b] = False
+                    out["refined"][b] = True
         out["goal_sel"] = G[ar, goal_of[ar, best]]
         # shadow: goal masked; its best sample by the goal-free term (progress), never the mean
         # (averaging the shadow samples would bring back mode averaging)
@@ -269,6 +443,6 @@ class GoalFlow(nn.Module):
         use_shadow = dev > shadow_thresh
         traj_main = traj
         traj = torch.where(use_shadow[:, None, None], sh_best, traj)
-        out.update(samples=S, traj=traj, traj_raw=S_raw[ar, best], scores=f, best=best, shadow=shadow,
+        out.update(samples=S, traj=traj, traj_raw=traj_raw_sel, scores=f, best=best, shadow=shadow,
                    used_shadow=use_shadow, traj_main=traj_main, traj_shadow=sh_best, shadow_dev=dev)
         return out

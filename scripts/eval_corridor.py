@@ -38,9 +38,30 @@ LABELS = {
     "teacher": "corridor-lattice, privileged (teacher)",
     "observed": "corridor-lattice, observed, pre-L3 (50e9ad9)",
     "observed_stubfix": "corridor-lattice, observed, pre-L3 + goal-line stub fix (a)",
+    "observed_stubfix_filter": "(a) + GoalFlow's exact 0.12 m circle filter and near-field memory (memory fix)",
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
+    "goalflow_l3": "GoalFlow, closed loop (NMS-K3 + safety, shadow off, 1 step, single-scan BEV; near-observation memory)",
+    "goalflow_l3_nearobs": "GoalFlow, closed loop (= goalflow_l3; near-observation memory)",
+    "goalflow_l3_visgate": "GoalFlow, closed loop (visibility-gate memory; lost the pre-set rule)",
+    "goalflow_l3_exact": "GoalFlow, closed loop (goalflow_l3 + exact box-to-point safety filter, 0.12 m)",
+    "goalflow_l3_exact_jitter": "GoalFlow, closed loop (exact filter + goal jitter +-0.3 m)",
+    "goalflow_l3_exact_refine": "GoalFlow, closed loop (exact filter + 8 gradient steps when no candidate is safe)",
+    "goalflow_l3_circles": "GoalFlow, closed loop (exact 0.12 m filter against fitted obstacle circles + circle memory)",
+    "goalflow_l3_circles_scanlog": "goalflow_l3_circles with per-scan logging (filter on)",
+    "goalflow_l3_circles_filteroff": "goalflow_l3_circles, safety filter off (verdict logged, not applied), memory on",
+    "goalflow_l3_circles_entry2": "goalflow_l3_circles + 2-scan entry rule (change a)",
+    "goalflow_l3_circles_lambda3": "goalflow_l3_circles + lambda3 consistency (change b)",
+    "goalflow_l3_circles_edge": "goalflow_l3_circles + track-edge critic 1.0 (change c)",
+    "goalflow_l3_circles_refine": "goalflow_l3_circles + refinement against circles (change d)",
+    "goalflow_l3_circles_memfix": "goalflow_l3_circles + memory fix: re-observation replaces, free rays drop (a2)",
+    "goalflow_l3_combined": "GoalFlow combined: circles + memory fix (a2) + track-edge critic (c)",
+    "goalflow_final": "GoalFlow final (frozen): circles filter + near-field memory + track-edge critic",
+    "observed_l3_nocache": "(b) without the failed-search cache",
+    "observed_l3_nohold": "(b) without hold",
+    "observed_l3_nocache_nohold": "(b) without cache and hold",
+    "observed_l3_nohyst": "(b) without kept-plan hysteresis and fallback",
     "funnel_priv": "corridor-funnel (original design), privileged",
     "funnel_obs": "corridor-funnel (original design), observed",
 }
@@ -60,7 +81,42 @@ def _scene(seed: int):
     return generate_scene(seed)
 
 
+_GF = None
+LAMBDA3 = 1.29    # from the spread replay (median best-vs-3rd goal-group gap), DEVIATIONS 2026-11-27
+
+
 def make_planner(name: str):
+    global _GF
+    gf_variants = {"goalflow_l3": dict(),                     # picked (pre-set rule): near-observation memory
+                   "goalflow_l3_nearobs": dict(),             # alias of goalflow_l3 (name used in the smoke test)
+                   "goalflow_l3_visgate": dict(visibility_gate=True, memory_obs_range=0.0),   # lost the rule
+                   "goalflow_l3_exact": dict(exact_filter=True, safety_margin=0.12),        # exact box-to-point filter
+                   "goalflow_l3_exact_jitter": dict(exact_filter=True, safety_margin=0.12, goal_jitter=0.3),
+                   "goalflow_l3_exact_refine": dict(exact_filter=True, safety_margin=0.12, refine_steps=8),
+                   "goalflow_l3_circles": dict(circle_filter=True, safety_margin=0.12),   # circles, as baseline (a)
+                   # model or system? (DEVIATIONS 2026-11-27): same planner with per-scan logging, filter on / off
+                   "goalflow_l3_circles_scanlog": dict(circle_filter=True, safety_margin=0.12, log_scans=True),
+                   "goalflow_l3_circles_filteroff": dict(circle_filter=True, safety_margin=0.12, log_scans=True,
+                                                         filter_off=True),
+                   # pre-registered per-change runs (DEVIATIONS 2026-11-27), each alone on top of goalflow_l3_circles
+                   "goalflow_l3_circles_entry2": dict(circle_filter=True, safety_margin=0.12, entry_scans=2),
+                   "goalflow_l3_circles_lambda3": dict(circle_filter=True, safety_margin=0.12, lambda3=LAMBDA3),
+                   "goalflow_l3_circles_edge": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0),
+                   "goalflow_l3_circles_refine": dict(circle_filter=True, safety_margin=0.12, refine_steps=8),
+                   "goalflow_l3_circles_memfix": dict(circle_filter=True, safety_margin=0.12, mem_fix=True),
+                   # combined config (Can, 2026-11-27): (a2) memory fix + (c) edge critic; (a), lambda3 off; (d) out
+                   # on its brake-scan latency cost (DEVIATIONS)
+                   "goalflow_l3_combined": dict(circle_filter=True, safety_margin=0.12, mem_fix=True, edge_w=1.0),
+                   # FROZEN final GoalFlow config (Can, 2026-11-27; DEVIATIONS): circles + track-edge critic, no memory fix
+                   "goalflow_final": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0)}
+    if name == "goalflow_l3_circles_lambda3":
+        assert LAMBDA3 is not None, "lambda3 not set yet (spread replay)"
+    if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
+        if _GF is None:
+            from gfsem.planners.goalflow_planner import GoalFlowPlanner
+            _GF = GoalFlowPlanner(**gf_variants[name])
+            _GF.name = name
+        return _GF
     from gfsem.planners.corridor import CorridorConfig, CorridorPlanner
     from gfsem.planners.corridor_lattice import LatticeCorridorPlanner, l3_config
     from gfsem.sim.closed_loop import CorridorObserved, CorridorPrivileged
@@ -70,12 +126,21 @@ def make_planner(name: str):
         return CorridorObserved(LatticeCorridorPlanner(mode="observed"), name)
     if name == "observed_stubfix":    # config (a): pre-L3 + goal-line stub fix (A6)
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name)
+    if name == "observed_stubfix_filter":   # (a) + GoalFlow's safety filter and near-field memory (DEVIATIONS)
+        from gfsem.planners.safety_wrap import FilteredObserved
+        return FilteredObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name)
     if name == "observed_l3":         # config (b): stub fix + approved L3 set, no time budget
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config()), name)
     if name == "observed_l3_noedge":  # config (c): (b) without edge memory (fair vs single-scan GoalFlow BEV)
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config(edge_memory=False)), name)
+    abl = {"observed_l3_nocache": dict(fail_cache_scans=0), "observed_l3_nohold": dict(hold_confirm=1),
+           "observed_l3_nocache_nohold": dict(fail_cache_scans=0, hold_confirm=1),
+           "observed_l3_nohyst": dict(keep_hysteresis=False, fallback=False)}
+    if name in abl:                   # stall ablations of (b)
+        return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
+                                                       lcfg=l3_config(**abl[name])), name)
     if name == "observed_l3_notrack": # config (d): (b) without obstacle tracking
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config(tracking=False)), name)
@@ -86,24 +151,98 @@ def make_planner(name: str):
     raise ValueError(name)
 
 
-def run_one(job: tuple[str, int, str]) -> dict:
+def _stall_diag(lb: dict, scene, veh) -> dict:
+    """At the last "no safe candidate" scan: best true clearance among the candidates (Juno's box vs the true
+    discs); the filter element (circle / point) that flags the truly best candidate: its offset from the nearest true
+    obstacle (centre distance for circles) and that candidate's true clearance."""
+    import torch
+    from gfsem.models.goalflow import observed_collision_exact
+    from gfsem.sim.geometry import to_frame
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from eval_selection import path_clearance
+    T = to_frame(scene.centres, lb["true_pose"])
+    O = torch.zeros(1, scene.n, 3)
+    O[0, :, :2] = torch.from_numpy(T)
+    O[0, :, 2] = torch.from_numpy(scene.radii)
+    S = torch.from_numpy(lb["S"]).float()
+    clr = path_clearance(S, O.expand(len(S), -1, -1), torch.full((len(S),), scene.n), veh).numpy()
+    i = int(clr.argmax())
+    out = {"stall_best_true_clearance": round(float(clr[i]), 3)}
+    F = lb["filt"]
+    for j in range(len(F)):
+        if observed_collision_exact(S[i:i + 1][None], [torch.from_numpy(F[j:j + 1]).float()], 0.12)[0, 0]:
+            off = float(np.hypot(*(T - F[j, :2]).T).min()) if scene.n else float("nan")
+            out.update(stall_blocker_offset=round(off, 3), stall_blocker_true_clearance=round(float(clr[i]), 3))
+            break
+    return out
+
+
+def _scan_rows(planner, scene, veh) -> list:
+    """Per scan: was the top-ranked candidate rejected by the filter, its true clearance, and the executed path's true
+    clearance (empty if braking); true clearance = Juno's box vs the true obstacle discs at the true pose."""
+    import torch
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from eval_selection import path_clearance
+    from gfsem.sim.geometry import to_frame
+    out = []
+    for L in planner.scan_log:
+        T = to_frame(scene.centres, L["true_pose"]) if scene.n else np.zeros((0, 2))
+        O = torch.zeros(1, max(scene.n, 1), 3)
+        O[0, :scene.n, :2] = torch.from_numpy(T)
+        O[0, :scene.n, 2] = torch.from_numpy(scene.radii)
+        P = [L["top"]] + ([L["exe"]] if L["exe"] is not None else [])
+        c = path_clearance(torch.from_numpy(np.stack(P)).float(), O.expand(len(P), -1, -1),
+                           torch.full((len(P),), scene.n), veh).numpy()
+        out.append((L["k"], int(L["top_rejected"]), round(float(c[0]), 3), int(L["no_safe"]),
+                    round(float(c[1]), 3) if len(c) > 1 else "", round(L.get("spread", float("nan")), 4)))
+    planner.scan_log = []
+    return out
+
+
+def run_one(job: tuple) -> dict:
     from gfsem.sim.closed_loop import run_episode
-    name, seed, level = job
+    from gfsem.sim.config import LidarConfig, SimConfig
+    name, seed, level = job[:3]
+    mount = job[3] if len(job) > 3 else "front_axle"
+    speed_mode = job[4] if len(job) > 4 else "constant"
     scene = _scene(seed)
     P = make_planner(name)
-    r = run_episode(scene, P, level)
+    if hasattr(P, "lidar"):
+        P.lidar = LidarConfig.with_mount(mount)          # GoalFlow's visibility guard uses the run's mount
+    gf = name.startswith("goalflow")
+    from gfsem.sim.config import ControllerConfig
+    simcfg = SimConfig(lidar=LidarConfig.with_mount(mount), control=ControllerConfig(speed_mode=speed_mode))
+    r = run_episode(scene, P, level, simcfg, record=gf)
     row = r.row()
-    stats = getattr(P.p, "stats", [])
+    row["mount"] = mount
+    row["speed_mode"] = speed_mode
+    inner = getattr(P, "p", P)
+    stats = getattr(inner, "stats", [])
+    if gf:
+        from gfsem.planners.goalflow_planner import collision_cause
+        from gfsem.sim.config import SimConfig
+        cfg = simcfg
+        row["collision_cause"] = (collision_cause(inner, scene, r.trajectory[-1, :3], cfg.vehicle, cfg.lidar)
+                                  if r.outcome == "collision" else "")
+        row["stall_best_true_clearance"] = ""
+        row["stall_blocker_offset"] = ""
+        row["stall_blocker_true_clearance"] = ""
+        if r.outcome in ("stopped", "timeout") and getattr(inner, "last_brake", None):
+            row.update(_stall_diag(inner.last_brake, scene, cfg.vehicle))
+        row["scan_log"] = _scan_rows(inner, scene, cfg.vehicle) if getattr(inner, "log_scans", False) else []
     row["layout"] = scene.layout
-    row["fail_cause"] = ";".join(f"{k}" for k in getattr(P.p, "fail_causes", {}) or [])
+    row["fail_cause"] = ";".join(f"{k}" for k in getattr(inner, "fail_causes", {}) or [])
     row["triggers"] = dict(Counter(t for t, _ in stats))
     row["plan_times"] = stats
-    row["plan_expansions"] = list(getattr(P.p, "expansions", []))
-    ev = getattr(P.p, "events", {}) or {}
+    row["plan_expansions"] = list(getattr(inner, "expansions", []))
+    ev = getattr(inner, "events", {}) or {}
     row["guard_refusals"] = int(ev.get("guard_refusal", 0))       # goal-cut guard: brake instead of a bad line
     row["no_edges_brakes"] = int(ev.get("no_edges", 0))
+    row["cache_skipped_scans"] = int(ev.get("cache_hit", 0))      # replans skipped by the failed-search cache
+    row["hold_scans"] = int(ev.get("hold", 0))                    # plans found but held (waiting for confirmation)
+    row["held_scans"] = int(ev.get("held_scans", 0))              # scans spent braked / held since a brake
     row["events"] = " ".join(f"{k}:{v}" for k, v in sorted(ev.items()))
-    row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(P.p, "kappa_log", []))
+    row["kappa_levels"] = " ".join(f"{k:.2f}" for k in getattr(inner, "kappa_log", []))
     return row
 
 
@@ -204,6 +343,9 @@ def main():
     ap.add_argument("--workers", type=int, default=max(1, mp.cpu_count() - 1))
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l0"))
     ap.add_argument("--l3", action="store_true", help="run 'observed' as config (b): stub fix + approved L3 set")
+    ap.add_argument("--mount", default="front_axle", help="LiDAR mount preset (gfsem.sim.config.LIDAR_MOUNTS)")
+    ap.add_argument("--speed-mode", default="constant", choices=("constant", "juno_bangbang"),
+                    help="constant 3 m/s (all results so far) or Juno's bang-bang valve control (placeholders)")
     a = ap.parse_args()
     if a.l3:
         a.planners = ",".join("observed_l3" if p == "observed" else p for p in a.planners.split(","))
@@ -212,8 +354,26 @@ def main():
     jobs = []
     for name in a.planners.split(","):
         for lvl in (["L0"] if name in PRIVILEGED else levels):
-            jobs += [(name, s, lvl) for s in seeds]
+            jobs += [(name, s, lvl, a.mount, a.speed_mode) for s in seeds]
     a.out.mkdir(parents=True, exist_ok=True)
+    # one run per output folder (house rule): refuse if a live process holds the lock; replace a stale one
+    import os
+    lock = a.out / "RUNNING.lock"
+    if lock.exists():
+        try:
+            pid = int(lock.read_text().split()[0])
+            os.kill(pid, 0)
+            raise SystemExit(f"{a.out} is in use by pid {pid} (RUNNING.lock); not starting a second run")
+        except (ValueError, ProcessLookupError, PermissionError, IndexError):
+            pass                                   # stale lock
+    lock.write_text(f"{os.getpid()} {time.ctime()} {' '.join(sys.argv)}\n")
+    try:
+        _main_body(a, jobs, seeds, levels)
+    finally:
+        lock.unlink(missing_ok=True)
+
+
+def _main_body(a, jobs, seeds, levels):
     t0 = time.time()
     rows = []
     ctx = mp.get_context("spawn")
@@ -224,7 +384,7 @@ def main():
                 print(f"{i + 1}/{len(jobs)} episodes, {time.time() - t0:.0f}s", flush=True)
     elapsed = time.time() - t0
     rows.sort(key=lambda r: (r["planner"], r["noise"], r["seed"]))
-    keys = [k for k in rows[0] if k not in ("plan_times", "plan_expansions", "triggers")] + ["triggers"]
+    keys = [k for k in rows[0] if k not in ("plan_times", "plan_expansions", "triggers", "scan_log")] + ["triggers"]
     with open(a.out / "results.csv", "w", newline="") as f:
         w = csv.DictWriter(f, keys, extrasaction="ignore")
         w.writeheader()
@@ -237,6 +397,14 @@ def main():
             ex = r.get("plan_expansions") or [""] * len(r["plan_times"])
             for (t, m), e in zip(r["plan_times"], ex):
                 w.writerow([r["planner"], r["noise"], r["seed"], t, f"{m:.2f}", e])
+    if any(r.get("scan_log") for r in rows):          # per-scan log (model-or-system study)
+        with open(a.out / "scans.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["planner", "noise", "seed", "k", "top_rejected", "top_true_clearance", "brake",
+                        "executed_true_clearance", "top3_goal_score_spread"])
+            for r in rows:
+                for s in r.get("scan_log") or []:
+                    w.writerow([r["planner"], r["noise"], r["seed"], *s])
     summarise(rows, a.out, seeds, levels, elapsed)
     print((a.out / "summary.md").read_text())
 

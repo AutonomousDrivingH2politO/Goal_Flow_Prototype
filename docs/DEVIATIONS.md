@@ -273,6 +273,27 @@ Docs note: the flow-matching notes are in `docs/` as
     which assumes front-face hits. When a cluster's front face is below the lowest beam or in the blind zone,
     use a two-point geometric solution or keep the tracked centre (the 287 / 451 cone grazes, 0.30-0.33 m
     offset). Config (a) stays as it is.
+16. **MPPI refinement around the chosen GoalFlow sample.** In tight gaps GoalFlow's best candidate clears the
+    true obstacles by ~0.01 m (seed 17), so the safety filter brakes; a local MPPI refinement of the chosen sample
+    could add margin. Not implemented.
+17. **Stall diagnosis and a "second chance" before braking (queued 2026-11-25, not run).** For the 6 goalflow_l3
+    smoke-test stalls (L0: 4, 36; L4: 1, 18, 28, 32), at the stalled scans: is baseline (a)'s route (homotopy
+    signature of its driven path vs the true obstacles) among the routes of GoalFlow's 3 NMS goals, and what is the
+    best true clearance per goal? If another route was available but not sampled, try a "second chance" before
+    braking: resample once with K = 6 goals, excluding goals whose candidates were all flagged; brake only if that
+    also yields no safe candidate. Order vs item 16 (MPPI refinement): run this diagnosis first (replays only); if
+    (a)'s route is mostly missing from the 3 goals, try the second chance first (one extra model call on ~3% of
+    replans, targets route choice, e.g. seed 28); if it is mostly present but its candidates clear by only a few cm,
+    MPPI refinement first (targets precision in tight gaps, e.g. seed 17).
+18. **Candidate margin against the fitted circles (queued 2026-11-26, rules to be pre-registered before running):**
+    (1) the gradient refinement (step C variant b) run against the fitted obstacle circles instead of raw hits;
+    (2) a clearance critic: among candidates passing the 0.12 m circle filter, prefer larger clearance to the circles
+    (soft, saturating toward 0.25 m), weight fixed in advance. MPPI refinement (item 16) only if both fail. Then
+    steps 5 (latency profile), 6 (brake-rate column in the selection table) and 7 (tracker birth rule).
+    **Plan (decided 2026-11-25):** this diagnosis first, before the full run. If it points to the second chance or
+    to MPPI, implement that one and rerun the same 80-episode smoke test (seeds 0-39, L0 and L4) under a rule fixed
+    here before the run: fewest stalls + collisions on feasible scenes, ties to fewer collisions; goalflow_l3 is kept
+    unless the new variant wins. The full run then uses the winner, on Can's go.
 
 ### L2 findings on validation (2026-11-25)
 
@@ -315,6 +336,564 @@ on every rate, so the filter uses cell_slack = 0 (changed after seeing these num
   3.8%) against 0.36-0.59% for GoalFlow, so "collisions <= either baseline" is not met open loop. GoalFlow
   beats regression (3.17%). The closed-loop L3 comparison, with identical tracked perception for both, decides.
 
+### Pre-registered L3 comparison baseline (2026-11-25)
+
+GoalFlow (L3 configuration) is compared, at each noise level, against the **best classical observed config at
+that level**: currently (a) pre-L3 + stub fix at L2-L4 and (b) stub fix + L3 at L0-L1
+(`reports/lidar_demo/l0_rerun/REPORT.md`). Config (c), (b) without edge memory, is reported alongside as the
+same-information baseline (single-scan edges like GoalFlow's BEV, with tracked obstacles). If the stall
+ablation changes which config is best at a level, the best config is re-picked on these validation scenes
+before any GoalFlow closed-loop result exists, and recorded here.
+**Re-pick after the drift change (2026-11-26):** with distance-proportional drift the best classical config is (b) at
+L0 (unchanged; no drift) and **(a) at L1-L4** (L1: (a) 97.9% vs (b) 97.1%, a 4-scene margin; previously (b) 97.3% vs
+(a) 97.1%). Chosen from the baseline rerun alone (`reports/lidar_demo/l0_rerun_distdrift/REPORT.md`); the only
+GoalFlow closed-loop results so far are 40-seed smoke tests used for variant selection, not for this choice.
+
+### L3 observed additions: findings and frozen baselines (2026-11-25)
+
+`reports/lidar_demo/l0_rerun/REPORT.md`, `reports/lidar_demo/l0_rerun/ablation_L4/`. The L3 set (tracking, edge
+memory, kept-plan hysteresis + fallback, hold, failed-search cache) helps at L0-L1 (zero collisions) but stalls
+at L3-L4. Stall ablation of (b) at L4 (success / collision / exit / stalled %, seeds 0-499):
+
+| L4 | Success | Collision | Exit | Stalled |
+|---|---|---|---|---|
+| (a) pre-L3 + stub fix | 93.7 | 2.3 | 0.4 | 3.6 |
+| (b) stub fix + L3 | 74.8 | 1.9 | 0.8 | 22.4 |
+| (b) without failed-search cache | 74.8 | 1.9 | 0.8 | 22.4 (identical in all 500: the cache never fires at L4) |
+| (b) without hold | 86.8 | 3.8 | 0.8 | 8.6 |
+| (b) without hysteresis + fallback | 77.8 | 0.8 | 0.4 | 21.0 |
+
+* The cache hypothesis is falsified: under L4 noise the tracked positions change every scan, so its "tracks
+  unchanged" condition never holds (0 hits; it fires at L0-L3: 477 / 76 / 36 / 7 hits, mostly in no-route
+  scenes, without changing outcomes). Kept for now; decided with the real-time budget after the Orin
+  measurement.
+* Hold is a filter, not a bug: in (b) a stalled episode spends 40 braked scans, 11 with a plan found but
+  held, 29 with no plan. Without hold, stalls drop (22.4 -> 8.6%) but collisions double (1.9 -> 3.8%): it
+  rejects flickering bad plans.
+* "No route (A*)" stalls at L4 (perception check, `perception_noroute_*.json`): at the failing scans the planner
+  holds ~21 tracked obstacles in view against ~11 true ones: ~5.2 phantoms per scan (no true obstacle within
+  0.6 m; in 99% of failing scans, close to the L4 clutter rate of 5 per scan) and, by difference, ~4.9 extra
+  tracks within 0.6 m of true obstacles (likely duplicate tracks of displaced fits); 0.2 true obstacles missed;
+  matched centre error 0.15 m. Not fixed yet.
+* **Stop rule applied:** no L3 variant beats (a) at L3-L4, so the L3-level rerun is skipped and the comparison
+  baselines are frozen as pre-registered: (a) at L2-L4, (b) at L0-L1, (c) reported as the same-information
+  baseline. Next: the closed-loop GoalFlow planner.
+
+### Closed-loop GoalFlow: hit memory in the safety filter (2026-11-25)
+
+GoalFlow's safety filter checks candidates against the current scan's observed hits plus remembered hits: a map
+of 0.2 m cells in the odom frame (believed, noisy, drifting pose; never the true pose), a cell used once hit in
+>= 2 scans and while it is ahead of the rear bumper and within 4 m of the car (position-based, no time limit).
+First version (1.5 s time window) replaced after the smoke test: the cone collisions came 2.05-2.15 s after the
+cone vanished below the lowest beam, with the car crawling (1.1-1.2 m travelled); remembered single-scan clutter
+blocked candidates at L4. A cone-only memory was rejected: it would let a learned camera label gate which
+obstacles the filter keeps (team rule), drop ~1 in 5 cones at L4 (label flips), and forget bollards beside the
+car. Seed 17's L0 stall is mostly correct braking: the best candidate cleared the true obstacles by a median
+0.010 m, and only ~0.9 of 128 per stalled scan by more than 0.12 m (candidate quality in tight gaps).
+
+Position-based memory without a time limit removed all collisions but stalled 18 of 39 feasible L4 scenes
+(seeds 0-39). Replay of L4 stall seeds 1, 4, 9: the blocking remembered cells lie where the current scan cannot
+see (~6 per stalled scan vs 0.1-0.6 visible), and most are not on real obstacles (median 0.51 / 0.14 / 0.96 m from
+the nearest true surface): cells stored 10-20 m ahead are displaced by accumulated heading drift when mapped back.
+
+**Pre-set rule (2026-11-25, before the smoke test):** two memory variants run the same 80-episode smoke test
+(seeds 0-39, L0 and L4): (i) visibility gate (remembered cells used only where the current scan cannot see), and
+(ii) near-observation memory (only hits observed within 4 m of the sensor are remembered; position-based
+retention and the 2-scan rule in both). The full run uses the variant with the fewest collisions + stalls over
+those 80 episodes (feasible scenes; ties: fewer collisions).
+**Result:** near-observation memory: L0 37 / 0 / 2 / 0, L4 35 / 0 / 4 / 0 (success / collision / stalled / exit,
+feasible scenes), 6 collisions + stalls, "no safe candidate" brakes 3.0% of replans; visibility gate: L0
+38 / 0 / 1 / 0, L4 19 / 0 / 20 / 0, 21 collisions + stalls, 7.6%. **The full run uses the near-observation memory**
+(`eval_corridor.py --planners goalflow_l3`, the default; the losing variant is `goalflow_l3_visgate`). The BEV input stays single-scan, as trained. Reason: a 0.40 m cone falls below the lowest
+beam within ~2.03 m of the sensor, so a single scan loses it exactly when the car reaches it (the closed-loop
+smoke test's only collisions were such cones), while the corridor baseline (a) has implicit memory through its
+kept plan. If no candidate survives the filter, the planner brakes.
+
+### Closed-loop GoalFlow: critics off, and the tight-gap precision rule (2026-11-26)
+
+**Critics off.** GoalFlow's trajectory score uses only the distance to the candidate's goal, progress and the goal's
+own score (NMS-K); the lambda3 consistency term (distance to the previous chosen path), a smoothness critic and a
+track-edge critic are off. Reasons: lambda3 = 0 was the validated configuration (open loop has no previous path to
+tune it on); every candidate is already a rolled-out, curvature-feasible executed path, so smoothness is largely
+enforced by the rollout; track exits stayed at 0 in the smoke tests, so no edge critic was needed yet. Check in the
+full run: door flips per run for every planner, with the baselines' definition (the chosen path's side signature
+changing between consecutive replans). If GoalFlow flips more than the baseline, lambda3 is turned on and the run
+repeated.
+
+**Tight-gap precision, pre-set rule (before any run).** Variants, cheapest first, each on top of the step-2 filter
+(exact box-to-point, 0.12 m): (a) goal jitter: per NMS goal also goals shifted +-0.3 m sideways, M = 128 in total
+(3 goals x 3 offsets, ~14 samples each); (b) a few gradient steps on the chosen candidates' waypoints away from the
+hit points (exact distances), then re-rollout. Both run the same 80-episode smoke test (seeds 0-39, L0 and L4). The
+winner is the one with the fewest stalls + collisions on feasible scenes, ties to fewer collisions; if neither beats
+the step-2 variant, the step-2 variant is kept. MPPI refinement (Part C item 16) only if both fail.
+**Amendment (2026-11-26, before running), split by noise model:** the L0 half of that smoke test (seeds 0-39) runs
+now, since L0 has no odometry drift; the L4 half waits for the distance-proportional drift. Variant names:
+`goalflow_l3_exact_jitter` (a; +-0.3 m) and `goalflow_l3_exact_refine` (b; 8 gradient steps, only when no candidate
+is safe). Reference: `goalflow_l3_exact`. The rule is applied once both halves exist; the L0 half alone is
+reported, not used to choose.
+**Final choice rule (2026-11-26, before the L4 half):** candidates `goalflow_l3_exact`, `goalflow_l3_exact_jitter`,
+`goalflow_l3_exact_refine`. Score = stalls + collisions on feasible scenes over seeds 0-39 at L0 and L4 (80
+episodes), L4 run with the distance-proportional drift; the L0 halves already run are reused (no drift at L0, so
+identical under either drift model). Lowest score wins; ties go to fewer collisions; a remaining tie keeps
+`goalflow_l3_exact`. The winner is the GoalFlow variant for the full run.
+**Result:** exact L0 37/0/2/0, L4 27/0/12/0 (score 14); jitter 38/0/1/0, 23/0/16/0 (17); refine 36/0/3/0, 28/0/11/0
+(14) (success / collision / stalled / exit, feasible scenes). Exact and refine tie at 14 with 0 collisions each, so
+the rule keeps **`goalflow_l3_exact`** for the full run. Note: at L4 its stalls rose from 8 (time-based drift) to 12
+with the distance-proportional drift; the drift fix did not remove the L4 stalls.
+
+**Halo diagnosis and `goalflow_l3_circles` (pre-registered 2026-11-26, before running).** Replays of 5 of the 12 L4
+stalls (1, 13, 21, 29, 35; `reports/lidar_demo/l3_goalflow/diagnose_halo.json`): the points that block truly clear
+candidates lie a median 0.17-0.36 m outside the true obstacle surface (on the free/gap side), are 65-100%
+remembered, come from 23-80 scans per obstacle, and sit in the outer part of the scatter (above the obstacle's own
+median protrusion, but only 5-39% in its outermost decile). L4 range noise scatters raw hits and the memory keeps their
+union, so each obstacle grows a ~0.3 m halo that closes tight gaps; the corridor baseline fits circles, which
+averages the noise. **Variant:** the safety filter checks the exact 0.12 m clearance (Juno's box to the circle
+surface) against obstacle circles fitted per scan by the same `cluster_obstacles` code as baseline (a), plus a
+near-field memory of circles: circles observed within 4 m of the sensor update it (centre averaged over sightings,
+associated within 0.6 m, in the believed odom frame), kept until behind the rear bumper or > 4 m away; position
+only, no time limit. **Rule:** 80-episode smoke test (seeds 0-39, L0 and L4; L4 with the distance-proportional
+drift; L0 is rerun because the filter changes L0 too), score = stalls + collisions on feasible scenes, compared with
+`goalflow_l3_exact` (score 14); lower wins, ties to fewer collisions, otherwise `goalflow_l3_exact` is kept. Full run
+only after that, on Can's go.
+**Result:** circles L0 36/0/3/0, L4 31/0/8/0 (score 11, 0 collisions; brake 2.9% / 7.5%, 215 ms per replan) vs exact
+14 -> the rule picks **`goalflow_l3_circles`**. L4 still trails (a) on these seeds (37/1/1/0). Phantom check on the 8
+L4 stalls (`diagnose_phantom_circles.json`): 30-65% of the filter's circles are phantoms (no true obstacle within
+0.5 m), but none of the circles blocking truly clear candidates is a phantom; every blocker is a real obstacle's
+fitted circle, slightly off the true disc, against candidates that clear the truth by only a little. A 2-sighting
+rule would not remove these stalls; the remaining lever is candidate margin.
+
+### Odometry drift proportional to distance driven (decided 2026-11-26, before any rerun)
+
+**Change.** The closed-loop noise model's odometry drift was a time-based random walk: every replan (10 Hz) added
+N(0, drift_xy) to x and y and N(0, drift_yaw) to the heading, whatever the car did. It now scales with the distance
+driven since the previous replan: each increment is multiplied by sqrt(ds / 0.30 m), so the variance grows in
+proportion to distance. **Calibration:** 0.30 m is one replan at 3 m/s, so at cruising speed the drift per scan
+equals the old value and each noise level keeps its meaning; only slow and stopped driving change (a stopped car
+no longer drifts). Same random draws as before (the streams stay aligned); only their scale changes.
+**Reason.** With the time-based walk a car crawling at 0.5 m/s accrued ~6x more drift per metre than at 3 m/s, and a
+stopped car kept drifting; real wheel odometry error grows with distance. The GoalFlow filter memory exposed it:
+80-100% of the remembered points blocking truly clear candidates at the L4 stalls had drifted while moving slowly,
+and at seed 1 drifted points (median 0.28 m off the true surface) let a path through a remembered cone
+(`reports/lidar_demo/l3_goalflow/diagnose_drift_exposure.json`). A zero-velocity update was rejected: it would
+remove at most ~15-20% of that drift.
+**Scope.** Applies to every planner (corridor baselines and GoalFlow). The baselines (a)-(d) are rerun at L1-L4
+(L0 has no drift); the old L1-L4 tables stay, labelled "time-based drift". Training data is **not** regenerated:
+drift affects only map-derived inputs there (the goal line and the track-relative ego status), and the shards
+used the time-based model. `run_episode(drift_per_distance=False)` reproduces the old model (the 50e9ad9 planner
+regression test uses it).
+**Real-car lesson.** The filter memory is only as good as the odometry: on Juno it needs wheel odometry + IMU in the
+EKF (the ZED visual odometry read 10-60% low).
+
+### Run hygiene
+
+Run hygiene (house rules, 2026-11-26): (1) stopping a chain stops its whole process group (`kill -- -<PGID>`,
+or `pkill -f` on eval_corridor for that output folder), then `ps` confirms no eval_corridor / worker processes remain
+before anything is relaunched (killing a bash chain script leaves its running child evaluation alive; on 2026-11-26
+config (a) briefly ran twice into one folder because of this); (2) never two runs writing to the same output folder:
+`scripts/eval_corridor.py` holds `RUNNING.lock` in its output folder and refuses to start if a live process holds it;
+(3) more load on request still keeps >= 5% CPU idle, about 7 CPU-bound workers in total on the 8-core Mac.
+
+### EMX sensor level (2026-11-27)
+
+**Sensor facts (RoboSense EMX user guide, Table 1 "EMX Specifications", p. 8; generationrobots.com copy):** range
+1.5-200 m (200 m @ 10% NIST), blind zone <= 1.5 m; horizontal FOV 120 deg (-60 to +60), resolution 0.08 deg; vertical
+FOV 20 deg (-12 to +8), resolution 0.1 deg (192 lines); accuracy +-5 cm @ 1 sigma (typical); frame rate 10 Hz;
+2,880,000 pts/s. These match `LidarConfig` (blind zone 1.5 m, 120 deg, -12/+8 deg, 10 Hz), so L0-L4 are unchanged.
+A reseller's 140 deg horizontal FOV contradicts the manufacturer's guide; 120 deg is used. The guide gives 0.1 deg
+vertical resolution but no per-beam table: uniform spacing is assumed (the simulator models the vertical span as
+continuous, which 0.1 deg spacing approximates).
+
+**Preset `EMX`** (added alongside L0-L4, never replacing them; `NOISE_LEVELS["EMX"]`, not in `LADDER`):
+
+| Parameter | EMX value | Source |
+|---|---|---|
+| range noise (1 sigma) | 0.05 m | spec (accuracy +-5 cm @ 1 sigma) |
+| horizontal ray step | 0.08 deg (1,501 rays over 120 deg) | spec (horizontal resolution) |
+| vertical span | continuous, -12 to +8 deg | spec (0.1 deg over 20 deg) |
+| frame rate | 10 Hz | spec; Juno's planning rate |
+| bearing jitter | 0.05 deg | **assumption** (L1 value) |
+| point dropout | 5% | **assumption** (L1) |
+| clutter | 0.5 clusters / scan | **assumption** (L1) |
+| edge noise / edge dropouts | 0.10 m / 0.3 per side per scan | **assumption** (L1) |
+| class flips | 5% | **assumption** (L1) |
+| odometry drift | 0.005 m, 0.05 deg per 0.30 m driven | **assumption** (L1; distance-proportional model) |
+
+Unit check (2D simulator, one return per horizontal ray per obstacle; not comparable to the 3D 2.88 M pts/s): hits per
+bollard EMX vs L2 at 3 / 10 / 20 m from the sensor: 104 vs 40 / 32 vs 15 / 18 vs 11 (mean of 20 scans); per scan on
+scene 3: 238 vs 87 points, simulation 0.7 vs 0.5 ms, rasterisation 4.7 vs 2.5 ms. `observation_from_shard` now
+derives the ray geometry from the stored scan length, so 0.08 deg shards rebuild correctly (0.2 deg shards
+unchanged).
+
+**Pre-registered (2026-11-27, before any EMX result):** EMX is the realistic headline level of the final comparison;
+L0-L4 remain robustness and stress levels (L4 in particular is far noisier and sparser than the real sensor). The
+per-level baseline rule (best classical config per level, chosen from the baseline run alone) applies to EMX too.
+GoalFlow runs at EMX only after the baselines at EMX and the open-loop distribution-shift check
+(`scripts/emx_shift_check.py`: GoalFlow was trained on 0.2 deg rays; same validation scenes, seeds 250000+, at EMX vs L2;
+a clear drop is a sim-to-real warning and puts retraining with EMX-level data in the queue).
+
+**How to read "EMX ~ L1-L2":** every noise component is on in the EMX preset. Range noise is the spec's 0.05 m (= L2;
+L1 0.03); the beam pattern is finer than every ladder level (0.08 deg horizontal vs 0.2, i.e. 2.5x the hits per
+obstacle); all other artefacts (bearing jitter 0.05 deg, dropout 5%, clutter 0.5 clusters/scan, edge noise 0.10 m with
+0.3 dropouts per side, class flips 5%, drift 0.005 m / 0.05 deg) sit at L1, lighter than L2 (0.10 deg, 15%, 1.5, 0.15 m /
+0.6, 8%, 0.010 m / 0.10 deg). So EMX = L2 range noise + L1 artefacts + a denser beam pattern; the blind zone (1.5 m),
+lowest-beam cut-off, 120 deg FOV, 40 m sim range and 25 m edge range are the same as at every level. None is off, so
+the "EMX + L2 artefacts" shift-check variant is not triggered; the L1 artefact values remain assumptions.
+
+**Beams-only comparison (Can's question "EMX vs our L4"; queued 2026-11-27):** because EMX mixes the denser beam pattern
+with lighter (assumed L1) artefacts, two levels separate the two: `emx_L2art` / `emx_L4art` = EMX beam pattern (0.08 deg)
+and range noise (0.05 m) with the L2 / L4 artefacts. Baselines (a) and (c), seeds 0-499, vs the existing L2 and L4
+baselines (`scripts/run_emx_art.sh`, after the lambda3 spread replay, before the per-change runs; output
+`reports/lidar_demo/emx_art/`). Hits per obstacle (`scripts/hits_per_obstacle.py`, 60 scenes x 3 poses, mean returns
+within r + 0.15 m, occluded = 0; bollard at 2-5 / 8-12 / 18-22 m; cone likewise): L2 29.6 / 10.4 / 5.0 and 30.8 / 12.0 /
+5.3; L4 17.8 / 6.2 / 2.7 and 19.1 / 7.1 / 3.2; EMX 82.8 / 29.0 / 13.9 and 86.3 / 33.1 / 15.1; emx_L2art 74.9 / 26.0 /
+12.6 and 76.2 / 29.6 / 13.5; emx_L4art 49.2 / 16.9 / 7.8 and 47.6 / 19.4 / 8.1.
+
+**Beams-only result (2026-11-27; `reports/lidar_demo/emx_art/README.md`):** with the same artefacts the denser beam
+pattern does not help the classical baselines ((a): L2 98.7 vs emx_L2art 96.9, L4 93.1 vs emx_L4art 91.6; (c): 95.0 vs
+95.6, 78.0 vs 78.6). EMX scoring like L1-L2 comes from its assumed L1 artefacts, so the EMX headline depends on the
+real dropout / clutter / edge-noise / class-flip rates (to be measured from Juno recordings).
+
+**EMX baselines (2026-11-27, seeds 0-499; `reports/lidar_demo/emx_baselines/`):** success / collision / stalled % /
+exits: (b) 97.7 / 0.0 / 1.9 / 2, (a) 98.7 / 0.0 / 1.0 / 1, (c) 97.9 / 0.0 / 1.9 / 1; **EMX baseline = (a)** by the
+rule (reviewed). These use the **front-axle mount (1.60 m, 1.10 m, 7 deg) and constant 3 m/s**; the roof-mount and
+`juno_bangbang` checks come later.
+
+**EMX mounting (analytic; height 1.10 m, vertical FOV -12/+8 deg about the pitched axis, blind zone 1.5 m, Juno's body
+front at 2.24 m from the rear axle, assuming symmetric 0.6375 m overhangs, still unmeasured):**
+
+| mount_x [m] | pitch [deg] | lowest / highest beam [deg] | blind zone past bumper [m] | 0.40 m cone invisible within [m from sensor / past bumper] | lowest beam hits ground [m from sensor / past bumper] | 0.40 m cone hit up to | 1.10 m bollard hit up to |
+|---|---|---|---|---|---|---|---|
+| 1.60 (front axle) | 10 | -22 / -2 | +0.86 | 1.73 / +1.10 | 2.72 / +2.09 | 31.5 m | 31.5 m |
+| 1.60 | 8 | -20 / +0 | +0.86 | 1.92 / +1.29 | 3.02 / +2.38 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.60 | 7 | -19 / +1 | +0.86 | 2.03 / +1.40 | 3.19 / +2.56 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.60 | 4 | -16 / +4 | +0.86 | 2.44 / +1.80 | 3.84 / +3.20 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.60 | 0 | -12 / +8 | +0.86 | 3.29 / +2.66 | 5.18 / +4.54 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 10 | -22 / -2 | +0.26 | 1.73 / +0.50 | 2.72 / +1.49 | 31.5 m | 31.5 m |
+| 1.00 | 8 | -20 / +0 | +0.26 | 1.92 / +0.69 | 3.02 / +1.78 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 7 | -19 / +1 | +0.26 | 2.03 / +0.80 | 3.19 / +1.96 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 4 | -16 / +4 | +0.26 | 2.44 / +1.20 | 3.84 / +2.60 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 1.00 | 0 | -12 / +8 | +0.26 | 3.29 / +2.06 | 5.18 / +3.94 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 10 | -22 / -2 | -0.24 | 1.73 / -0.00 | 2.72 / +0.99 | 31.5 m | 31.5 m |
+| 0.50 | 8 | -20 / +0 | -0.24 | 1.92 / +0.19 | 3.02 / +1.28 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 7 | -19 / +1 | -0.24 | 2.03 / +0.30 | 3.19 / +1.46 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 4 | -16 / +4 | -0.24 | 2.44 / +0.70 | 3.84 / +2.10 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+| 0.50 | 0 | -12 / +8 | -0.24 | 3.29 / +1.56 | 5.18 / +3.44 | beyond sim max range (40 m) | beyond sim max range (40 m) |
+
+Far coverage (geometric; height 1.1 m): at pitch <= 8 deg the top beam is at or above the horizontal, so cones and
+bollards are hit beyond the simulator's 40 m max range (real reach is limited by the EMX's rated range on
+low-reflectivity targets, 200 m @ 10% NIST, and by beam density); above 8 deg every beam points down
+and nothing standing on the ground is hit beyond where the top beam meets the ground (1.1 m / tan(pitch - 8 deg): 31.5
+m at 10 deg). Every pitch below 8 deg leaves some beams above the horizontal (+1 / +4 / +8 deg at 7 / 4 / 0 deg pitch).
+**Far range needed:** a gap must be seen ~10 m before the swerve at 3 m/s, plus planning, so ~15-20 m; geometrically
+the steepest pitch that keeps 20 m is 11.1 deg (15 m: 12.2 deg), so 10 deg still meets it (31.5 m) while
+cutting the cone blind range to 1.73 m from the sensor; this ignores reflectivity and beam density at range. Mounting the
+sensor further back shrinks the blind region in front of the bumper, and more downward pitch shrinks the region where
+low cones vanish. But both cost far range and upward coverage, and at 1.10 m height a rearward sensor may have its
+near field hidden by Juno's own body (not modelled).
+
+### Vehicle data and the roof LiDAR mount (2026-11-27)
+
+**Juno data (Juno data sheet, internal spreadsheet, not committed; values recorded here):** overall height 1,165 mm,
+ground clearance 100 mm, length 2,875 mm, width 1,165 mm, wheelbase 1,600 mm, track 1,000 mm, tyre radius 0.2792 m. The
+sheet's 5.5 m turning radius is mechanical; the planners keep the 10 deg software steering limit (~9.1 m radius). From
+a side photo: nose ~2.35 m ahead of the rear axle (front overhang ~0.75 m); the AD-SEM footprint says +2.445 m. The
+simulator still assumes symmetric 0.6375 m overhangs (body front 2.2375 m) for every run so far.
+
+**Roof mount.** The EMX will sit on the roof at the base of the ZED support, at the top edge of the windshield,
+outside the glass (the ZED stays on top of the support): ~1.0-1.1 m ahead of the rear axle, optical centre ~1.20 m
+(roof 1.165 m + half the housing). The LiDAR mount is one config entry, `LidarConfig` (mount_x from the rear axle,
+height, pitch), with presets in `LIDAR_MOUNTS`: `front_axle` (1.60 m, 1.10 m, 7 deg; the default, every run so far)
+and `roof` (1.05 m, 1.20 m, 7 deg; provisional until measured). Sim, raster and planners take the mount from it;
+`eval_corridor.py --mount roof` selects it.
+
+**Self-occlusion (placeholder geometry, assumptions until measured).** The windshield and hood are a polyline in the
+sensor's vertical plane: roof edge 3.5 cm below the optical centre just ahead of it, windshield sloping 20 deg below
+the horizontal (from the photo) over 0.6 m, a mid-hood point, the nose top at 0.55 m height at the body front
+(`placeholder_body_profile`). Beams below its clearance angle hit the car; with a profile set, the simulator clips the
+lowest beam there (`LidarConfig.body_clearance_rad`; the `roof` preset sets it, `front_axle` does not). Removing beams
+that hit the car is a simulator simplification: the real EMX returns points on the glass and hood, so AD-SEM needs a
+body crop box that drops them (car bring-up item, not simulation work). Roof preset:
+clearance -22.9 deg, so the steepest usable pitch is ~10.9 deg (lowest beam = -12 deg - pitch). It depends on the
+unmeasured windshield length: 0.4 / 0.6 / 0.9 / 1.2 m of glass give -24.3 / -22.9 / -21.9 / -21.5 deg, i.e. a steepest
+pitch of 12.3 / 10.9 / 9.9 / 9.5 deg; a long 20 deg windshield tends to ~8 deg.
+
+**Roof mounting table (analytic; blind zone 1.5 m; -12/+8 deg about the pitched axis; placeholder body profile):**
+
+Summary (full table: `reports/lidar_demo/mounting/roof_table.csv`, 30 rows; mount_x 1.0 / 1.1 m, height 1.15 /
+1.20 / 1.25 m, pitch 5-9 deg, body front 2.35 / 2.445 m): blind zone past the bumper 0.06-0.25 m; 0.40 m cone
+invisible past the bumper 0.5-1.5 m (smaller with more pitch, larger with more height; ~1.0 m at 7 deg); with the
+placeholder windshield no lowest beam hits the car in any row; cones and bollards are hit beyond the sim's 40 m max
+range up to 8 deg pitch and up to 66-72 m at 9 deg (geometric); 12 vertical beams on a cone at 20 m.
+
+Beams on a cone at 20 m: vertical count at 0.1 deg spacing (12 for every row; the 2D simulator models one row).
+**Recommended pitch:** 7-8 deg. 8 deg is the steepest that keeps the top beam at the horizontal (far reach beyond the sim's 40 m, limited in reality by
+the EMX's rated range on dark targets)
+and still clears a 20 deg windshield of any length, but with no margin against an unmeasured steeper glass or mounting
+tolerance; 7 deg leaves 1 deg. Final choice after the measurement and the simulated pitch check.
+
+**All results so far use the front-axle mount (1.60 m, 1.10 m, 7 deg).** The final comparison uses the measured roof
+mount: it moves the blind area and the cone-invisible zone in GoalFlow's input, so the front-axle numbers do not
+transfer as they are. Before any retraining, a roof-mount shift check (current model, `roof` preset, validation seeds
+250000+, same protocol as the EMX shift check, `scripts/emx_shift_check.py`); retrain only if it degrades. Queued after
+the EMX shift check.
+
+**Measurements needed (Can):** LiDAR optical-centre position (x from the rear axle) and height, and its pitch;
+windshield top edge and base (x, height); nose top (x, height); front and rear overhang. At first power-on: check the
+point cloud for a fixed cluster on the windshield or hood (self-hits).
+
+**Queued after the full run:** pitch check in simulation: EMX preset, roof mount, pitch 5-9 deg; hits per cone and
+bollard at 10-30 m, and whether `cluster_obstacles` returns a circle for each.
+
+### After the full run: pre-registered changes (2026-11-27, before running; dev seeds only)
+
+Full run reviewed: GoalFlow is the safest planner at every level and matches (c) on success at L3-L4 with fewer
+collisions; the success gap is stalls. Changes, in this order (lambda3 and the edge critic go with the margin fixes, not
+behind them), each tested alone on seeds 0-99 at L0, L2 and L4; **a change is accepted only if collisions do not
+rise AND stalls drop (or success rises)** on those seeds and levels; the per-change numbers go in one small table; then
+the accepted set combined on seeds 0-499 x L0-L4:
+(a) filter false alarms (69 of 99 L4 stalls had a candidate truly clear by >= 0.12 m): circle radius capped at the class radius + an allowance instead of the fitted radius;
+clusters enter the filter after 2 scans, except the near-field memory; the 0.12 m clearance is kept.
+(b) lambda3 on (door flips at L0-L2 exceed the baseline: 0.30 / 0.25 / 0.27 vs 0.05 / 0.14 / 0.26, per the rule above).
+(c) track-edge critic on (exits 11 / 10 at L0 / L1 vs 3 / 1; the smoke-test reason for leaving it off no longer holds).
+(d) refinement against the fitted circles for the L0-L1 precision stalls (item 18).
+Weights and allowances are fixed in this file before the first of these runs.
+
+**Principles for the values (2026-11-27; derived from a stated principle, not from results; no sweeps on dev seeds;
+values confirmed by Can before any per-change run):**
+- lambda3: the consistency term is lambda3 * minmax(mean distance to the previous chosen path), so a full door flip (the
+  farthest candidate) costs lambda3. lambda3 = the median, over all scans of the filter-on scanlog run (seeds 0-99, L0 /
+  L2 / L4), of the pre-filter critic-score spread between the best and the 3rd-best goal group (`top3_goal_score_spread`
+  in `scans.csv`; a deterministic rerun of that run with the spread logged, `scripts/run_spread_replay.sh`). A
+  measurement of the existing score's scale, not a tuning result.
+- edge critic: hinge on the distance d from Juno's box along the path to the observed track edge,
+  1.0 * clamp((0.12 - d) / 0.12, 0, 1) (zero beyond the 0.12 m filter margin, 1 at contact), weighted like lambda1 = 1.0;
+  one value, no sweep. Not min-max normalised (that would amplify differences when every candidate is clear).
+- **Decisions (Can, 2026-11-27):** radius allowance dropped, class radii unchanged. **(a) = the 2-scan entry rule
+  only:** a circle from the current scan enters the filter only if a circle was also seen within the association gate
+  (0.6 m, odom frame) in the previous scan; near-field circles (observed within 4 m of the sensor, the circle memory's
+  range) are exempt and enter at once (`entry_scans=2`). lambda3 and the edge critic confirmed as defined here.
+  **(d) refinement against circles:** step C's settings (8 Adam steps, top 16, lr 0.03, hinge at 0.12 + 0.08 m) with
+  the distance taken to the circle surface (the refinement previously ignored the radius column; fixed). **Acceptance**
+  per change vs the full run's rows for the same seeds, pooled over L0 / L2 / L4 (300 episodes): collisions not above
+  the reference AND stalls below it (or success above it); per-level numbers reported alongside. The per-change runs
+  start once lambda3 is written here, unless lambda3 is outside 0.5-3 (then stop and report).
+- **False-alarm diagnostic (replays, before the per-change runs; `scripts/diagnose_false_alarms.py`):** each full-run
+  stall with a candidate truly clear by >= 0.12 m, the blocking circle classified as phantom / remembered near-field /
+  class-flipped / real, with centre errors (single scan and 3-scan mean). If real obstacles with offset centres
+  dominate, change (a2) = centre averaging (mean of the associated cluster centres over the last 3 scans, odom frame,
+  gate 0.3 m) is pre-registered here and tested alone like the others; otherwise dropped.
+  **Amended (Can, 2026-11-27), (a2) by the dominant category:** remembered near-field circles (which (a) exempts) ->
+  (a2) = memory fix: a remembered circle's centre is replaced by the matching current observation when the obstacle is
+  seen again (gate 0.3 m), and a remembered circle is dropped when the current scan's free channel covers its
+  footprint; real obstacles with offset centres -> centre averaging as above; phantoms -> no (a2), (a) as is.
+  (a2) is tested alone like the others.
+- **lambda3 = 1.29** (written 2026-11-27 05:20, before any per-change run): median best-vs-3rd goal-group gap of the
+  pre-filter critic score over 38,431 scans (seeds 0-99, L0 / L2 / L4; per level 1.30 / 1.29 / 1.28; interquartile
+  1.06-1.43), from `model_or_system/scanlog_spread/scans.csv`, a deterministic rerun that reproduced all 300 episodes of
+  the filter-on run (which itself reproduced the full run's 300 rows). Within 0.5-3, so the per-change runs start.
+  Values for the per-change runs: (a) entry_scans = 2; (b) lambda3 = 1.29; (c) edge_w = 1.0, margin 0.12 m; (d) refine
+  8 steps, top 16, lr 0.03.
+- **False-alarm diagnostic result (2026-11-27 06:05; `reports/lidar_demo/l3_goalflow/false_alarms/SUMMARY.md`; 139
+  episodes, all reproduced):** blocking circles at L2 / L3 / L4: remembered near-field 18 / 30 / 53, phantom 10 / 15 /
+  31, real 1 / 3 / 5, class-flipped 0 / 0 / 1. Remembered circles dominate (103 of 170 over all levels; centre error
+  median 0.08 / 0.14 / 0.23 m single vs 0.02 / 0.10 m for a 3-scan mean of current observations), so **(a2) = the
+  memory fix** (not centre averaging). **Visibility guard added to the drop rule** (necessary, flagged to Can): the
+  free channel clears cells along each ray regardless of obstacle height, so a near-field cone below the lowest beam
+  looks "free"; a remembered circle is therefore dropped only where the lowest beam would hit an obstacle of its class
+  (distance from the sensor >= (mount height - class height) / tan(lowest beam), outside the blind zone, fully inside
+  the FOV, every ray across its angular span returning beyond it). Without the guard the rule would delete exactly the
+  near-field cone memories the memory exists for. Replacement: the nearest current circle within 0.3 m (odom frame)
+  replaces the remembered centre and radius. `mem_fix=True`, variant `goalflow_l3_circles_memfix`, tested alone on
+  seeds 0-99 at L0 / L2 / L4 after the four (`scripts/run_memfix.sh`), same acceptance rule.
+- **Per-change results (2026-11-27; `reports/lidar_demo/l3_goalflow/per_change/TABLE.md`, `scripts/per_change_table.py`):**
+  pooled over seeds 0-99 x L0 / L2 / L4 vs the full run on the same seeds (success 89.2%, 1 collision, 29 stalls):
+  (a) 89.2% / 1 / 27 accepted (flag: L4 success -2.1 points); (b) lambda3 88.5% / 0 / 31 not accepted (stalls rise);
+  (c) edge critic 89.6% / 0 / 30 accepted (success +1 episode, exits 1 -> 0); (d) refinement 89.6% / 1 / 28 accepted.
+  Every difference is 1-4 episodes of 300, i.e. within noise; the rule is applied as registered. (a2) first run:
+  89.9% / 3 / 24, the 3 collisions at L0 caused by a bug in the visibility guard (distance to the circle centre instead
+  of its near surface; the simulator decides visibility at the near surface, so near-field cones below the lowest beam
+  were dropped; seed 4: cone dropped at 2.04 m centre / 1.79 m near surface vs the 2.03 m lowest-beam reach). Fixed to the
+  near surface, as the registered rule intends (b2e61a7); seeds 4 / 17 / 37 then match the reference with no collision.
+  (a2) rerun alone, same seeds and rule; both runs are reported. **(a2) rerun (09:34): 90.3% / 0 / 26 accepted, no
+  flag** (L0 94.8 / 0 / 4, L2 92.7 / 0 / 6, L4 83.3 / 0 / 16). Accepted set: (a), (c), (d), (a2); (a) flagged (L4 -2.1
+  points); the combined run (0-499 x L0-L4) waits for Can's decision on (a).
+- **Decisions after the per-change runs (Can, 2026-11-27):**
+  - **Combined config = (a2) memory fix + (c) edge critic** (+ (d) refinement only if its latency cost is small; see
+    below: it is not, so (d) is out). (a) dropped: no pooled gain, the L4 flag, and (a2) covers the larger false-alarm
+    source (103 remembered vs 56 phantom blocking circles). lambda3 stays off. Note: lambda3's acceptance should have
+    measured door flips rather than stalls; its flips were mixed (L0 0.19 -> 0.08, L2 0.12 -> 0.21, L4 0.20 -> 0.15),
+    so off stands.
+  - **(d) latency, from the per-change runs' plan_times.csv** (5 workers sharing the GPU, same load for every run; ms per
+    replan): all scans 245.5 (refine) vs 239.3-245.2 for (a2) / (a) / lambda3 (+~5 ms, +2%), p95 302.9 vs 288.0-295.0;
+    **brake scans 337.2 vs 238.0-247.1 (+~95 ms, +40%), p95 399.4 vs 286.0-295.6.** Refinement runs exactly when no
+    candidate is safe, so it delays the brake decision by ~95 ms on this machine (~0.2 m more stopping distance at
+    2.22 m/s); judged noticeable, so (d) is out of the combined config (reversible if the Orin cost is small). Also
+    noted: the edge critic costs ~+22 ms on every scan (262.6 vs ~240, +9%); kept (not conditional), to be revisited in
+    the latency profile.
+  - **All per-change differences are within noise** (1-4 of 300 episodes); the combined run on seeds 0-499 x L0-L4 is
+    the real test. (c)'s test had only 1 exit in the reference, so it barely measured its purpose.
+  - **Filter-off L2 / L4 check:** the identical totals (89.6 / 9.4 / 0) are a coincidence, not a duplicated row: the
+    results file has 300 distinct (level, seed) rows, no L2 / L4 row pair is identical (outcome, replans, flips), and
+    the colliding seeds differ (L2: 1, 4, 11, 23, 28, 36, 37, 58, 80; L4: 4, 11, 23, 28, 36, 58, 75, 78, 80).
+  - **Recorded findings:** the safety is the system's (filter off: 8-9 collisions per 100 episodes; filter on 0 / 0 / 1);
+    denser EMX beams alone do not help the classical planner; **EMX numbers stay unquoted until the artefact rates
+    (dropout, clutter, edge noise, class flips) are measured from Juno recordings.**
+  - Combined run prepared, not launched (`scripts/run_combined.sh`, planner `goalflow_l3_combined`); Can starts it.
+  - **Edge critic vectorised (2026-11-27, before the combined run; definition unchanged):** `observed_min_distance`
+    forward-fills the headings with cummax instead of a loop over steps, computes all candidates x steps x edge points in
+    one batched operation, and first skips edge points outside the bounding box of every densified reference pose
+    expanded by the box reach + 0.12 m (they cannot come within 0.12 m, where the critic is 0 anyway).
+    Equivalence: (a) 260 logged scans (L0 / L2 / L4, 32,760 candidates, 514 with a non-zero critic): max |old - new| = 0
+    and the same top-ranked candidate in 260 / 260 scans; (b) seeds 17 (L0), 4 (L2), 4 (L4) of the (c) per-change run
+    rerun: every episode column identical (incl. triggers). Cost per replan, single worker, machine otherwise idle, 4
+    episodes x 3 configs (534 replans each): no critic 142.7 ms, old critic 157.4 ms (+14.8), new 148.9 ms (+6.3).
+- **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
+  at any single level is flagged to Can before the combined run.
+- radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most
+  0.25 m under a class flip), not a fitted radius (`cluster_obstacles`, `fit_circle_fixed_r`), so a cap at class radius +
+  allowance is a no-op. Part (a) therefore reduces to the 2-scan entry rule unless Can replaces the cap.
+
+### Is GoalFlow's low collision rate the model or the system around it? (2026-11-27)
+
+**Input check (code-traced, `sim/lidar.py`, `sim/raster.py`):** none of the 6 BEV channels uses privileged information.
+hits = simulated LiDAR returns (noise, dropout, clutter, occlusion, blind zone, lowest-beam cut-off); free = per-ray
+clearing from the same scan; unknown = cells no ray reached; drivable = observed noisy road-edge points within 25 m with
+the nominal 12 m width fill (a constant); class = camera label per hit with flips; goal line = the map's goal line
+through the believed (drifting) pose. The ego vector (speed, steer, yaw rate, heading and lateral offset relative to the
+track) uses the believed pose too. The true scene, teacher routes and true edges appear only as training targets.
+
+**Dev seeds are optimistic.** Seeds 0-499 drove design decisions (safety filter, memory, NMS goals, selection rules),
+so every dev-seed result is optimistic. The unbiased number is the fresh test set (seeds 400000+), which stays untouched
+until the final configuration is frozen.
+
+**Queued behind the EMX baselines:** (1) filter-off ablation: goalflow_l3_circles with the safety filter off (memory on),
+seeds 0-99 at L0 / L2 / L4, vs the full run on the same seeds; per level, the share of scans where the top-ranked
+candidate was rejected by the filter and how many of those would truly have collided, from per-scan logging in both
+runs (filter on and filter off; `scans.csv`), not a replay of the full run. (2) Scene overlap: for each dev scene 0-499, the nearest training scene (100000+) by obstacle
+layout; report any near-copy.
+
+### Juno's real speed control: `juno_bangbang` speed mode (2026-11-27)
+
+**Real controller (from Can):** 6-8 km/h band (1.67-2.22 m/s), bang-bang on the ICE valve: open until 2.22 m/s, then
+closed (coasting) until 1.67 m/s. The speed controller never brakes; the AD stack commands the real brake for stops (it
+stopped at a stop sign at SEM). **All simulation results so far use a constant 3 m/s with 3 m/s^2 braking.**
+
+**Config:** `ControllerConfig.speed_mode` = `"constant"` (default, every result so far; reproduces exactly, regression
+test passes) or `"juno_bangbang"` (`JunoSpeedConfig`, `sim/vehicle.py: JunoSpeed`; `eval_corridor.py --speed-mode`).
+Valve and brake commands pass through FIFO delays; the planner's brake command closes the valve and applies the brake;
+in this mode the planner's speed command is ignored. **Placeholders (assumptions until measured):** valve-open accel
+1.0 m/s^2, coast decel 0.1 m/s^2, valve delay 0.2 s; brake decel 3.0 m/s^2, brake delay 0.3 s. With the valve delay the
+speed overshoots the band: steady state 1.645-2.445 m/s, mean 2.03 m/s (one episode: 17.5 s vs 12.0 s at 3 m/s).
+
+**Stopping distance** (brake decision to standstill; delay at constant speed, then 3.0 m/s^2): from 2.22 m/s **1.49 m**;
+1.71 m with one scan (0.1 s) of perception latency; from the 2.445 m/s overshoot 1.70 m (simulated) to 1.94 m (with the
+scan latency). **Against the roof mount's cone-invisible zone** (0.40 m cone, `roof` preset: 0.93-1.02 m past the
+bumper for a body front at 2.445 / 2.35 m): the stopping distance is longer, so a cone must be detected and acted on
+while still >= ~1.7-1.9 m (+ 0.12 m margin) past the bumper. It is visible there; the margin is ~0.8 m. A cone first
+seen inside that distance (out of occlusion) cannot be stopped for. **Safety checks** (filter rollouts and the brake
+decision) are to assume 2.22 m/s plus the brake delay; the planners brake immediately when no checked path is safe, and
+their checked paths reach well beyond 1.9 m, so the requirement is that an obstacle is flagged at that range; the
+rollouts' path geometry is near speed-independent (pure pursuit + bicycle) and stays as trained.
+
+**Stopping distance with the planner's own latency** (reaction = planner latency + 0.1 s scan + 0.3 s brake delay at
+constant speed, then 3.0 m/s^2; placeholders):
+
+| speed | planner latency | reaction | stopping distance | can't stop if first seen closer than (past the bumper, + 0.12 m margin) |
+|---|---|---|---|---|
+| 2.220 m/s | 241 ms (Mac, 5 workers) | 0.641 s | 2.24 m | 2.36 m |
+| 2.220 m/s | 50 ms (Orin target) | 0.450 s | 1.82 m | 1.94 m |
+| 2.445 m/s | 241 ms (Mac, 5 workers) | 0.641 s | 2.56 m | 2.68 m |
+| 2.445 m/s | 50 ms (Orin target) | 0.450 s | 2.10 m | 2.22 m |
+
+So with the roof mount, an obstacle first seen closer than ~1.8-2.1 m (Orin target) or ~2.2-2.6 m (current Mac latency)
+past the bumper, e.g. appearing from behind another obstacle, cannot be stopped for (+0.12 m to keep the filter margin).
+The 0.40 m cone's invisible zone (0.93-1.02 m past the bumper) lies inside that range; cones seen from farther away
+are unaffected. 241 ms is the 5-worker shared-GPU number; the single-worker latency profile (step 5) replaces it.
+
+**Queued after the margin-fix run:** GoalFlow (final accepted config) and the frozen baselines with `juno_bangbang`,
+seeds 0-99 at L0 / L2 / L4, vs constant 3 m/s on the same seeds.
+
+**Measurements needed (Can):** from the SEM stop-sign recording, if it exists: brake decel and command-to-braking delay
+(otherwise a short logged brake test at 8 km/h); a coast-down from 8 km/h with the valve closed (coast decel);
+valve-open accel in the 6-8 km/h band and the valve delay.
+
+### (a)+filter: does GoalFlow's safety advantage transfer to the classical planner? (pre-registered 2026-11-27, before running)
+
+**Config `observed_stubfix_filter`** (`gfsem/planners/safety_wrap.py`): baseline (a) unchanged, plus GoalFlow's safety
+layer from `goalflow_l3_combined`: every scan the same circle set (this scan's `cluster_obstacles` circles, class radii)
+and near-field circle memory with the memory fix (a2); the executed path is simulated (the closed loop's pure pursuit,
+lookahead 2.5 m, and vehicle model from the current speed and steering, along (a)'s path, for GoalFlow's horizon of
+12 m or the path's end) and checked with the exact 0.12 m box-to-circle filter; if it fails, the scan brakes. (a)'s own
+planning, keep logic and checks are untouched. The filter's time is not in (a)'s plan_times (only (a)'s own planning).
+**Run:** seeds 0-499 x L0-L4, 7 workers. **Report** per level success / collision / stall vs (a) and vs
+`goalflow_l3_combined` (+ McNemar on success vs (a), paired by seed). **Reading, fixed in advance:** if (a)+filter's
+collisions fall to GoalFlow's level without a larger stall increase than GoalFlow's, the safety advantage is the
+filter's and transfers; if its stalls rise sharply, the filter's false alarms (remembered-circle drift) cost the
+classical planner the same way; either way the result informs whether GoalFlow-specific work (item 7) is worth it.
+No change to (a) or the filter is made on the basis of this run without Can.
+
+### Combined run, chain results and decisions (2026-11-27 evening)
+
+**Combined run** (`goalflow_l3_combined` = circles + (a2) memory fix + (c) edge critic; seeds 0-499 x L0-L4): success
+93.3 / 91.6 / 89.1 / 87.8 / 80.5%, collisions 0.2 / 0.4 / 0.6 / 0.8 / 1.0% (15 vs 2 for `goalflow_l3_circles`; 13
+"safety-filter miss, obstacle in hit memory"), stalls down at L2-L4, exits at L0 / L1 11 / 10 -> 4 / 2. **Decision
+(Can): goalflow_l3_combined is not the final config.**
+
+**Replay of the 13 filter-miss collisions** (`scripts/diagnose_combined_collisions.py`, all reproduced;
+`reports/lidar_demo/l3_goalflow/combined_collisions/`, one render per cause): **9 re-anchored to an offset observation**
+(the memory fix replaced the remembered centre with a current circle within 0.3 m that was farther from the truth;
+remembered centre then 0.23-0.29 m off, the filter saw 0.13-0.24 m clearance, the truth was -0.10 to 0.00 m; also at
+L0, so near-field partial clusters, not only range noise), **3 dropped by the free-ray rule** (L3 / L4), **1 drifted**;
+none re-anchored to a different obstacle or a noise cluster. So the memory fix's replacement step is the main cause:
+the running mean of sightings (old behaviour) is a better centre than the latest near-field observation.
+
+**Recorded (Can):**
+- **The per-change screening (300 episodes) cannot detect collision-rate changes around 0.5%; it only rules out large
+  harm.** (A 0.5% rate means ~1.5 expected collisions in 300 episodes.)
+- **(a)+filter beats goalflow_l3_combined on success and collisions at every level** ((a)+filter L0-L4: 94.8 / 0.0,
+  96.2 / 0.0, 96.4 / 0.0, 95.2 / 0.0, 85.5 / 0.2 % success / collision; (a) alone at L4 93.1 / 2.3). So the safety
+  advantage is the filter + memory, not the network. **The recommended planner for the car is the corridor-lattice
+  planner + this safety layer.** GoalFlow continues as a research track for real data.
+
+**juno_bangbang (item 5; seeds 0-99, L0 / L2 / L4; success % / collisions / stalls, vs constant 3 m/s on the same seeds):**
+GoalFlow combined 47.9 / 12 / 38, 51.0 / 9 / 37, 38.5 / 14 / 45 (vs 95.8 / 0 / 4, 93.8 / 0 / 6, 84.4 / 1 / 14);
+(b) 97.9 / 0 / 2, 96.9 / 0 / 3, 82.3 / 0 / 17; (a) 96.9 / 0 / 3, 99.0 / 0 / 1, 90.6 / 1 / 7; (c) 96.9 / 0 / 3, 99.0 / 0
+/ 1, 79.2 / 0 / 20. The baselines are unaffected (or better); **GoalFlow collapses**: 35 of its 40 collisions are
+"no safe candidate" (braking, but too late with the 0.3 s brake delay), stalls 120 (61 truly blocked). Untested
+hypotheses: the model was trained at 3 m/s only (ego speed 1.6-2.4 m/s is out of distribution, and its rollouts use the
+current speed), and its "no safe candidate" decisions come late, which the brake delay turns into contact. A separating
+test (e.g. zero brake delay, or the speed input fixed at 3 m/s) needs Can's approval. Another point for the
+corridor-lattice planner + safety layer on the car.
+
+**Scene overlap (item 8):** no dev scene (0-499) is a near-copy of a training scene (15,000 scenes, 100000+); nearest
+symmetric chamfer distance min 0.36 m, 5th percentile 0.81 m, median 1.35 m (sanity: a training scene finds itself at
+0). The closest pairs have 6-9 obstacles about 0.4-0.5 m apart on average; no memorisation concern.
+
+**Queue changes (Can):** item 7 drops "GoalFlow at EMX"; the EMX shift and roof-mount checks will be done for
+(a)+filter (waiting for Can). Item 9 drops the tracker birth rule. **Planned, not approved:** after the replay, freeze
+both final configs (GoalFlow and (a)+filter) and run each once on the fresh test seeds (400000+, all levels) for the
+final numbers.
+
+### FREEZE: final configs and the test-seed run (Can, 2026-11-27; frozen at commit f3f4a51)
+
+**goalflow_final** = `goalflow_l3_circles` + track-edge critic (1.0 x clamp((0.12 - d) / 0.12, 0, 1), vectorised), no
+memory fix, no lambda3, no 2-scan entry rule, no refinement (`eval_corridor.py` planner `goalflow_final`: circle filter,
+0.12 m margin, near-field circle memory with the running mean, edge_w 1.0). **Evidence:** the combined run (memory fix
++ edge critic) had 15 collisions = 13 memory-fix filter misses (replay: 9 re-anchored to an offset observation, 3
+dropped by the free-ray rule, 1 drifted) + 2, the same level as the circles run (2); the edge critic cut exits at L0 / L1
+from 11 / 10 to 4 / 2.
+
+**(a)+filter** (`observed_stubfix_filter`) frozen as pre-registered above (baseline (a) + the exact 0.12 m circle filter
+on the simulated executed path + the near-field memory with the memory fix, as run on the dev seeds).
+
+**Final run (approved):** fresh test seeds 400000-400499 (never used), L0-L4, one at a time: goalflow_final,
+(a)+filter, (a), (b), (c) (`scripts/run_final_test.sh`, output `reports/lidar_demo/final_test/`), then
+`FINAL_COMPARISON.md` (`scripts/build_final_comparison.py`): success / collision / stall / exits, brake rate, door flips,
+correct brakes; McNemar per level: GoalFlow vs the opponent, vs (c), vs (a)+filter; (a)+filter vs (a) and (b). The
+per-level opponent stays as frozen ((b) at L0, (a) at L1-L4; (c) alongside); nothing is re-picked on test results.
+**No changes of any kind after seeing these numbers.** Note: (a)+filter keeps the memory fix as pre-registered and run
+on the dev seeds, although GoalFlow's final config drops it.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
@@ -344,6 +923,8 @@ waypoint jitter: a 3 cm lateral wiggle at 0.75 m spacing already implies about Î
   0.34) confirmed the validation finding. Its numbers can no longer count as held-out. The split is
   frozen (kept, never re-read for any choice), and **before L4 a fresh test set is generated with
   new, disjoint scene seeds**; every final number in L4 comes from that set, read once at the end.
+  **Fresh test seeds (decided 2026-11-26): 400000+.** 300000+ is the spent L1 test split; training uses
+  100000+, validation 200000+, and closed-loop development seeds 0-499.
   Until then all comparisons (selection variants, thresholds, the shadow trigger) use validation only.
 * **Training-target mode (checked 2026-11-25).** `SimFrames` is built with `driven_only=False`
   (`train.py:453`), so each time a frame is loaded one teacher mode is drawn uniformly

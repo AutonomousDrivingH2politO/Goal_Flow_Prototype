@@ -1,0 +1,139 @@
+{
+ "cones": [
+  {
+   "seed": 4,
+   "level": "L0",
+   "outcome": "collision",
+   "cone": 14,
+   "height": 0.4,
+   "radius": 0.25,
+   "contact_t": 13.450000000000001,
+   "last_seen_t": 11.3,
+   "time_since": 2.1500000000000004,
+   "speed_at_last": 0.6000000000000024,
+   "mean_speed_since": 0.5122093023255859,
+   "distance_since": 1.1012500000000098,
+   "bearing_deg": 17.857928709165847,
+   "range_surface": 1.8494025299168224,
+   "next_bearing_deg": 18.73897927311163,
+   "next_range_surface": 1.8091687228028226,
+   "vanished_because": "below the lowest beam",
+   "lowest_beam_reach": 2.032947614373076,
+   "in_memory_window_at_contact": false
+  },
+  {
+   "seed": 12,
+   "level": "L4",
+   "outcome": "collision",
+   "cone": 7,
+   "height": 0.4,
+   "radius": 0.25,
+   "contact_t": 13.450000000000001,
+   "last_seen_t": 11.3,
+   "time_since": 2.1500000000000004,
+   "speed_at_last": 1.200000000000001,
+   "mean_speed_since": 0.5529069767441867,
+   "distance_since": 1.1887500000000015,
+   "bearing_deg": -17.338259207570587,
+   "range_surface": 1.9123000474404548,
+   "next_bearing_deg": -18.779915304901618,
+   "next_range_surface": 1.8152843665446543,
+   "vanished_because": "below the lowest beam",
+   "lowest_beam_reach": 2.032947614373076,
+   "in_memory_window_at_contact": false
+  },
+  {
+   "seed": 23,
+   "level": "L4",
+   "outcome": "collision",
+   "cone": 7,
+   "height": 0.4,
+   "radius": 0.25,
+   "contact_t": 11.25,
+   "last_seen_t": 9.200000000000001,
+   "time_since": 2.049999999999999,
+   "speed_at_last": 1.5000000000000009,
+   "mean_speed_since": 0.5591463414634144,
+   "distance_since": 1.1462499999999989,
+   "bearing_deg": 0.08883758031024654,
+   "range_surface": 1.8504132819073273,
+   "next_bearing_deg": 0.7048560361239243,
+   "next_range_surface": 1.6954796746341287,
+   "vanished_because": "below the lowest beam",
+   "lowest_beam_reach": 2.032947614373076,
+   "in_memory_window_at_contact": false
+  }
+ ],
+ "stalls": [
+  {
+   "seed": 17,
+   "level": "L0",
+   "outcome": "stopped",
+   "stalled_scans": 39,
+   "mean_per_scan": {
+    "current_blocking": 58.92307692307692,
+    "current_clutter": 0.0,
+    "remembered_blocking": 840.0512820512821,
+    "remembered_clutter": 0.0,
+    "remembered_total": 2959.25641025641,
+    "current_total": 191.66666666666666
+   }
+  },
+  {
+   "seed": 17,
+   "level": "L4",
+   "outcome": "stopped",
+   "stalled_scans": 48,
+   "mean_per_scan": {
+    "current_blocking": 9.625,
+    "current_clutter": 0.020833333333333332,
+    "remembered_blocking": 185.6875,
+    "remembered_clutter": 24.979166666666668,
+    "remembered_total": 1578.125,
+    "current_total": 97.95833333333333
+   }
+  },
+  {
+   "seed": 28,
+   "level": "L4",
+   "outcome": "stopped",
+   "stalled_scans": 31,
+   "mean_per_scan": {
+    "current_blocking": 14.580645161290322,
+    "current_clutter": 0.06451612903225806,
+    "remembered_blocking": 235.19354838709677,
+    "remembered_clutter": 27.129032258064516,
+    "remembered_total": 1427.3225806451612,
+    "current_total": 93.70967741935483
+   }
+  },
+  {
+   "seed": 32,
+   "level": "L4",
+   "outcome": "stopped",
+   "stalled_scans": 30,
+   "mean_per_scan": {
+    "current_blocking": 5.366666666666666,
+    "current_clutter": 0.0,
+    "remembered_blocking": 149.46666666666667,
+    "remembered_clutter": 42.03333333333333,
+    "remembered_total": 642.9333333333333,
+    "current_total": 32.46666666666667
+   }
+  },
+  {
+   "seed": 36,
+   "level": "L4",
+   "outcome": "stopped",
+   "stalled_scans": 61,
+   "mean_per_scan": {
+    "current_blocking": 16.83606557377049,
+    "current_clutter": 0.08196721311475409,
+    "remembered_blocking": 221.85245901639345,
+    "remembered_clutter": 17.672131147540984,
+    "remembered_total": 1619.032786885246,
+    "current_total": 111.95081967213115
+   }
+  }
+ ]
+}

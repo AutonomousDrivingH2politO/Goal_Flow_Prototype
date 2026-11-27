@@ -260,7 +260,10 @@ def observation_from_shard(arr: dict, i: int, lidar=None) -> Observation:
     lc = lidar or LidarConfig()
     p0, p1 = arr["points_off"][i], arr["points_off"][i + 1]
     e0, e1 = arr["edge_off"][i], arr["edge_off"][i + 1]
-    ang = lc.ray_angles
+    import math
+    n = len(arr["scan"][i])                  # ray count from the stored scan (0.2 deg = 601, EMX 0.08 deg = 1501)
+    h = math.radians(lc.hfov_deg) / 2
+    ang = np.array([-h, -h + 2 * h / (n - 1)])
     return Observation(
         points=arr["points"][p0:p1], labels=arr["labels"][p0:p1],
         scan_ranges=arr["scan"][i].astype(np.float32),

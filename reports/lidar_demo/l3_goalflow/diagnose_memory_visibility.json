@@ -1,0 +1,23 @@
+[
+ {
+  "seed": 1,
+  "outcome": "stopped",
+  "brake_scans": 21,
+  "blocking_remembered_unseen_per_scan": 6.0,
+  "blocking_remembered_visible_per_scan": 0.14285714285714285
+ },
+ {
+  "seed": 4,
+  "outcome": "stopped",
+  "brake_scans": 26,
+  "blocking_remembered_unseen_per_scan": 5.8076923076923075,
+  "blocking_remembered_visible_per_scan": 0.5769230769230769
+ },
+ {
+  "seed": 9,
+  "outcome": "stopped",
+  "brake_scans": 20,
+  "blocking_remembered_unseen_per_scan": 6.0,
+  "blocking_remembered_visible_per_scan": 0.6
+ }
+]

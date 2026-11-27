@@ -1,0 +1,8 @@
+start Thu Nov 26 21:11:39 CET 2026 head 952c088
+goalflow_l3_exact start Thu Nov 26 21:11:39 CET 2026
+goalflow_l3_exact exit 0 end Thu Nov 26 21:17:16 CET 2026
+goalflow_l3_exact_jitter start Thu Nov 26 21:17:16 CET 2026
+goalflow_l3_exact_jitter exit 0 end Thu Nov 26 21:23:18 CET 2026
+goalflow_l3_exact_refine start Thu Nov 26 21:23:18 CET 2026
+goalflow_l3_exact_refine exit 0 end Thu Nov 26 21:29:07 CET 2026
+done Thu Nov 26 21:29:07 CET 2026

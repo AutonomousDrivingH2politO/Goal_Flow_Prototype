@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
@@ -94,6 +94,8 @@ def scan(scene: Scene, pose: np.ndarray, noise: NoiseLevel, rng: np.random.Gener
     quantities that come from the map: the goal line and the track-relative ego status.
     """
     cfg = cfg or LidarConfig()
+    if getattr(noise, "h_step_deg", None):            # e.g. the EMX preset: 0.08 deg horizontal resolution
+        cfg = replace(cfg, h_step_deg=noise.h_step_deg)
     belief = pose if belief is None else belief
     track = scene.track
     sens = compose(pose, np.array([cfg.mount_x, cfg.mount_y, 0.0]))
