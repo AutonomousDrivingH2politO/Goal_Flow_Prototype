@@ -44,7 +44,7 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 pre-registered. **Running (approved): final test-seed run**, seeds 400000-400499 x L0-L4, one at a time: goalflow_final
 (5 workers, ~4.5 h) -> (a)+filter -> (a) -> (b) -> (c) (7 workers each), then `FINAL_COMPARISON.md`.
 `nohup ./scripts/run_final_test.sh > /dev/null 2>&1 &`, output `reports/lidar_demo/final_test/`, log `chain.log` ends with
-"end"; each eval writes `RUNNING.lock`. **No changes of any kind after the numbers; nothing starts after it.**
+"end"; each eval writes `RUNNING.lock`. Started 21:54 from 99434c0, process group 11915 (stop: `kill -- -11915`, confirm ps). **No changes of any kind after the numbers; nothing starts after it.**
 
 **Waiting for Can after the final run:** GoalFlow juno_bangbang separating test (optional); item 7 for (a)+filter (EMX
 shift, roof mount); item 9 (brake column, seed 190/399 render fix, Orin expansion budget).
