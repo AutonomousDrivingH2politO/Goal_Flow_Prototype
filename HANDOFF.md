@@ -40,14 +40,17 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 
 ## 5. Queue, in order (behind the EMX baselines, not alongside)
 1. EMX baselines (running) -> per-level EMX baseline by the rule.
-1b. "Model or system?" (DEVIATIONS 2026-11-27), **auto-starts after EMX (c)**: `scripts/run_model_or_system.sh`
+1b. DONE 04:42 (README in `reports/lidar_demo/l3_goalflow/model_or_system/`): filter off 8-9 collisions per 100 episodes
+   vs 0/0/1 on; the low collision rate is the filter. lambda3 = 1.29 from the spread replay (05:17).
+   "Model or system?" (DEVIATIONS 2026-11-27), **auto-starts after EMX (c)**: `scripts/run_model_or_system.sh`
    (detached, waits for emx_baselines/chain.log "done"), planners `goalflow_l3_circles_scanlog` (filter on) and
    `goalflow_l3_circles_filteroff` (verdict logged, not applied; never brakes), seeds 0-99 at L0/L2/L4, 5 workers,
    output `reports/lidar_demo/l3_goalflow/model_or_system/<name>/` with `scans.csv` per scan (top-ranked candidate
    rejected y/n, its true clearance, brake, executed path's true clearance). Report vs the full run on the same seeds
    (seed 0 L0 reproduces it exactly) and per level the rejection share and how many rejected tops would truly collide.
    Then the scene-overlap check (dev 0-499 vs training 100000+). Input check done (no privileged channel).
-1c. Queued in order, each script waits for the previous: `scripts/run_spread_replay.sh` (lambda3 scale: deterministic
+1c. Running: `run_emx_art.sh` (05:17) -> `run_per_change.sh` (false-alarm diagnostic, then entry2 / lambda3 / edge /
+   refine; output `reports/lidar_demo/l3_goalflow/per_change/`). Was: queued in order, each script waits for the previous: `scripts/run_spread_replay.sh` (lambda3 scale: deterministic
    rerun of the scanlog config with the top-3 goal-group score spread; then send Can lambda3 / edge critic 1.0 / radius
    note for confirmation) -> `scripts/run_emx_art.sh` (beams-only: (a), (c) at emx_L2art / emx_L4art, seeds 0-499,
    `reports/lidar_demo/emx_art/`; report vs L2 / L4 baselines with hits per obstacle). Per-change runs only after Can
