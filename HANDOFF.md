@@ -38,53 +38,32 @@ Headline: GoalFlow is the safest planner at every level and matches (c) on succe
 success gap is stalls (L0-L1 mostly truly blocked, L2-L4 mostly filter false alarms). Door flips at L0-L2 trigger
 lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 
-## 5. Queue, in order (behind the EMX baselines, not alongside)
-1. EMX baselines (running) -> per-level EMX baseline by the rule.
-1b. DONE 04:42 (README in `reports/lidar_demo/l3_goalflow/model_or_system/`): filter off 8-9 collisions per 100 episodes
-   vs 0/0/1 on; the low collision rate is the filter. lambda3 = 1.29 from the spread replay (05:17).
-   "Model or system?" (DEVIATIONS 2026-11-27), **auto-starts after EMX (c)**: `scripts/run_model_or_system.sh`
-   (detached, waits for emx_baselines/chain.log "done"), planners `goalflow_l3_circles_scanlog` (filter on) and
-   `goalflow_l3_circles_filteroff` (verdict logged, not applied; never brakes), seeds 0-99 at L0/L2/L4, 5 workers,
-   output `reports/lidar_demo/l3_goalflow/model_or_system/<name>/` with `scans.csv` per scan (top-ranked candidate
-   rejected y/n, its true clearance, brake, executed path's true clearance). Report vs the full run on the same seeds
-   (seed 0 L0 reproduces it exactly) and per level the rejection share and how many rejected tops would truly collide.
-   Then the scene-overlap check (dev 0-499 vs training 100000+). Input check done (no privileged channel).
-1e. **Decided (Can, 2026-11-27): combined = (a2) memory fix + (c) edge critic**; (a) dropped, lambda3 off, (d) out on
-   latency (+~95 ms on brake scans). **Prepared, not launched:** `nohup ./scripts/run_combined.sh > /dev/null 2>&1 &`
-   (planner `goalflow_l3_combined`, seeds 0-499 x L0-L4, 5 workers, ~4.5 h, output
-   `reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/`, then COMPARISON.md via `scripts/build_comparison.py`).
-   Edge critic vectorised before it (identical values and episodes; +14.8 -> +6.3 ms per replan, single worker).
-   **RUNNING since 2026-11-27 14:30 (Can's go) from dd68c5a:** process group 2469 (eval PID 2483), lock
-   `full_goalflow_l3_combined/RUNNING.lock`, progress `full_goalflow_l3_combined.log` (every 200 of 2,500 episodes),
-   `full_goalflow_l3_combined.chain.log` ends with "end" after COMPARISON.md is built. Stop: `kill -- -2469`, confirm ps. EMX numbers stay unquoted until artefact rates are measured from Juno recordings.
-1d. Per-change runs DONE (09:34; `reports/lidar_demo/l3_goalflow/per_change/TABLE.md`): accepted (a) [flag: L4 -2.1],
-   (c), (d), (a2) memory fix (rerun after a guard bug; first run kept as `_guardbug`); lambda3 not accepted. **Next:
-   combined run of the accepted set on 0-499 x L0-L4, waiting for Can's decision on (a).**
-1c. Was running: `run_emx_art.sh` (05:17) -> `run_per_change.sh` (false-alarm diagnostic, then entry2 / lambda3 / edge /
-   refine; output `reports/lidar_demo/l3_goalflow/per_change/`). Was: queued in order, each script waits for the previous: `scripts/run_spread_replay.sh` (lambda3 scale: deterministic
-   rerun of the scanlog config with the top-3 goal-group score spread; then send Can lambda3 / edge critic 1.0 / radius
-   note for confirmation) -> `scripts/run_emx_art.sh` (beams-only: (a), (c) at emx_L2art / emx_L4art, seeds 0-499,
-   `reports/lidar_demo/emx_art/`; report vs L2 / L4 baselines with hits per obstacle). Per-change runs only after Can
-   confirms the values.
-2. COMPARISON.md additions (in `scripts/build_comparison.py`): paired McNemar on success, GoalFlow vs baseline and vs
-   (c), per level; stall overlap (GoalFlow stalls on seeds where the baseline also stalls), split truly blocked vs filter
-   false alarm.
-3. The two L4 collisions ("safety-filter miss, obstacle in hit memory"): render both, find why the remembered obstacle
-   did not block (memory position drift, circle radius, or filter lookup); fix if it is a bug.
-4. Pre-registered changes (DEVIATIONS, 2026-11-27), in this order; lambda3 and the edge critic go with the margin
-   fixes, not behind them: (a) filter false alarms (69 of 99 L4 stalls): circle radius capped at class radius + a small
-   allowance, clusters enter the filter after 2 scans except the near-field memory, 0.12 m clearance kept; (b) lambda3
-   on; (c) track-edge critic on; (d) refinement against circles for the L0-L1 precision stalls. Each alone on seeds 0-99
-   at L0, L2, L4, accepted only if collisions do not rise AND stalls drop (or success rises); per-change numbers in one
-   small table; then the accepted set combined on 0-499 x L0-L4.
-5. Latency: single-worker per-component profile (step 5); 241 ms with 5 workers sharing the GPU is not the number.
-5c. After the margin-fix run: GoalFlow (final accepted config) and the frozen baselines with `--speed-mode
-   juno_bangbang` (Juno's valve bang-bang, placeholders; DEVIATIONS 2026-11-27), seeds 0-99 at L0/L2/L4, vs constant
-   3 m/s on the same seeds.
-6. EMX pitch check (roof mount, 5-9 deg); EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); GoalFlow at
-   EMX after review; roof-mount shift check before any retraining.
-7. Brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix; Orin
-   expansion budget; MPPI (item 16) only as fallback.
+## 5. Queue (2026-11-27 14:45; one run at a time)
+
+**Running:** combined run `goalflow_l3_combined` = circles + (a2) memory fix + (c) edge critic (vectorised), seeds
+0-499 x L0-L4, started 14:30 from dd68c5a, ~4.5 h; process group 2469 (eval PID 2483), lock
+`reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/RUNNING.lock`, progress `full_goalflow_l3_combined.log`, chain
+log ends with "end" after COMPARISON.md is built. Stop: `kill -- -2469`, then confirm with ps.
+
+**Next, in order (each waits for the previous; GoalFlow runs at 5 workers):**
+1. Combined-run COMPARISON.md: report vs the frozen baselines and vs `goalflow_l3_circles`.
+2. COMPARISON.md additions (`scripts/build_comparison.py`): paired McNemar on success vs the baseline and vs (c) per
+   level; stall overlap (GoalFlow stalls on seeds where the baseline also stalls), truly blocked vs false alarm.
+3. The full run's two L4 collisions ("safety-filter miss, obstacle in hit memory"): render, find why the remembered
+   obstacle did not block; fix if a bug. Recheck on the combined run.
+4. Latency: single-worker per-component profile (the 241 ms is 5 workers sharing the GPU; single worker ~143 ms).
+5. `juno_bangbang` speed mode: final GoalFlow config and the frozen baselines, seeds 0-99 at L0/L2/L4, vs 3 m/s.
+6. EMX pitch check (EMX, roof mount, pitch 5-9 deg; hits per cone/bollard at 10-30 m; circle fitted?).
+7. EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); then GoalFlow at EMX after review; roof-mount shift
+   check before any retraining. EMX numbers stay unquoted until artefact rates are measured from Juno recordings.
+8. Scene-overlap check (dev 0-499 vs training 100000+ by obstacle layout).
+9. Smaller: brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix;
+   Orin expansion budget (after Can's measurement); MPPI only as fallback.
+
+**Done today** (details in DEVIATIONS 2026-11-27): EMX baselines ((a) = EMX baseline); model or system (the filter
+provides the safety); lambda3 = 1.29 measured; beams-only (denser beams alone do not help); false-alarm diagnostic
+(remembered circles dominate); per-change runs ((a), (c), (d), (a2) accepted; lambda3 not; (a2) rerun after a guard
+bug); decisions (combined = (a2) + (c)); edge critic vectorised.
 
 ## 6. Can's TODO
 - LiDAR optical centre x (from the rear axle), height, pitch.
