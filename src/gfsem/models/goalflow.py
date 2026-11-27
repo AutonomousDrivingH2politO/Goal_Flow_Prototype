@@ -353,6 +353,7 @@ class GoalFlow(nn.Module):
             f = f + l4 * minmax(G_score[ar[:, None], goal_of])
         if l3 > 0 and prev_path is not None:
             f = f - l3 * minmax((S - prev_path[:, None]).norm(dim=-1).mean(-1))
+        out["scores_raw"] = f.clone()                             # before the safety mask (top-ranked = argmax)
         if safety:                                                # observed hits only (no privileged input)
             if safety_points is not None:                         # exact box-to-point check (margin in m)
                 safe = ~observed_collision_exact(S, safety_points, margin=safety_margin)

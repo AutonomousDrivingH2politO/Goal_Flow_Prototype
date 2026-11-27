@@ -646,8 +646,8 @@ until the final configuration is frozen.
 
 **Queued behind the EMX baselines:** (1) filter-off ablation: goalflow_l3_circles with the safety filter off (memory on),
 seeds 0-99 at L0 / L2 / L4, vs the full run on the same seeds; per level, the share of scans where the top-ranked
-candidate was rejected by the filter and how many of those would truly have collided (needs replays: the full run logs
-episodes, not scans). (2) Scene overlap: for each dev scene 0-499, the nearest training scene (100000+) by obstacle
+candidate was rejected by the filter and how many of those would truly have collided, from per-scan logging in both
+runs (filter on and filter off; `scans.csv`), not a replay of the full run. (2) Scene overlap: for each dev scene 0-499, the nearest training scene (100000+) by obstacle
 layout; report any near-copy.
 
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)

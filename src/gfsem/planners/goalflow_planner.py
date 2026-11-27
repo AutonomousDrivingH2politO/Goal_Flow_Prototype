@@ -62,7 +62,8 @@ class GoalFlowPlanner:
                  memory_min_scans: int = 2, memory_cell: float = 0.2, scan_dt: float = 0.1,
                  visibility_gate: bool = False, memory_obs_range: float = 4.0, exact_filter: bool = False,
                  safety_margin: float = 0.12, goal_jitter: float = 0.0, refine_steps: int = 0,
-                 circle_filter: bool = False, circle_gate: float = 0.6):
+                 circle_filter: bool = False, circle_gate: float = 0.6, filter_off: bool = False,
+                 log_scans: bool = False):
         from ..models.common import pick_device
         from ..train import load
         self.dev = pick_device(device)
@@ -75,6 +76,10 @@ class GoalFlowPlanner:
         self.exact_filter, self.safety_margin = exact_filter, safety_margin
         self.goal_jitter, self.refine_steps = goal_jitter, refine_steps
         self.circle_filter, self.circle_gate = circle_filter, circle_gate
+        # filter_off (ablation, circle filter only): the filter's verdict is computed and logged but not applied;
+        # the planner executes the top-ranked candidate and never brakes. log_scans: per-scan record (top-ranked
+        # candidate, its filter verdict, the executed path) for true-clearance scoring after the episode.
+        self.filter_off, self.log_scans = filter_off, log_scans
         from ..sim.config import VehicleConfig
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
         self.rc = RasterConfig()
@@ -88,6 +93,7 @@ class GoalFlowPlanner:
         self.mem: list[tuple[float, np.ndarray]] = []     # remembered points used at the last scan (diagnostics)
         self.circ: list[list] = []                        # circle memory: [x, y, r, n] in the believed odom frame
         self.last_brake: dict = {}
+        self.scan_log: list[dict] = []
 
     def _memory_hits(self, obs) -> torch.Tensor:
         """(1, H, W) hit mask: this scan's hits plus remembered cells (hit in >= min scans, ahead of the rear
@@ -188,8 +194,12 @@ class GoalFlowPlanner:
         hits = self._memory_hits(obs) if self.memory_range > 0 else None
         if self.circle_filter:
             self.filter_points = self._circles(obs)
-            r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True,
+            r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=not self.filter_off,
                                 safety_points=[self.filter_points], safety_margin=self.safety_margin)
+            if self.filter_off:
+                from ..models.goalflow import observed_collision_exact
+                r["safe"] = ~observed_collision_exact(r["samples"], [self.filter_points], margin=self.safety_margin)
+                r["no_safe"] = torch.zeros(1, dtype=torch.bool)
         elif self.exact_filter:
             if hits is None:
                 self.filter_points = np.asarray(obs.points, float).reshape(-1, 2)
@@ -200,6 +210,12 @@ class GoalFlowPlanner:
             r = self.model.plan(bev, ego, M=self.M, n_steps=1, goal_K=self.goal_K, safety=True, safety_slack=0.0,
                                 safety_hits=hits)
         no_safe = bool(r["no_safe"][0])
+        if self.log_scans and "safe" in r:
+            top = int(r["scores_raw"][0].argmax())
+            self.scan_log.append(dict(k=self.k, true_pose=np.asarray(true_pose, float).copy(), no_safe=no_safe,
+                                      top_rejected=not bool(r["safe"][0, top]),
+                                      top=r["samples"][0, top].cpu().numpy(),
+                                      exe=None if no_safe else r["traj_main"][0].cpu().numpy()))
         self.k += 1
         if self.dev.type == "mps":
             torch.mps.synchronize()

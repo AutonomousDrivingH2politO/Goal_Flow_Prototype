@@ -48,6 +48,8 @@ LABELS = {
     "goalflow_l3_exact_jitter": "GoalFlow, closed loop (exact filter + goal jitter +-0.3 m)",
     "goalflow_l3_exact_refine": "GoalFlow, closed loop (exact filter + 8 gradient steps when no candidate is safe)",
     "goalflow_l3_circles": "GoalFlow, closed loop (exact 0.12 m filter against fitted obstacle circles + circle memory)",
+    "goalflow_l3_circles_scanlog": "goalflow_l3_circles with per-scan logging (filter on)",
+    "goalflow_l3_circles_filteroff": "goalflow_l3_circles, safety filter off (verdict logged, not applied), memory on",
     "observed_l3_nocache": "(b) without the failed-search cache",
     "observed_l3_nohold": "(b) without hold",
     "observed_l3_nocache_nohold": "(b) without cache and hold",
@@ -82,7 +84,11 @@ def make_planner(name: str):
                    "goalflow_l3_exact": dict(exact_filter=True, safety_margin=0.12),        # exact box-to-point filter
                    "goalflow_l3_exact_jitter": dict(exact_filter=True, safety_margin=0.12, goal_jitter=0.3),
                    "goalflow_l3_exact_refine": dict(exact_filter=True, safety_margin=0.12, refine_steps=8),
-                   "goalflow_l3_circles": dict(circle_filter=True, safety_margin=0.12)}   # circles, as baseline (a)
+                   "goalflow_l3_circles": dict(circle_filter=True, safety_margin=0.12),   # circles, as baseline (a)
+                   # model or system? (DEVIATIONS 2026-11-27): same planner with per-scan logging, filter on / off
+                   "goalflow_l3_circles_scanlog": dict(circle_filter=True, safety_margin=0.12, log_scans=True),
+                   "goalflow_l3_circles_filteroff": dict(circle_filter=True, safety_margin=0.12, log_scans=True,
+                                                         filter_off=True)}
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
         if _GF is None:
             from gfsem.planners.goalflow_planner import GoalFlowPlanner
@@ -146,6 +152,28 @@ def _stall_diag(lb: dict, scene, veh) -> dict:
     return out
 
 
+def _scan_rows(planner, scene, veh) -> list:
+    """Per scan: was the top-ranked candidate rejected by the filter, its true clearance, and the executed path's true
+    clearance (empty if braking); true clearance = Juno's box vs the true obstacle discs at the true pose."""
+    import torch
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from eval_selection import path_clearance
+    from gfsem.sim.geometry import to_frame
+    out = []
+    for L in planner.scan_log:
+        T = to_frame(scene.centres, L["true_pose"]) if scene.n else np.zeros((0, 2))
+        O = torch.zeros(1, max(scene.n, 1), 3)
+        O[0, :scene.n, :2] = torch.from_numpy(T)
+        O[0, :scene.n, 2] = torch.from_numpy(scene.radii)
+        P = [L["top"]] + ([L["exe"]] if L["exe"] is not None else [])
+        c = path_clearance(torch.from_numpy(np.stack(P)).float(), O.expand(len(P), -1, -1),
+                           torch.full((len(P),), scene.n), veh).numpy()
+        out.append((L["k"], int(L["top_rejected"]), round(float(c[0]), 3), int(L["no_safe"]),
+                    round(float(c[1]), 3) if len(c) > 1 else ""))
+    planner.scan_log = []
+    return out
+
+
 def run_one(job: tuple) -> dict:
     from gfsem.sim.closed_loop import run_episode
     from gfsem.sim.config import LidarConfig, SimConfig
@@ -171,6 +199,7 @@ def run_one(job: tuple) -> dict:
         row["stall_blocker_true_clearance"] = ""
         if r.outcome in ("stopped", "timeout") and getattr(inner, "last_brake", None):
             row.update(_stall_diag(inner.last_brake, scene, cfg.vehicle))
+        row["scan_log"] = _scan_rows(inner, scene, cfg.vehicle) if getattr(inner, "log_scans", False) else []
     row["layout"] = scene.layout
     row["fail_cause"] = ";".join(f"{k}" for k in getattr(inner, "fail_causes", {}) or [])
     row["triggers"] = dict(Counter(t for t, _ in stats))
@@ -323,7 +352,7 @@ def _main_body(a, jobs, seeds, levels):
                 print(f"{i + 1}/{len(jobs)} episodes, {time.time() - t0:.0f}s", flush=True)
     elapsed = time.time() - t0
     rows.sort(key=lambda r: (r["planner"], r["noise"], r["seed"]))
-    keys = [k for k in rows[0] if k not in ("plan_times", "plan_expansions", "triggers")] + ["triggers"]
+    keys = [k for k in rows[0] if k not in ("plan_times", "plan_expansions", "triggers", "scan_log")] + ["triggers"]
     with open(a.out / "results.csv", "w", newline="") as f:
         w = csv.DictWriter(f, keys, extrasaction="ignore")
         w.writeheader()
@@ -336,6 +365,14 @@ def _main_body(a, jobs, seeds, levels):
             ex = r.get("plan_expansions") or [""] * len(r["plan_times"])
             for (t, m), e in zip(r["plan_times"], ex):
                 w.writerow([r["planner"], r["noise"], r["seed"], t, f"{m:.2f}", e])
+    if any(r.get("scan_log") for r in rows):          # per-scan log (model-or-system study)
+        with open(a.out / "scans.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["planner", "noise", "seed", "k", "top_rejected", "top_true_clearance", "brake",
+                        "executed_true_clearance"])
+            for r in rows:
+                for s in r.get("scan_log") or []:
+                    w.writerow([r["planner"], r["noise"], r["seed"], *s])
     summarise(rows, a.out, seeds, levels, elapsed)
     print((a.out / "summary.md").read_text())
 
