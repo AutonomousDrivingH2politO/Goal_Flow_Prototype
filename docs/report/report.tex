@@ -14,6 +14,8 @@
 \usepackage{microtype}
 \usepackage{parskip}
 \usepackage{float}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
 \setlength{\emergencystretch}{4em}
 
 \definecolor{accent}{RGB}{38,110,200}
@@ -23,6 +25,10 @@
 
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\term}[1]{\textbf{#1}}
+\definecolor{okc}{RGB}{40,130,70}
+\newcommand{\solved}{\textcolor{okc}{\textbf{Solved}}}
+\newcommand{\partly}{\textcolor{accent}{\textbf{Partly}}}
+\newcommand{\open}{\textcolor{warn}{\textbf{Open}}}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
 \newenvironment{keybox}[1]{%
@@ -39,7 +45,7 @@
 
 \title{\textbf{GoalFlow for Juno}\\[2pt]\large Learned path planning through the Shell Eco-marathon obstacle course:\\ goals, architecture, obstacle avoidance and the methods behind it}
 \author{Team H2politO, Autonomous Driving division\\ \small Prepared for anyone joining the project}
-\date{26 November 2026}
+\date{27 November 2026}
 
 \begin{document}
 \maketitle
@@ -50,8 +56,19 @@ Juno through the autonomous obstacle course better than our classical planner. G
 \emph{where} to go (a goal point), then generates many candidate paths toward it with a \term{rectified-flow}
 generative model, and finally lets simple rules (\term{critics}) and a hard geometric \term{safety filter}
 pick the path to drive. Everything so far runs in a fast 2D simulator with a simulated RoboSense EMX
-LiDAR. GoalFlow is trained, its configuration for closed-loop testing is chosen, the classical baselines
-are fixed, and the full closed-loop comparison is the next step. CARLA and then the real track follow.
+LiDAR.
+
+\textbf{Where we stand (27 Nov).} The full closed-loop comparison is done: 500 unseen scenes at each of five noise
+levels. GoalFlow is the \emph{safest} planner at every level (0.0\% collisions at L0--L3, 0.4\% at L4 against 2.3\% for
+the best classical planner) but succeeds 6--14 points less often, almost entirely because it stops (``stalls'') when
+its safety filter finds no path it trusts. Against a classical planner given exactly the same information it matches
+success at L3--L4 with far fewer collisions. Follow-up tests showed that the safety comes from the
+\emph{system} (filter and memory), not from the network alone, and that the same safety layer on the classical
+planner, \textbf{(a)+filter}, beats GoalFlow on both success and collisions at every level.
+
+\textbf{Conclusion.} The planner for Juno should be the corridor-lattice planner with the safety layer developed
+here. GoalFlow continues as a research track whose case rests on real data. Final numbers on the untouched test
+seeds (400000+) are being produced with both configurations frozen.
 \end{keybox}
 
 \tableofcontents
@@ -68,7 +85,9 @@ limitation that shapes everything: the steering angle is capped at $10^\circ$ in
 gives a minimum turning radius of about 9.1\,m. To pass a tight pair of obstacles the car must start
 swerving roughly 10\,m before them. A planner that reacts late cannot recover.
 
-Our current stack uses classical methods (Nav2, a costmap, MPPI and pure pursuit). The team's idea was to
+At SEM, Juno drove with \code{competition.launch.py}: a camera lane-follower (segmentation mask $\to$
+bird's-eye view $\to$ lane midpoints $\to$ pure-pursuit steering) plus a stop-sign node. Nav2 is launched alongside
+but idle, so the car currently has \emph{no LiDAR-based obstacle planner}. The team's idea was to
 use \emph{``a diffusion model for path selection, like an MPPI critic''}: a generative network proposes
 many plausible paths, and cheap scoring rules choose among them. GoalFlow is a published method that does
 exactly this, so we are prototyping it.
@@ -76,7 +95,7 @@ exactly this, so we are prototyping it.
 \subsection{The question we want answered}
 Can GoalFlow, seeing only noisy LiDAR, reach the goal line more often than our classical planner, without
 colliding more, especially when the sensor is noisy? The success criteria were fixed in advance and are
-measured on 1{,}000 unseen scenes:
+measured on unseen scenes (500 per noise level):
 \begin{enumerate}[nosep]
   \item success rate at least as high as both baselines, and higher at the noisiest levels (L3--L4);
   \item collisions no higher than either baseline;
@@ -192,7 +211,7 @@ Phase & What it is & What we did / status \\
 L0 & Classical planners in closed loop & Built the corridor-lattice planner (teacher and observed baseline) and the older funnel planner; ran them on seeds 0--499 at all noise levels. Found and fixed the A6 bugs (goal-line edge stub, edge fill inside the true edge). Done. \\
 L1 & Training data and toy tests & Generated about 658{,}000 frames from the teacher (Section~\ref{sec:data}); unit-tested the rectified-flow code on toy problems. Done. \\
 L2 & Training and open-loop validation & Trained GoalFlow and the regression baseline (seed 0); goal-scorer diagnostics; compared 17 selection variants open loop and chose the configuration for L3. Done. \\
-L3 & Closed-loop comparison & Classical baseline rerun and frozen per noise level; GoalFlow closed-loop planner built; obstacle-memory study on smoke tests. Full run (500 seeds $\times$ 5 noise levels) pending. \\
+L3 & Closed-loop comparison & Classical baseline rerun and frozen per noise level; GoalFlow closed-loop planner built; obstacle-memory study and exact safety filter on smoke tests; drift model corrected and baselines rerun at L1--L4. Full run (500 seeds $\times$ 5 noise levels) pending. \\
 L4 & Final evaluation & Final numbers on a fresh test set (seeds 400000+), read once. Not started. \\
 \bottomrule
 \end{tabularx}
@@ -275,11 +294,14 @@ Item & Value \\
 \midrule
 Juno & 2.875\,m long, 1.165\,m wide, 1.60\,m wheelbase \\
 Steering & $10^\circ$ maximum $\Rightarrow$ minimum radius $\approx 9.1$\,m, maximum curvature $\kappa_{\max}\approx 0.110\,\mathrm{m}^{-1}$ \\
-Speed in the course & about 3\,m/s \\
+Speed & simulator: constant 3\,m/s (10.8\,km/h), braking 3\,m/s$^2$. Juno: 6--8\,km/h, bang-bang on the
+engine valve (open to 8, coast to 6\,km/h); the AD stack commands the real brake for stops \\
 Track & 12\,m wide \\
 Obstacles & bollards (radius 0.225\,m, 1.10\,m tall) and cones (radius 0.25\,m, 0.40\,m tall) \\
 Passable gap (door rule) & $\text{gap} - 2r \ge \text{car width} + 2\times 0.25$\,m, about 2.12\,m between bollard centres \\
-LiDAR & RoboSense EMX: $120^\circ$ wide, beams from $-19^\circ$ to $+1^\circ$ (mounted 1.10\,m high, tilted $7^\circ$ down), 1.5\,m blind zone \\
+LiDAR & RoboSense EMX: 192 beams, $120^\circ\times20^\circ$, 0.08$^\circ$ horizontal steps, $\pm5$\,cm, 1.5\,m blind zone.
+All results so far: front-axle mount (1.60\,m ahead of the rear axle, 1.10\,m high, tilted $7^\circ$ down, beams $-19^\circ$
+to $+1^\circ$). Planned: roof mount at the base of the ZED support (about 1.05\,m, 1.20\,m, $7^\circ$; to be measured) \\
 Planning horizon & 4\,s: 16 points every 0.25\,s, about 12\,m ahead \\
 \bottomrule
 \end{tabularx}
@@ -347,8 +369,9 @@ GoalFlow & BEV image & the method under test \\
 The observation is turned into a $6\times128\times128$ image covering 25.6\,m around the car at 0.2\,m per
 cell (\code{sim/raster.py}). The six layers are: LiDAR hits, free space (cells crossed by LiDAR rays),
 unknown (never reached), drivable area (between the observed track edges), obstacle class (bollard or
-cone, from the camera), and the goal direction. This mirrors the costmap that Nav2 builds on the real car,
-so the same interface can later be fed from CARLA or from Juno.
+cone, from the camera, with label flips), and the goal line (from the map, placed through the car's own drifting
+pose). A check on 27 Nov confirmed that no layer uses privileged information (true scene, teacher routes or true
+edges). The same interface can later be fed from CARLA or from Juno.
 
 %=====================================================================
 \section{The simulator and the training data}
@@ -644,8 +667,8 @@ to a hard geometric veto. If all layers fail to find a safe path, the car brakes
   \node[learned, text width=0.86\linewidth, align=left] (l1) {\textbf{1. Goal choice} (learned): the DAC head pushes goals that would put the car on an obstacle or off the track down the ranking; NMS-K3 keeps alternatives on different routes.};
   \node[learned, below=of l1, text width=0.86\linewidth, align=left] (l2) {\textbf{2. Path generation} (learned): the generator has seen thousands of teacher paths around obstacles and produces paths that go around them toward the chosen goals.};
   \node[classic, below=of l2, text width=0.86\linewidth, align=left] (l3) {\textbf{3. Drivability} (physics): the rollout turns every sample into what the car can actually steer with $10^\circ$.};
-  \node[safety, below=of l3, text width=0.86\linewidth, align=left] (l4) {\textbf{4. Safety filter} (geometry, hard veto): any executed path whose footprint touches a LiDAR hit, current or remembered, is removed.};
-  \node[classic, below=of l4, text width=0.86\linewidth, align=left] (l5) {\textbf{5. Critics} (rules): among the safe paths, prefer reaching the goal and making progress.};
+  \node[safety, below=of l3, text width=0.86\linewidth, align=left] (l4) {\textbf{4. Safety filter} (geometry, hard veto): LiDAR hits are clustered into obstacle circles (fixed class radius, fitted centre); any executed path whose car box comes within 0.12\,m of a current or remembered circle is removed.};
+  \node[classic, below=of l4, text width=0.86\linewidth, align=left] (l5) {\textbf{5. Critics} (rules): among the safe paths, prefer reaching the goal, making progress and (combined configuration) keeping 0.12\,m from the observed track edge.};
   \node[safety, below=of l5, text width=0.86\linewidth, align=left] (l6) {\textbf{6. Brake} (fallback): if nothing is safe, stop. Geometry always has the final say.};
 \end{tikzpicture}
 \caption{The layers of obstacle avoidance in GoalFlow.}
@@ -657,17 +680,24 @@ reaches about 0.86\,m past the front bumper. Worse, the lowest beam points $19^\
 a 0.40\,m cone passes under it once it is within about 2.03\,m of the sensor. Planning from a single scan,
 GoalFlow ``forgot'' cones right before reaching them, and every collision in early tests was of this kind.
 
-We therefore give the safety filter (only the filter; the network input stays single-scan) a short memory
-of LiDAR hits:
+We therefore give the safety filter (only the filter; the network input stays single-scan) a short memory.
+It went through several versions (challenges 13, 14, 21 and 22); the final one:
 \begin{itemize}[nosep]
-  \item only hits observed within 4\,m of the sensor are remembered (far observations are distorted by
-        odometry drift when mapped back: up to 1\,m in our tests);
-  \item a 0.2\,m cell counts only after it was hit in at least two scans (removes single-scan clutter);
-  \item cells are stored in the car's own, drifting odometry frame, never the true pose, and are kept
-        until they are behind the rear bumper or more than 4\,m away.
+  \item stores obstacle \emph{circles}, not raw hits, and only those observed within 4\,m of the sensor
+        (far observations are distorted more by odometry drift);
+  \item keeps them in the car's own, drifting odometry frame, never the true pose.
 \end{itemize}
-Four memory designs were compared under a rule fixed in advance; this one removed all collisions in the
-smoke test without adding stalls.
+A ``memory fix'' (re-anchor a remembered circle to a new observation; drop it when the scan sees its place free)
+reduced false alarms in screening but caused 13 collisions in the full run and was removed (challenge 22). The
+remaining weakness is drift: remembered circles end up 0.08--0.31\,m off, which causes both false alarms and the
+rare collision. On the real car the memory is only as good as the odometry.
+
+\paragraph{How much of the safety is the network?} With the filter switched off (seeds 0--99), GoalFlow's top path
+collides in about 8--9 of 100 episodes, worse than any classical configuration. The filter removes these
+collisions; 55--64\% of the paths it rejects really would have collided, and nearly all others were within the
+0.12\,m margin. So the low collision rate belongs to the \emph{system}: network plus geometric filter plus memory.
+Put on top of the classical planner, the same layer brings its collisions to about zero too
+(Section~\ref{sec:afilter}).
 
 \subsection{How the classical planner avoids obstacles}
 The corridor-lattice planner avoids obstacles by construction: it only plans through gaps that pass the
@@ -821,47 +851,571 @@ Three goals plus the safety filter is the real gain (paired McNemar $p=0.004$; m
 With a single goal the filter does nothing: all samples follow nearly the same line, so there is no safe
 alternative to switch to.
 
-\subsection{Classical baseline (closed loop, seeds 0--499; success \%)}
-\begin{table}[h]
-\small
-\begin{tabular}{@{}lrrrrr@{}}
+\subsection{Classical baselines (closed loop, seeds 0--499)}
+After the drift correction (challenge 14), the classical configurations score as follows (success / collision /
+stalled \% of the 477 feasible scenes; track exits as a count):
+\begin{table}[H]
+\footnotesize
+\begin{tabular}{@{}lllll@{}}
 \toprule
-Config & L0 & L1 & L2 & L3 & L4 \\
+Config & L1 & L2 & L3 & L4 \\
 \midrule
-Before fixes & 91.2 & 97.1 & 98.1 & 94.8 & 70.0 \\
-(a) original + goal-line fix & 94.8 & 97.1 & 97.1 & \textbf{96.6} & \textbf{93.7} \\
-(b) + L3 additions & 97.5 & 97.3 & 95.8 & 92.5 & 74.8 \\
-(c) (b) without edge memory & 95.4 & 96.9 & 94.3 & 89.5 & 77.1 \\
-(d) (b) without tracking & \textbf{97.9} & \textbf{97.5} & 94.8 & 74.4 & 37.1 \\
+(a) & \textbf{97.9} / 0.6 / 1.3 / 1 & \textbf{98.7} / 0.0 / 1.3 / 0 & \textbf{97.3} / 0.8 / 1.9 / 0 & \textbf{93.1} / 2.3 / 4.4 / 1 \\
+(b) & 97.1 / 0.0 / 2.7 / 1 & 95.8 / 0.4 / 3.6 / 1 & 91.0 / 0.4 / 8.6 / 0 & 78.0 / 3.1 / 18.0 / 4 \\
+(c) & 95.6 / 0.2 / 3.8 / 2 & 95.0 / 1.0 / 4.0 / 0 & 87.8 / 1.0 / 11.1 / 0 & 78.0 / 2.9 / 18.7 / 2 \\
+(d) & 96.6 / 0.4 / 2.7 / 1 & 95.2 / 0.0 / 4.6 / 1 & 73.4 / 0.8 / 25.6 / 1 & 39.6 / 0.8 / 59.3 / 1 \\
 \bottomrule
 \end{tabular}
 \end{table}
-Two edge-handling bugs were found and fixed (an edge stub at the goal line and an edge guess inside the real
-edge). The L3 additions help at low noise but stall at high noise: their obstacle tracker turns LiDAR clutter
-into about five phantom obstacles per scan at L4, and the ``hold'' rule waits for confirmations that noisy
-scans rarely give. GoalFlow is compared against the best configuration at each level: (a) at L2--L4, (b) at
-L0--L1, with (c) also reported.
+(a) original planner + goal-line fix; (b) (a) + L3 additions (tracking, edge memory, hysteresis, hold); (c) (b)
+without edge memory; (d) (b) without tracking.
+At L0 (no drift) (b) is best with 97.5 / 0.0 / 1.9 / 3. Before any GoalFlow closed-loop result existed, the
+opponent at each level was frozen as the best classical configuration: \textbf{(b) at L0, (a) at L1--L4}. Config
+(c) is reported alongside as the \emph{same-information} baseline: like GoalFlow's input, it has no memory of track
+edges.
 
-\subsection{Closed-loop GoalFlow (smoke test, seeds 0--39)}
-\begin{table}[h]
+\subsection{Full closed-loop run: GoalFlow vs the frozen baselines}
+\label{sec:fullrun}
+GoalFlow configuration \code{goalflow\_l3\_circles} (NMS-K3, circle safety filter with near-field circle memory,
+shadow off), seeds 0--499 at every level, front-axle mount, 3\,m/s. Cells: success / collision / stalled \% of
+feasible scenes / track-exit count.
+\begin{table}[H]
 \small
-\begin{tabular}{@{}lcc@{}}
+\begin{tabularx}{\linewidth}{@{}lLLL@{}}
 \toprule
-Planner & L0 (success/coll./stall/exit) & L4 (success/coll./stall/exit) \\
+Level & GoalFlow & Best classical & (c) same information \\
 \midrule
-GoalFlow, near-field memory & 37 / 0 / 2 / 0 & 35 / 0 / 4 / 0 \\
-Classical (a) & 37 / 0 / 0 / 2 & 35 / 1 / 3 / 0 \\
-Classical (b) & 39 / 0 / 0 / 0 & 31 / 1 / 7 / 0 \\
+L0 (vs b) & 91.8 / \textbf{0.0} / 5.9 / 11 & \textbf{97.5} / 0.0 / 1.9 / 3 & 95.4 / 0.0 / 4.0 / 3 \\
+L1 (vs a) & 91.6 / \textbf{0.0} / 6.3 / 10 & \textbf{97.9} / 0.6 / 1.3 / 1 & 95.6 / 0.2 / 3.8 / 2 \\
+L2 (vs a) & 88.7 / \textbf{0.0} / 10.7 / 3 & \textbf{98.7} / 0.0 / 1.3 / 0 & 95.0 / 1.0 / 4.0 / 0 \\
+L3 (vs a) & 85.7 / \textbf{0.0} / 14.3 / 0 & \textbf{97.3} / 0.8 / 1.9 / 0 & 87.8 / 1.0 / 11.1 / 0 \\
+L4 (vs a) & 78.8 / \textbf{0.4} / 20.8 / 0 & \textbf{93.1} / 2.3 / 4.4 / 1 & 78.0 / 2.9 / 18.7 / 2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{itemize}[nosep]
+  \item \textbf{Collisions:} GoalFlow is at or below every baseline at every level. Both L4 collisions are
+        ``safety-filter miss, obstacle in memory'': a remembered cone had drifted 0.26--0.31\,m, so the filter saw clearance
+        where there was contact.
+  \item \textbf{Success:} 6--14 points below the best classical planner, almost entirely through stalls. At L3--L4
+        it matches the same-information baseline (c) on success with far fewer collisions.
+  \item \textbf{Door flips} (route changes per run): 0.30 / 0.25 / 0.27 at L0--L2 against 0.05 / 0.14 / 0.26, but
+        0.30 / 0.32 at L3--L4 against 0.69 / 1.61. \textbf{Brake rate} 3.3--7.3\% of planning steps against
+        1.3--9.5\%. \textbf{Correct stops} in the 23 scenes with no route: 22, 21, 22, 23, 23.
+  \item \textbf{Track exits} at L0--L1 (11 and 10) were unexpected: the track-edge critic had been left off.
+\end{itemize}
+
+\paragraph{What the stalls are.} At the moment the car gave up, how much true clearance did GoalFlow's best
+candidate have?
+\begin{table}[H]
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Level & Stalls & Best candidate truly collides & Clear, but by $<0.12$\,m & Clear by $\ge0.12$\,m (false alarm) \\
+\midrule
+L0 & 28 & 16 & 11 & 1 \\
+L1 & 30 & 16 & 11 & 3 \\
+L2 & 51 & 18 & 7 & 26 \\
+L3 & 68 & 20 & 8 & 40 \\
+L4 & 99 & 18 & 12 & 69 \\
+\midrule
+All & 276 & 88 (32\%) & 49 (18\%) & 139 (50\%) \\
 \bottomrule
 \end{tabular}
 \end{table}
-On 39 feasible scenes per level this is indicative only. GoalFlow had no collisions; ``no safe candidate''
-brakes happened in 3.0\% of planning steps. All six GoalFlow failures are stalls in scenes where baseline (a)
-succeeds: GoalFlow's candidates pass very close to obstacles in tight gaps (in seed 17 the best candidate
-cleared by a median 1\,cm), so the safety filter rejects them all and the car brakes. In seed 1 at L0 the
-opposite happened: (a) left the track and GoalFlow succeeded. Refining the chosen GoalFlow path with MPPI is
-queued to fix the precision problem. The full run (500 seeds, all levels) is next. Planning takes about
-183\,ms per step on the Mac; the 50\,ms Orin target is not yet met.
+At L0--L1 most stalls are real precision problems or dead ends. From L2 up most are \emph{false alarms}: a path
+was truly clear with the full margin, but the filter rejected it. A replay of all 139 false alarms found the
+blocking circles were mostly remembered near-field circles that had drifted (103), then phantoms from clutter
+(56), real obstacles with offset centres (10) and one class flip. About two thirds of all stalls therefore had a
+way through.
+
+\subsection{Screening of improvements (seeds 0--99 at L0, L2, L4)}
+Each change was pre-registered, implemented behind a flag and tested alone; accepted only if collisions do not
+rise and stalls fall or success rises (pooled over the three levels, 300 episodes).
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}Lrrrl@{}}
+\toprule
+Change & Success \% & Collisions & Stalls & Verdict \\
+\midrule
+Reference (full run, same seeds) & 89.2 & 1 & 29 & -- \\
+(a) a cluster enters the filter after 2 scans & 89.2 & 1 & 27 & accepted, flagged (L4 $-2.1$) \\
+(b) consistency critic $\lambda_3=1.29$ (measured, not tuned) & 88.5 & 0 & 31 & not accepted \\
+(c) track-edge critic & 89.6 & 0 & 30 & accepted (exits $1\to0$) \\
+(d) refinement against circles & 89.6 & 1 & 28 & accepted, then dropped (latency) \\
+(a2) memory fix & \textbf{90.3} & \textbf{0} & \textbf{26} & accepted, best (L4 83.3 vs 80.2) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+All differences are 1--4 episodes out of 300, within noise; the screening only rules out harm. (d) delays the
+brake decision by about 95\,ms because it runs exactly when no path is safe, so it was left out. The
+\textbf{combined configuration} is (a2) + (c); its full run (seeds 0--499 $\times$ L0--L4) started on 27 Nov at 14:30.
+
+\paragraph{Combined run (27 Nov).} Success / collision / stalled \% / exits, seeds 0--499:
+\begin{table}[H]
+\scriptsize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llllll@{}}
+\toprule
+Run & L0 & L1 & L2 & L3 & L4 \\
+\midrule
+Combined & 93.3 / 0.2 / 5.7 / 4 & 91.6 / 0.4 / 7.5 / 2 & 89.1 / 0.6 / 10.1 / 1 & 87.8 / 0.8 / 11.1 / 1 & 80.5 / 1.0 / 18.4 / 0 \\
+Circles & 91.8 / 0.0 / 5.9 / 11 & 91.6 / 0.0 / 6.3 / 10 & 88.7 / 0.0 / 10.7 / 3 & 85.7 / 0.0 / 14.3 / 0 & 78.8 / 0.4 / 20.8 / 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Success rose by up to 2.1 points and the edge critic cut track exits at L0--L1 from 11/10 to 4/2, but collisions rose
+from 2 to 15. A replay traced 13 of them to the memory fix: 9 remembered circles re-anchored to an offset observation
+(a partly seen cone gives an offset centre), 3 dropped by the free-ray rule, 1 plain drift. The screening on 300
+episodes could not have shown this: at a 0.5\% rate it expects only one or two collisions. \textbf{Final GoalFlow
+configuration} (frozen 27 Nov): circles + edge critic, without the memory fix.
+
+Against the best classical planner, GoalFlow's lower success is significant at every level (paired McNemar,
+$p\le10^{-3}$); against the same-information baseline (c) it is not significant at L0, L3 or L4.
+
+\subsection{The decisive test: the safety layer on the classical planner}
+\label{sec:afilter}
+\textbf{(a)+filter} is classical configuration (a) unchanged, plus GoalFlow's safety layer: every scan the same
+obstacle circles and near-field memory, the executed path simulated over the same 12\,m horizon, and a brake if it
+comes within 0.12\,m. Pre-registered before it ran. Success / collision / stalled \%:
+\begin{table}[H]
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Level & (a)+filter & Best classical alone & GoalFlow combined \\
+\midrule
+L0 & 94.8 / 0.0 / 4.4 & 97.5 / 0.0 / 1.9 (b) & 93.3 / 0.2 / 5.7 \\
+L1 & 96.2 / 0.0 / 3.6 & 97.9 / 0.6 / 1.3 & 91.6 / 0.4 / 7.5 \\
+L2 & 96.4 / 0.0 / 3.6 & 98.7 / 0.0 / 1.3 & 89.1 / 0.6 / 10.1 \\
+L3 & 95.2 / 0.0 / 4.8 & 97.3 / 0.8 / 1.9 & 87.8 / 0.8 / 11.1 \\
+L4 & 85.5 / 0.2 / 13.8 & 93.1 / 2.3 / 4.4 & 80.5 / 1.0 / 18.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+The safety transfers: collisions drop to about zero, at a cost of about 2 points of success at L1--L3 and 7.6 at L4
+(all stalls). (a)+filter beats GoalFlow on success and collisions at every level. In simulation, GoalFlow's
+advantage was the safety layer, and the safety layer is not specific to GoalFlow.
+
+\subsection{The EMX sensor in simulation}
+\begin{itemize}[nosep]
+  \item \textbf{EMX preset} (EMX beam pattern, $\pm5$\,cm range noise, other artefacts assumed at L1 values),
+        classical baselines, seeds 0--499: (a) 98.7 / 0.0 / 1.0, (b) 97.7 / 0.0 / 1.9, (c) 97.9 / 0.0 / 1.9.
+  \item \textbf{Beams only:} the EMX beam pattern with the L2 or L4 artefacts gives about 2.5 times the hits per
+        obstacle (7.8 vs 5.0 at 20\,m even with L4 artefacts against L2), yet the classical planner scores like L2
+        and L4 respectively: (a) 96.9 vs 98.7 and 91.6 vs 93.1.
+  \item \textbf{Reading:} the artefacts (dropout, clutter, edge noise, class flips), not the beam density, set the
+        result. The EMX's good score comes from its assumed L1 artefacts; real rates must be measured from Juno
+        recordings before these numbers are quoted.
+\end{itemize}
+
+\subsection{Mounting and speed}
+\begin{itemize}[nosep]
+  \item \textbf{Roof mount} (provisional 1.05\,m, 1.20\,m): the blind zone ends 0.06--0.25\,m past the bumper; a 0.40\,m
+        cone becomes invisible within 0.5--1.5\,m past the bumper (about 1.0\,m at $7^\circ$). A placeholder windshield
+        model allows pitch up to 9.5--12.3$^\circ$ depending on the glass length (about $8^\circ$ for a very long
+        windshield). \textbf{Recommended pitch: 7--8$^\circ$.}
+  \item \textbf{Stopping distance} from 8\,km/h (2.22\,m/s) with 0.1\,s scan, 0.3\,s brake delay and 3\,m/s$^2$
+        braking (placeholders): 1.82\,m with a 50\,ms planner (Orin target), 2.24\,m with the Mac's 241\,ms. Obstacles
+        seen from farther away are fine; one that appears late (from behind another) within about 2\,m cannot be
+        stopped for.
+  \item \textbf{EMX pitch check} (roof mount): pitch 5--8$^\circ$ gives the same results; cones get 34 / 21 / 15 / 11 / 8 returns at
+        10 / 15 / 20 / 25 / 30\,m and a fitted circle 100 / 100 / 96 / 96 / 82\% of the time; at 9$^\circ$ distant bollards lose
+        returns. The 2D simulator does not model the vertical beam count, so this only checks the top-beam cut-off.
+\end{itemize}
+
+\paragraph{Latency profile} (one worker, idle Mac, 1{,}479 replans): 152\,ms per replan.
+\begin{table}[H]
+\small
+\begin{tabular}{@{}lr@{\qquad}lr@{}}
+\toprule
+Component & ms & Component & ms \\
+\midrule
+Rollout (128 candidates $\times$ 80 steps) & 86 & Edge critic & 6 \\
+Flow sampling (network) & 33 & Scorer (network) & 4 \\
+Safety filter & 10 & Rasterise & 2.5 \\
+Encoder (network) & 6 & Circles, memory, goal selection, other & 4.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+The network parts total about 43\,ms and should speed up a lot with TensorRT on the Orin; the rollout (56\%) is many
+small sequential operations and needs rewriting (vectorised or fused) whatever the hardware.
+
+%=====================================================================
+\section{What it looks like}
+\label{sec:visual}
+%=====================================================================
+The renders below are taken from the repository (\code{reports/lidar\_demo/}). Each folder has a
+\code{RULE.txt} stating how its frames were chosen (for example ``the first six frames where \dots''), so the
+examples are not hand-picked. Closed-loop stills come from the 25 Nov smoke test (an earlier memory variant); the
+full-run numbers above are the reference.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\linewidth]{showcase_1_goal_scores.png}
+\caption{\textbf{How GoalFlow decides.} Bird's-eye view of what the car sees (grey: drivable between observed
+edges; blue: unknown; black: LiDAR hits). The goal scorer rates 1{,}024 candidate goal points (coloured dots: the
+top 200); the generator then draws 128 paths toward the best goal $g^*$ (star), and the chosen path (red) is
+driven. Cyan dashed: the two routes the classical teacher found. Validation frame, never seen in training.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{showcase_2_regression_vs_goalflow.png}
+\caption{\textbf{Why a generative planner.} The same scene, two ways. Left: one goal only, as in the original
+paper; the chosen path (red) and the regression network's single path (magenta) both run into an obstacle.
+Right: our selection, three goals at least 1.5\,m apart plus the safety filter. Candidates now cover different
+gaps and the chosen path passes cleanly. Over 11{,}331 validation frames this cut collisions from 0.79\% (one goal)
+and 3.17\% (regression) to 0.36\%.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{showcase_3_closed_loop_L4.png}
+\caption{\textbf{Driving through the noisiest sensor level (L4).} The whole run, seen from above, at 3\,m/s.
+Left: the classical planner (a) succeeds but brakes in 7 planning steps (red crosses) as noisy edges and clutter
+close its corridor. Right: GoalFlow, seeing the same noisy LiDAR, drives through in one smooth line with no braking
+and reaches the goal line (green) slightly earlier.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{showcase_4_baseline_exits_goalflow_succeeds.png}
+\caption{\textbf{A case GoalFlow handles and the classical planner does not.} A curved section with a line of
+cones and bollards (perfect sensor, L0). Left: the classical planner (a) leaves the track near the goal line.
+Right: GoalFlow passes; pink squares are obstacles kept in the near-field memory after they dropped below the
+lowest LiDAR beam, so the filter still avoids them.}
+\end{figure}
+
+%=====================================================================
+\section{Challenges: what we tried, what worked, what is still open}
+\label{sec:challenges}
+%=====================================================================
+
+This section collects every significant problem met so far, in the order it came up, with what was tried
+and the honest outcome. \solved{} means the problem is fixed and verified; \partly{} means improved but not
+fully resolved; \open{} means not solved yet, and the remedy is listed as future work.
+
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}rLl@{}}
+\toprule
+\# & Challenge & Status \\
+\midrule
+1 & Video-only data could not support obstacle avoidance & \solved \\
+2 & $10^\circ$ steering: smoothed funnel paths cannot be followed & \solved \\
+3 & One safety margin everywhere rejected good plans & \solved \\
+4 & Edge fill placed track edges inside the track at high noise & \solved \\
+5 & Classical planner failed only with a perfect sensor (A6) & \partly \\
+6 & Training did not fit in the Mac's memory & \solved \\
+7 & Test split read too early & \solved \\
+8 & Goal scorer looked like it predicted only one route & \solved \\
+9 & Safety filter could miss obstacles & \solved \\
+10 & Shadow path added collisions & \solved \\
+11 & Route goals from the classical planner made things worse & \open \\
+12 & L3 additions to the classical planner stall at high noise & \partly \\
+13 & Cones vanish under the LiDAR's lowest beam near the car & \partly \\
+14 & Odometry drift displaces remembered obstacles & \solved \\
+15 & GoalFlow's paths are imprecise in tight gaps & \open \\
+16 & Dead ends: valid plans that lead nowhere & \open \\
+17 & Planning is too slow for the Orin target & \open \\
+18 & Training limitations: one seed, one random route per step & \open \\
+19 & Running long jobs reliably on one laptop & \solved \\
+20 & Public-repository hygiene & \solved \\
+21 & The filter's halo of raw hits blocked safe paths & \solved \\
+22 & GoalFlow stalls far more than the classical planner & \partly \\
+23 & The safety belongs to the system, not the network & \solved \\
+24 & EMX evidence rests on assumed noise artefacts & \open \\
+25 & Real speed, brake and mount differ from the simulator & \partly \\
+26 & Track exits and door flips at low noise & \partly \\
+27 & No obstacle planner on the car yet & \open \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{1. Video-only data \hfill\solved}
+\textbf{Problem.} The first plan learned from the team's ZED camera recordings. The footage had no bollards or
+cones, no measured steering, and the ZED odometry read 10--60\% low. Camera-only range at 10--15\,m was too
+weak to apply the door rule.\\
+\textbf{What we did.} Switched to LiDAR and a purpose-built 2D simulator with a privileged teacher, so data
+with obstacles and exact labels is unlimited. Kept the camera work (a frozen DINOv2 reaches 0.954 IoU on the
+drivable area) for later.\\
+\textbf{Outcome.} Worked: the simulator made all later work possible. \textbf{Future:} transfer to CARLA and to
+real Juno logs (fine-tuning chain sim $\to$ CARLA $\to$ real).
+
+\subsection*{2. Steering limit \hfill\solved}
+\textbf{Problem.} The original corridor-funnel planner smoothed a path and followed it with pure pursuit. With
+$10^\circ$ steering, tight gaps need a swerve that starts about 10\,m early, which the smoothed path did not
+contain; success was only 75.7\% even with the true scene.\\
+\textbf{What we did.} Built the corridor-lattice planner: it searches only over arcs the car can steer, with a
+curvature ladder (0.8, 0.9, 0.95 of the limit).\\
+\textbf{Outcome.} Worked: the teacher solves 474 of 477 feasible scenes with no collisions. Lesson carried to
+the real stack: use Nav2 Smac Hybrid-A* or State Lattice with a 9.1\,m minimum radius.
+
+\subsection*{3. One margin everywhere \hfill\solved}
+\textbf{Problem.} Using 0.25\,m clearance both when planning and when checking a path being followed made the
+planner drop good plans because of small tracking deviations.\\
+\textbf{What we did.} Plan at 0.25\,m, accept a followed (tracked) path down to 0.12\,m.\\
+\textbf{Outcome.} Worked. The same 0.12\,m is now used by GoalFlow's exact safety filter (challenge 9).
+
+\subsection*{4. Edge fill bug \hfill\solved}
+\textbf{Problem.} Unseen track edges are guessed by shifting the opposite edge 12\,m. With noisy edges the
+shift direction swung, putting fill points up to 4\,m inside the track; this caused most L4 stalls.\\
+\textbf{What we did.} Fit a curve to the source edge before offsetting it.\\
+\textbf{Outcome.} Worked: L4 success rose from 70.0\% to 89.5\% for the classical planner. Every number from
+before the fix was replaced.
+
+\subsection*{5. Failures only with a perfect sensor (A6) \hfill\partly}
+\textbf{Problem.} The classical planner failed on 33 scenes at L0 that it passed at L1--L2. Noise had been
+hiding two bugs: cutting the edges at the slanted goal line left a 15\,cm stub that made the car's own pose
+count as off-track; and beside the car the edge guess lay inside the real edge.\\
+\textbf{What we did.} A goal-line fix (never cut an edge short of the car's front) and edge memory (remember
+edges seen earlier), checked so that the teacher's results did not change.\\
+\textbf{Outcome.} 9 $\to$ 20 $\to$ 29 of the 33 scenes succeed. Four remain: they are \emph{dead ends}
+(challenge 16). \textbf{Future:} terminal feasibility.
+
+\subsection*{6. Memory limits during training \hfill\solved}
+\textbf{Problem.} Self-attention among all 1{,}024 goal queries needed 17.65\,GB, more than the 16\,GB Mac.\\
+\textbf{What we did.} Cross-attention only in the goal scorer (each goal is scored against the scene, not
+against other goals), gradient accumulation (two half-batches), and a cap on GPU memory use.\\
+\textbf{Outcome.} Worked: seed 0 trained overnight. Goal-to-goal attention remains an ablation for a bigger GPU.
+
+\subsection*{7. Test split read too early \hfill\solved}
+\textbf{Problem.} The test split was evaluated once, and the result influenced a decision, so it no longer
+counts as unseen.\\
+\textbf{What we did.} Froze it, and fixed in advance that the final numbers will come from a fresh test set
+(seeds 400000+). All choices since use validation data only, with selection rules written down before results.\\
+\textbf{Outcome.} Process fixed.
+
+\subsection*{8. ``Single-route'' goal scorer \hfill\solved}
+\textbf{Problem.} Plain cover@5 was only 0.32, and renders showed all 128 samples on one line, suggesting the
+scorer only predicted one route. A second suspicion, a too-narrow goal vocabulary, came from misreading the
+path-normalisation range ($\pm3.56$\,m) as the vocabulary's range.\\
+\textbf{What we did.} Better diagnostics on all 66{,}063 validation frames: vocabulary coverage, cover@$k$ with
+suppression of near-duplicate goals, homotopy coverage. Then NMS-K3: split the samples over three goals at
+least 1.5\,m apart.\\
+\textbf{Outcome.} The scorer was fine (suppressed cover@5 = 0.96; the vocabulary spans $\pm6.6$\,m and covers
+every route). The real problem was sending all samples to one goal. NMS-K3 with the safety filter cut
+open-loop collisions from 0.79\% to 0.36\% (main path).
+
+\subsection*{9. Safety filter could miss obstacles \hfill\solved}
+\textbf{Problem.} The first filter checked only $6\times3$ points of the footprint, 0.58\,m apart, so hits between
+them were missed; its calibration only measured false alarms.\\
+\textbf{What we did.} A distance-transform filter with $8\times4$ covering circles, recall measured (20 of 21
+frames with a colliding candidate are caught; the miss is a fully hidden bollard), slack chosen by recall.
+Then, for fairness with the classical planner, an exact filter: the true distance from the car's box to every
+hit point, rejected below 0.12\,m.\\
+\textbf{Outcome.} Works as a safety layer. The exact 0.12\,m rule stays as the fair rule; it now acts on obstacle
+circles instead of raw hits (challenge 21).
+
+\subsection*{10. Shadow path \hfill\solved}
+\textbf{Problem.} The paper's goal-free fallback fired when the chosen goal was very close; there it collided in
+23 frames against 8 for the main path, and it bypassed the safety filter.\\
+\textbf{What we did / outcome.} Turned it off. With three goals the crawl it was meant to fix mostly disappears
+(ADE 0.213 vs 0.202\,m), and collisions drop.
+
+\subsection*{11. Route goals from the classical planner \hfill\open}
+\textbf{Problem/attempt.} Taking one goal inside each route corridor proposed by the classical planner (route-K)
+was meant to guarantee one goal per route.\\
+\textbf{Outcome.} Worse than NMS-K: route goals replaced the scorer's best goal, and the chosen goal collided
+2.8\% of the time (vs 0.2\%). Parked. \textbf{Future:} keep $g^*$ as one slot and add route goals only as extras.
+
+\subsection*{12. L3 additions stall at high noise \hfill\partly}
+\textbf{Problem.} Adding tracking, edge memory, hysteresis, hold and a search cache to the classical planner
+removed collisions at L0--L1 but cut L4 success from 93.7\% to 74.8\%.\\
+\textbf{What we did.} An ablation at L4: the cache never fired; removing ``hold'' cut stalls but doubled
+collisions; removing hysteresis did not help. A perception check found the tracker keeps about 21 obstacles
+where 11 exist: about 5 phantoms from clutter and 5 duplicates per scan, which close the gaps.\\
+\textbf{Outcome.} No variant beat the original planner at L4, so the baselines were frozen per level: (a) at
+L2--L4, (b) at L0--L1, (c) reported as the same-information baseline. \textbf{Future:} a tracker birth rule (a
+track exists only after several sightings) and duplicate merging, then a re-test.
+
+\subsection*{13. Cones vanish near the car \hfill\partly}
+\textbf{Problem.} A 0.40\,m cone passes under the lowest beam within about 2.03\,m of the sensor. GoalFlow plans
+from a single scan, so it forgot cones right before reaching them; every early collision was of this kind.\\
+\textbf{What we tried} (memory for the safety filter only; the network input stays single-scan):
+\begin{itemize}[nosep]
+  \item 1.5\,s time window: too short; the car crawls, and contacts came 2.05--2.15\,s after the cone vanished.
+  \item Position-based memory, no time limit: no collisions, but 18 stalls at L4, because drift displaced the
+        stored points.
+  \item Use memory only where the scan cannot see: worse (20 stalls at L4).
+  \item Remember only hits observed within 4\,m of the sensor (smaller drift lever): \textbf{picked} by a rule
+        fixed in advance; no collisions, 4 stalls at L4, like the classical baseline.
+  \item Rejected on principle: remembering only cone-labelled hits, because a camera label would decide what the
+        safety layer remembers.
+\end{itemize}
+\textbf{Outcome.} Collisions solved on the smoke test; the remaining stalls trace to drift (challenge 14).
+
+\subsection*{14. Odometry drift displaces remembered obstacles \hfill\solved}
+\textbf{Problem.} With the exact 0.12\,m filter, L4 success fell from 35 to 30 of 39 scenes: about 92\% of the
+points blocking truly safe candidates were remembered points that had drifted away from any real obstacle. In
+one case (seed 1) drift moved a remembered cone 0.28\,m, and the filter let a path through the real cone.\\
+\textbf{What we found.} The simulator added drift every scan regardless of speed, so a crawling car got about 6
+times more drift per metre than a cruising one; real odometry error grows with distance driven. Expiring memory
+by time was rejected: a car stopped next to a hidden cone would forget it and drive into it.\\
+\textbf{What we did.} Made drift proportional to distance driven (random walk in distance), calibrated so cruising
+behaviour at 3\,m/s is unchanged; it applies to every planner, and the classical baselines are being rerun at
+L1--L4 with it.\\
+\textbf{Outcome.} Done: the baselines changed by at most about 1.5 points per cell (except (b)/(d) at L4), and the best
+classical configuration was re-picked from the baseline results alone ((a) at L1--L4). Remembered circles still drift a
+little (median 0.08--0.23\,m at L2--L4); the memory fix (challenge 22) re-anchors them. \textbf{Future, real car:} the memory is only as good as
+the odometry; Juno needs wheel odometry and an IMU fused in the EKF, and possibly scan matching to re-anchor
+remembered points.
+
+\subsection*{15. Imprecise paths in tight gaps \hfill\open}
+\textbf{Problem.} Where the classical planner threads a tight gap, GoalFlow's best candidate often clears by
+about 1\,cm (median), so the safety filter rejects everything and the car brakes.\\
+\textbf{What we tried} (choice rules fixed in advance): goals jittered $\pm0.3$\,m sideways and gradient steps away from
+hits, both without effect on the smoke test; then refinement against the obstacle circles, which gained one episode
+in 300 but delays the brake decision by about 95\,ms, so it was dropped. In the full run 16--18 stalls per level
+remain where GoalFlow's best candidate truly collides.\\
+\begin{center}\includegraphics[width=0.95\linewidth]{challenge_stall_L4.png}\end{center}
+\emph{Seed 32 at L4: the classical planner (left) threads the last gap; GoalFlow (right) has candidates toward the
+goal but the filter, partly through remembered circles (pink), rejects them all and the car stops 5\,m short.}\\
+\textbf{Future:} MPPI refinement if latency allows on the Orin; longer training of the generator (it was still
+improving); retraining with real data.
+
+\subsection*{16. Dead ends \hfill\open}
+\textbf{Problem.} A plan is checked only up to its 4\,s horizon, so the car can follow a valid plan into a position
+from which no steerable path exists, even with a stronger search and even in the true world (4 scenes; in two the
+blocking gap was visible 22--35\,m ahead).\\
+\textbf{Future:} accept a plan only if its end state allows a way on (terminal feasibility), or extend plans
+through the next gap; a 6\,s horizon ablation for GoalFlow.
+
+\subsection*{17. Latency \hfill\open}
+\textbf{Problem.} One GoalFlow planning step takes about 143\,ms on an idle Mac with one worker (241\,ms with five
+evaluation workers sharing the GPU), against a 50\,ms target on the Orin. The profile: rollout 86\,ms, flow sampling 33, safety filter 10, encoder 6, edge critic 6 (vectorised from 15,
+identical results), scorer 4.\\
+\textbf{Future:} profile by component; 0.1\,s rollout steps; rollout on CPU; $M=64$; TensorRT on the Orin; measure
+on the Orin itself.
+
+\subsection*{18. Training limitations \hfill\open}
+\textbf{Problem.} Only one training seed; stage A sees one random route per step, so the second route is scored
+low; stage B stopped while still improving; imitation caps GoalFlow at the teacher's style.\\
+\textbf{Future:} the mixture distance target (implemented behind a flag), longer stage B, seeds 1--2 on Colab Pro
+or the Bylogix GPUs.
+
+\subsection*{19. Running long jobs on one laptop \hfill\solved}
+\textbf{Problem.} Overnight jobs competed for CPU, one run was lost to a session restart, and finished results were
+once deleted and rerun.\\
+\textbf{What we did.} Detached, resumable job chains that skip finished parts; read logs and output folders before
+any delete or relaunch; keep 5\% CPU idle; deterministic settings so reruns reproduce results.\\
+\textbf{Outcome.} Worked. Colab Pro (chunked, resumable) and the new laptop are options for bigger runs.
+
+\subsection*{20. Public-repository hygiene \hfill\solved}
+\textbf{Problem.} A committed log contained a local file path; personal names appeared in some files.\\
+\textbf{What we did.} Evaluation logs are git-ignored and paths stripped; the report carries no personal name.
+\textbf{Outcome.} Fixed for new commits.
+
+\subsection*{21. The filter's halo of raw hits \hfill\solved}
+\textbf{Problem.} With the exact filter on raw hits, L4 stalls rose: range noise and clutter spread each obstacle's
+hits into a halo, and every point counted as an obstacle.\\
+\textbf{What we did.} Cluster the hits into obstacle circles with the fixed class radius (bollard 0.225\,m, cone
+0.25\,m; only the centre is fitted) and filter against the circles, with a near-field circle memory.\\
+\textbf{Outcome.} Fewer false rejections at the same 0.12\,m rule; this is the configuration of the full run.
+
+\subsection*{22. GoalFlow stalls far more than the classical planner \hfill\partly}
+\textbf{Problem.} In the full run GoalFlow stalls in 5.9--20.8\% of feasible scenes against 1.3--4.4\% for the best
+classical planner. Half of the stalls are false alarms (a path truly clear by at least 0.12\,m was rejected).\\
+\textbf{What we did.} A deterministic replay of all 139 false alarms classified the blocking circles: drifted
+remembered circles (103), phantoms (56), real obstacles with offset centres (10), class flip (1). Four fixes were
+screened alone; the memory fix (re-anchor on re-observation, drop when seen free where the lowest beam reaches)
+was the best and went into the combined run with the edge critic.\\
+\textbf{Outcome.} The memory fix failed in the full run: 13 new collisions (9 re-anchored to an offset observation,
+3 dropped by the free-ray rule) and was removed. The edge critic stays. Lesson: a 300-episode screen only rules out
+large harm; collision-rate changes around 0.5\% need the full run. \textbf{Future:} better odometry on the real car;
+a memory that tracks its own position uncertainty.
+
+\subsection*{23. The safety belongs to the system, not the network \hfill\solved}
+\textbf{Finding.} With the filter off, GoalFlow collides in 8--9 of 100 episodes. The low collision rate comes from
+the geometric filter and the memory, which could equally sit on top of the classical planner.\\
+\textbf{What we did.} Ran the classical planner (a) with the same filter and memory, pre-registered.\\
+\textbf{Outcome.} Answered: (a)+filter beats GoalFlow on success and collisions at every level
+(Section~\ref{sec:afilter}). The safety layer is this project's main transferable result.
+
+\subsection*{24. EMX evidence rests on assumed noise artefacts \hfill\open}
+\textbf{Finding.} 2.5 times more hits per obstacle does not help the classical planner when dropout, clutter, edge
+noise and class flips stay the same. The EMX preset's good results come from artefacts assumed at L1 values.\\
+\textbf{Future:} measure the real artefact rates from Juno recordings, then rerun the EMX preset with them.
+
+\subsection*{25. Real speed, brake and mount differ from the simulator \hfill\partly}
+\textbf{Finding.} Juno runs at 6--8\,km/h with bang-bang valve control (the simulator: constant 3\,m/s); the EMX will sit
+on the roof at the base of the ZED support (the simulator: front axle).\\
+\textbf{What we did.} A \code{juno\_bangbang} speed mode and a roof mount preset with a placeholder windshield model,
+both behind configuration switches so earlier results reproduce exactly; stopping distances and a 30-row mounting
+table.\\
+\textbf{Future:} measure the mount position and pitch, the windshield and nose, the brake deceleration and delay
+(from the SEM stop-sign recording if it exists) and a coast-down; then rerun with the measured values.
+
+\subsection*{26. Track exits and door flips at low noise \hfill\partly}
+\textbf{Problem.} GoalFlow left the track 11 and 10 times at L0--L1 (classical: 3 and 1) and changed route more often at
+L0--L2.\\
+\textbf{What we did.} A track-edge critic (zero beyond 0.12\,m from the observed edge) is in the combined run. The
+consistency critic $\lambda_3$ was measured (1.29) but did not pass the screening; door flips fell at L0 and L4 and rose
+at L2, so it stays off.
+
+\subsection*{27. No obstacle planner on the car yet \hfill\open}
+\textbf{Finding.} What drove at SEM is a camera lane-follower; Nav2 is launched but idle, and its mode switch has two
+bugs (a \code{String}/\code{Bool} type mismatch and an uninitialised flag).\\
+\textbf{Future:} see Section~\ref{sec:deploy}.
+
+%=====================================================================
+\section{Is GoalFlow worth it? An honest assessment}
+\label{sec:assessment}
+%=====================================================================
+Measured against the success criteria fixed at the start (dev seeds; the fresh test set will give the final numbers):
+\begin{table}[H]
+\small
+\begin{tabularx}{\linewidth}{@{}LLl@{}}
+\toprule
+Criterion & Result & Met? \\
+\midrule
+Success at least as high as both baselines, higher at L3--L4 & 6--14 points lower than the best classical planner; equal to (c) at L3--L4 & no \\
+Collisions no higher than either baseline & lowest of the three at every level in the circles run & yes \\
+Visible left/right choices where regression collides & open loop: 3.17\% $\to$ 0.36\% collisions & yes \\
+No more door flips than the classical planner & more at L0--L2, fewer at L3--L4 & partly \\
+At most 50\,ms per plan on the Orin & 152\,ms on the Mac; not yet measured on the Orin & no \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Why it does not win in simulation.} GoalFlow imitates the classical planner in a world built to suit that
+planner: circular obstacles, clean gaps, exact geometry. A student rarely beats its teacher on the teacher's home
+ground. Its only chance was robustness to noise, and there it matches the same-information baseline rather than
+beating it. Its low collision rate comes from the geometric safety layer, which works just as well on the
+classical planner.
+
+\textbf{Where it could still earn its place.} Real tracks break the classical planner's assumptions (irregular
+obstacles, messy edges, sensor quirks). A learned planner can be fine-tuned on real Juno recordings; a hand-written
+one must be re-engineered for each new case. That is a real possibility, not a demonstrated one.
+
+\textbf{Recommendation.}
+\begin{enumerate}[nosep]
+  \item Juno drives with the corridor-lattice planner plus the safety layer (circles, near-field memory, 0.12\,m
+        executed-path check).
+  \item GoalFlow becomes a research track: retrain for the roof mount, the EMX and Juno's speed; test offline on real
+        recordings; fine-tune; shadow mode. It is switched in only if it beats the classical planner on real data.
+  \item What carries over regardless: the simulator, the evaluation tooling, the safety layer and the memory.
+\end{enumerate}
+
+%=====================================================================
+\section{Path to the car}
+\label{sec:deploy}
+%=====================================================================
+At SEM, Juno drove with \code{competition.launch.py}: a camera lane-follower and a stop-sign node; Nav2 was launched
+but idle, and its mode switch has two bugs (a \code{String}/\code{Bool} mismatch on \code{/nav\_mode} and an
+uninitialised flag). The chosen integration avoids waking Nav2 for a first test:
+\begin{enumerate}[nosep]
+  \item \textbf{Perception front end} (ROS\,2): ground removal, clustering into class circles with ZED labels, track
+        edges, odometry. Shared by both planners.
+  \item \textbf{Corridor planner node} (Python is fast enough: 8--42\,ms): publishes a \code{nav\_msgs/Path} in
+        \code{odom} at about 10\,Hz, with the safety layer applied to its executed path.
+  \item \textbf{Path follower}: pure pursuit to the steering topic.
+  \item \textbf{Arbiter node}: chooses lane-follower or path follower (Bool topic, lane-follower by default, falls back
+        after about 0.3\,s without a path); stop and brake commands override both.
+\end{enumerate}
+Order: mount the EMX and record manual drives; check the front end on the recordings; corridor node and arbiter
+(CARLA if the Bylogix date comes, else the recordings, then the track at 6--8\,km/h with the emergency stop);
+GoalFlow later as a second path publisher behind the arbiter, in shadow mode first. A Nav2 planner plugin remains
+possible later (C++, a rolling goal, a behaviour tree that replans, \code{map} vs \code{odom} frames).
 
 %=====================================================================
 \section{Lessons for the real car}
@@ -876,19 +1430,30 @@ queued to fix the precision problem. The full run (500 seeds, all levels) is nex
         radius, not a funnel plus pure pursuit.
   \item \textbf{Two margins.} Plan with 0.25\,m clearance, accept down to 0.12\,m while following.
   \item \textbf{Trackers need a birth rule.} A track should exist only after several consistent sightings.
+  \item \textbf{A geometric safety layer pays off.} Checking the executed path against obstacle circles brought the
+        classical planner's collisions to about zero in simulation.
+  \item \textbf{Memory is only as good as odometry.} Remembered obstacles drifted 0.08--0.31\,m; fuse wheel odometry
+        and IMU, and crop the car's own body (glass, hood) out of the point cloud.
+  \item \textbf{Mount the EMX at 7--8$^\circ$} on the roof at the base of the ZED support; measure the real position.
+  \item \textbf{Stopping distance}: about 1.8\,m from 8\,km/h at a 50\,ms planner; an obstacle appearing later than
+        that cannot be stopped for, so latency matters.
+  \item \textbf{Measure the LiDAR artefacts} (dropout, clutter, edge noise, class flips) from recordings: they, not the
+        beam density, decided the simulated results.
 \end{itemize}
 
 %=====================================================================
 \section{Open problems and next steps}
 %=====================================================================
 \begin{enumerate}[nosep]
-  \item Full closed-loop GoalFlow run: 500 seeds $\times$ L0--L4 (Mac or chunked on Colab Pro).
-  \item Precision in tight gaps: refine the chosen GoalFlow path with MPPI.
-  \item Tracker birth rule and duplicate merging; then a tracked-perception GoalFlow variant.
-  \item A plan should only be accepted if its end state allows a way on (dead ends in the classical planner).
-  \item Latency on the Orin; a deterministic per-step search budget for the classical planner.
-  \item Retraining with a mixture target and more seeds (Colab Pro or the Bylogix GPUs), CARLA transfer.
-  \item Final numbers on the fresh test set (seeds 400000+).
+  \item Final numbers on the fresh test seeds (400000+) for the frozen configurations: GoalFlow (circles + edge
+        critic), (a)+filter and the classical baselines (running on 27--28 Nov).
+  \item On the car: EMX mount and pitch, recordings, artefact rates, brake and coast measurements (challenge 25).
+  \item Perception front end, corridor node with the safety layer, arbiter (Section~\ref{sec:deploy}); fix the
+        \code{nav\_mode} bugs in AD-SEM.
+  \item CARLA at Bylogix once a date is set: integration test of the full chain.
+  \item EMX and roof-mount checks for (a)+filter in simulation; the expansion budget once Orin speed is measured.
+  \item GoalFlow research track: retrain (roof mount, EMX, Juno speed), vectorised rollout and TensorRT for latency,
+        offline tests on recordings, fine-tuning, shadow mode.
 \end{enumerate}
 
 \appendix
@@ -906,7 +1471,10 @@ queued to fix the precision problem. The full run (500 seeds, all levels) is nex
   \item[Open / closed loop] Checking one plan vs driving the whole course with the planner.
   \item[Rectified flow] A generative model that learns straight-line velocities from noise to data.
   \item[Rollout] Simulating how the car would drive a path.
-  \item[Safety filter] The geometric check that removes paths touching LiDAR hits.
+  \item[(a)+filter] Classical configuration (a) with GoalFlow's safety layer added.
+  \item[False alarm] A stall where a path was truly clear by at least 0.12\,m but the filter rejected it.
+  \item[Safety filter] The geometric check that removes paths coming within 0.12\,m of an obstacle circle.
+  \item[Stall] The car stops and never reaches the goal before the time limit.
 \end{description}
 
 \end{document}
