@@ -874,6 +874,26 @@ symmetric chamfer distance min 0.36 m, 5th percentile 0.81 m, median 1.35 m (san
 both final configs (GoalFlow and (a)+filter) and run each once on the fresh test seeds (400000+, all levels) for the
 final numbers.
 
+### FREEZE: final configs and the test-seed run (Can, 2026-11-27; frozen at commit f3f4a51)
+
+**goalflow_final** = `goalflow_l3_circles` + track-edge critic (1.0 x clamp((0.12 - d) / 0.12, 0, 1), vectorised), no
+memory fix, no lambda3, no 2-scan entry rule, no refinement (`eval_corridor.py` planner `goalflow_final`: circle filter,
+0.12 m margin, near-field circle memory with the running mean, edge_w 1.0). **Evidence:** the combined run (memory fix
++ edge critic) had 15 collisions = 13 memory-fix filter misses (replay: 9 re-anchored to an offset observation, 3
+dropped by the free-ray rule, 1 drifted) + 2, the same level as the circles run (2); the edge critic cut exits at L0 / L1
+from 11 / 10 to 4 / 2.
+
+**(a)+filter** (`observed_stubfix_filter`) frozen as pre-registered above (baseline (a) + the exact 0.12 m circle filter
+on the simulated executed path + the near-field memory with the memory fix, as run on the dev seeds).
+
+**Final run (approved):** fresh test seeds 400000-400499 (never used), L0-L4, one at a time: goalflow_final,
+(a)+filter, (a), (b), (c) (`scripts/run_final_test.sh`, output `reports/lidar_demo/final_test/`), then
+`FINAL_COMPARISON.md` (`scripts/build_final_comparison.py`): success / collision / stall / exits, brake rate, door flips,
+correct brakes; McNemar per level: GoalFlow vs the opponent, vs (c), vs (a)+filter; (a)+filter vs (a) and (b). The
+per-level opponent stays as frozen ((b) at L0, (a) at L1-L4; (c) alongside); nothing is re-picked on test results.
+**No changes of any kind after seeing these numbers.** Note: (a)+filter keeps the memory fix as pre-registered and run
+on the dev seeds, although GoalFlow's final config drops it.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
