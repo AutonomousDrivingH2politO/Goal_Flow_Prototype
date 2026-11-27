@@ -38,6 +38,7 @@ LABELS = {
     "teacher": "corridor-lattice, privileged (teacher)",
     "observed": "corridor-lattice, observed, pre-L3 (50e9ad9)",
     "observed_stubfix": "corridor-lattice, observed, pre-L3 + goal-line stub fix (a)",
+    "observed_stubfix_filter": "(a) + GoalFlow's exact 0.12 m circle filter and near-field memory (memory fix)",
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
@@ -122,6 +123,9 @@ def make_planner(name: str):
         return CorridorObserved(LatticeCorridorPlanner(mode="observed"), name)
     if name == "observed_stubfix":    # config (a): pre-L3 + goal-line stub fix (A6)
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name)
+    if name == "observed_stubfix_filter":   # (a) + GoalFlow's safety filter and near-field memory (DEVIATIONS)
+        from gfsem.planners.safety_wrap import FilteredObserved
+        return FilteredObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name)
     if name == "observed_l3":         # config (b): stub fix + approved L3 set, no time budget
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config()), name)

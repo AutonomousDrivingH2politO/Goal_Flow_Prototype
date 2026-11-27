@@ -817,6 +817,21 @@ seeds 0-99 at L0 / L2 / L4, vs constant 3 m/s on the same seeds.
 (otherwise a short logged brake test at 8 km/h); a coast-down from 8 km/h with the valve closed (coast decel);
 valve-open accel in the 6-8 km/h band and the valve delay.
 
+### (a)+filter: does GoalFlow's safety advantage transfer to the classical planner? (pre-registered 2026-11-27, before running)
+
+**Config `observed_stubfix_filter`** (`gfsem/planners/safety_wrap.py`): baseline (a) unchanged, plus GoalFlow's safety
+layer from `goalflow_l3_combined`: every scan the same circle set (this scan's `cluster_obstacles` circles, class radii)
+and near-field circle memory with the memory fix (a2); the executed path is simulated (the closed loop's pure pursuit,
+lookahead 2.5 m, and vehicle model from the current speed and steering, along (a)'s path, for GoalFlow's horizon of
+12 m or the path's end) and checked with the exact 0.12 m box-to-circle filter; if it fails, the scan brakes. (a)'s own
+planning, keep logic and checks are untouched. The filter's time is not in (a)'s plan_times (only (a)'s own planning).
+**Run:** seeds 0-499 x L0-L4, 7 workers. **Report** per level success / collision / stall vs (a) and vs
+`goalflow_l3_combined` (+ McNemar on success vs (a), paired by seed). **Reading, fixed in advance:** if (a)+filter's
+collisions fall to GoalFlow's level without a larger stall increase than GoalFlow's, the safety advantage is the
+filter's and transfers; if its stalls rise sharply, the filter's false alarms (remembered-circle drift) cost the
+classical planner the same way; either way the result informs whether GoalFlow-specific work (item 7) is worth it.
+No change to (a) or the filter is made on the basis of this run without Can.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam

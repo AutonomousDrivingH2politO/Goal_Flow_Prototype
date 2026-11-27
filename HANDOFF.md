@@ -85,3 +85,12 @@ bug); decisions (combined = (a2) + (c)); edge critic vectorised.
 - never modify the AD-SEM repo, launch files or Nav2 configs; don't delete raw data;
 - no force-push over Can's commits (rebase);
 - commits end with Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com> plus the session line; messages lean.
+
+## Chain after the combined run (approved by Can 2026-11-27; one at a time, no review stops)
+
+Order: 2 McNemar + stall overlap (in COMPARISON.md) -> 3 the two L4 collisions (diagnose, report, no fix) -> (a)+filter
+(seeds 0-499 x L0-L4) -> 4 latency profile (single worker) -> 6 EMX pitch check (roof) -> 5 juno_bangbang (combined
+GoalFlow + (a), (b), (c); seeds 0-99 x L0/L2/L4) -> 8 scene overlap. Script `scripts/run_chain_after_combined.sh`, log
+`reports/lidar_demo/chain_after_combined.log`. Not approved (wait for Can): item 7 (EMX shift check, GoalFlow at EMX,
+roof-mount shift), item 9. Progress lines below are appended by the script as items finish.
+

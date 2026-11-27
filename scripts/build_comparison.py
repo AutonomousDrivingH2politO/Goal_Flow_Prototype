@@ -7,6 +7,8 @@ import csv
 import sys
 from pathlib import Path
 
+import math
+
 import numpy as np
 
 D = Path("reports/lidar_demo")
@@ -16,6 +18,33 @@ load = lambda p: list(csv.DictReader(open(D / p)))  # noqa: E731
 base = {"L0": ("(b)", load("l0_rerun/b/results.csv")),
         **{l: ("(a)", load("l0_rerun_distdrift/a/results.csv")) for l in ("L1", "L2", "L3", "L4")}}
 cc = {"L0": load("l0_rerun/c/results.csv"), **{l: load("l0_rerun_distdrift/c/results.csv") for l in ("L1", "L2", "L3", "L4")}}
+
+
+def mcnemar(A, B, l):
+    """Paired exact McNemar on success over the seeds both runs share at level l: (GoalFlow-only successes,
+    other-only successes, two-sided p)."""
+    a = {r["seed"]: r["success"] == "True" for r in A if r["noise"] == l and r["feasible"] == "True"}
+    b = {r["seed"]: r["success"] == "True" for r in B if r["noise"] == l and r["feasible"] == "True"}
+    ks = a.keys() & b.keys()
+    n01 = sum(a[k] and not b[k] for k in ks)
+    n10 = sum(b[k] and not a[k] for k in ks)
+    n = n01 + n10
+    p = min(1.0, 2 * sum(math.comb(n, i) for i in range(min(n01, n10) + 1)) / 2 ** n) if n else 1.0
+    return n01, n10, p
+
+
+def stall_overlap(G, B, l):
+    """GoalFlow stalls at level l on seeds where the other run also stalls, split by GoalFlow's best true clearance at
+    the last brake scan: truly blocked (< 0), filter false alarm (>= 0.12 m), in between."""
+    stall = lambda r: r["feasible"] == "True" and r["outcome"] in ("stopped", "timeout")  # noqa: E731
+    bs = {r["seed"] for r in B if r["noise"] == l and stall(r)}
+    gs = [r for r in G if r["noise"] == l and stall(r)]
+    both = [r for r in gs if r["seed"] in bs]
+
+    def split(rs):
+        v = [float(r["stall_best_true_clearance"]) for r in rs if r.get("stall_best_true_clearance")]
+        return sum(x < 0 for x in v), sum(x >= 0.12 for x in v), sum(0 <= x < 0.12 for x in v)
+    return len(gs), len(both), split(gs), split(both)
 
 
 def row(R, l):
@@ -40,6 +69,12 @@ for l in ("L0", "L1", "L2", "L3", "L4"):
     if bt:
         L.append(f"- GoalFlow stalls {len(st)}: best true clearance at the last brake scan: median {np.median(bt):.3f} m; "
                  f"truly blocked (<0) {sum(v < 0 for v in bt)}, clear by >= 0.12 m {sum(v >= 0.12 for v in bt)}")
+    for lab, R2 in ((f"baseline {b}", R), ("(c)", cc[l])):
+        n01, n10, p = mcnemar(G, R2, l)
+        n, nb, sg, sb = stall_overlap(G, R2, l)
+        L.append(f"- vs {lab}: McNemar on success: GoalFlow-only {n01}, {lab}-only {n10}, p = {p:.3g}; stall overlap: "
+                 f"{nb} of {n} GoalFlow stalls on seeds where {lab} also stalls (all GoalFlow stalls: truly blocked "
+                 f"{sg[0]}, false alarm {sg[1]}, 0-0.12 m {sg[2]}; overlapping ones: {sb[0]} / {sb[1]} / {sb[2]})")
     cz = [r["collision_cause"] for r in G if r["noise"] == l and r["outcome"] == "collision"]
     if cz:
         L.append(f"- GoalFlow collision causes: {dict((c, cz.count(c)) for c in set(cz))}")
