@@ -54,7 +54,9 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
    (planner `goalflow_l3_combined`, seeds 0-499 x L0-L4, 5 workers, ~4.5 h, output
    `reports/lidar_demo/l3_goalflow/full_goalflow_l3_combined/`, then COMPARISON.md via `scripts/build_comparison.py`).
    Edge critic vectorised before it (identical values and episodes; +14.8 -> +6.3 ms per replan, single worker).
-   **Wait for Can's go.** EMX numbers stay unquoted until artefact rates are measured from Juno recordings.
+   **RUNNING since 2026-11-27 14:30 (Can's go) from dd68c5a:** process group 2469 (eval PID 2483), lock
+   `full_goalflow_l3_combined/RUNNING.lock`, progress `full_goalflow_l3_combined.log` (every 200 of 2,500 episodes),
+   `full_goalflow_l3_combined.chain.log` ends with "end" after COMPARISON.md is built. Stop: `kill -- -2469`, confirm ps. EMX numbers stay unquoted until artefact rates are measured from Juno recordings.
 1d. Per-change runs DONE (09:34; `reports/lidar_demo/l3_goalflow/per_change/TABLE.md`): accepted (a) [flag: L4 -2.1],
    (c), (d), (a2) memory fix (rerun after a guard bug; first run kept as `_guardbug`); lambda3 not accepted. **Next:
    combined run of the accepted set on 0-499 x L0-L4, waiting for Can's decision on (a).**
