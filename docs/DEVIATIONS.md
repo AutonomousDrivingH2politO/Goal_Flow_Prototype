@@ -531,6 +531,19 @@ GoalFlow runs at EMX only after the baselines at EMX and the open-loop distribut
 (`scripts/emx_shift_check.py`: GoalFlow was trained on 0.2 deg rays; same validation scenes, seeds 250000+, at EMX vs L2;
 a clear drop is a sim-to-real warning and puts retraining with EMX-level data in the queue).
 
+**How to read "EMX ~ L1-L2":** every noise component is on in the EMX preset. Range noise is the spec's 0.05 m (= L2;
+L1 0.03); the beam pattern is finer than every ladder level (0.08 deg horizontal vs 0.2, i.e. 2.5x the hits per
+obstacle); all other artefacts (bearing jitter 0.05 deg, dropout 5%, clutter 0.5 clusters/scan, edge noise 0.10 m with
+0.3 dropouts per side, class flips 5%, drift 0.005 m / 0.05 deg) sit at L1, lighter than L2 (0.10 deg, 15%, 1.5, 0.15 m /
+0.6, 8%, 0.010 m / 0.10 deg). So EMX = L2 range noise + L1 artefacts + a denser beam pattern; the blind zone (1.5 m),
+lowest-beam cut-off, 120 deg FOV, 40 m sim range and 25 m edge range are the same as at every level. None is off, so
+the "EMX + L2 artefacts" shift-check variant is not triggered; the L1 artefact values remain assumptions.
+
+**EMX baselines (2026-11-27, seeds 0-499; `reports/lidar_demo/emx_baselines/`):** success / collision / stalled % /
+exits: (b) 97.7 / 0.0 / 1.9 / 2, (a) 98.7 / 0.0 / 1.0 / 1, (c) 97.9 / 0.0 / 1.9 / 1; **EMX baseline = (a)** by the
+rule (reviewed). These use the **front-axle mount (1.60 m, 1.10 m, 7 deg) and constant 3 m/s**; the roof-mount and
+`juno_bangbang` checks come later.
+
 **EMX mounting (analytic; height 1.10 m, vertical FOV -12/+8 deg about the pitched axis, blind zone 1.5 m, Juno's body
 front at 2.24 m from the rear axle, assuming symmetric 0.6375 m overhangs, still unmeasured):**
 
