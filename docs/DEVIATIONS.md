@@ -705,6 +705,16 @@ values confirmed by Can before any per-change run):**
   near-field cone memories the memory exists for. Replacement: the nearest current circle within 0.3 m (odom frame)
   replaces the remembered centre and radius. `mem_fix=True`, variant `goalflow_l3_circles_memfix`, tested alone on
   seeds 0-99 at L0 / L2 / L4 after the four (`scripts/run_memfix.sh`), same acceptance rule.
+- **Per-change results (2026-11-27; `reports/lidar_demo/l3_goalflow/per_change/TABLE.md`, `scripts/per_change_table.py`):**
+  pooled over seeds 0-99 x L0 / L2 / L4 vs the full run on the same seeds (success 89.2%, 1 collision, 29 stalls):
+  (a) 89.2% / 1 / 27 accepted (flag: L4 success -2.1 points); (b) lambda3 88.5% / 0 / 31 not accepted (stalls rise);
+  (c) edge critic 89.6% / 0 / 30 accepted (success +1 episode, exits 1 -> 0); (d) refinement 89.6% / 1 / 28 accepted.
+  Every difference is 1-4 episodes of 300, i.e. within noise; the rule is applied as registered. (a2) first run:
+  89.9% / 3 / 24, the 3 collisions at L0 caused by a bug in the visibility guard (distance to the circle centre instead
+  of its near surface; the simulator decides visibility at the near surface, so near-field cones below the lowest beam
+  were dropped; seed 4: cone dropped at 2.04 m centre / 1.79 m near surface vs the 2.03 m lowest-beam reach). Fixed to the
+  near surface, as the registered rule intends (b2e61a7); seeds 4 / 17 / 37 then match the reference with no collision.
+  (a2) rerun alone, same seeds and rule; both runs are reported.
 - **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
   at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most

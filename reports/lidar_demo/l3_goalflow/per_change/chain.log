@@ -1,0 +1,16 @@
+start Fri Nov 27 05:52:17 CET 2026 head e2a9e38
+false-alarm diagnostic start Fri Nov 27 05:52:17 CET 2026
+false-alarm diagnostic exit 0 end Fri Nov 27 06:05:20 CET 2026
+goalflow_l3_circles_entry2 start Fri Nov 27 06:05:20 CET 2026
+goalflow_l3_circles_entry2 exit 0 end Fri Nov 27 06:38:53 CET 2026
+goalflow_l3_circles_lambda3 start Fri Nov 27 06:38:53 CET 2026
+goalflow_l3_circles_lambda3 exit 0 end Fri Nov 27 07:13:01 CET 2026
+goalflow_l3_circles_edge start Fri Nov 27 07:13:01 CET 2026
+goalflow_l3_circles_edge exit 0 end Fri Nov 27 07:49:22 CET 2026
+goalflow_l3_circles_refine start Fri Nov 27 07:49:22 CET 2026
+goalflow_l3_circles_refine exit 0 end Fri Nov 27 08:23:14 CET 2026
+done Fri Nov 27 08:23:14 CET 2026
+goalflow_l3_circles_memfix start Fri Nov 27 08:23:39 CET 2026 head bb731a5
+goalflow_l3_circles_memfix exit 0 end Fri Nov 27 08:56:40 CET 2026
+memfix done Fri Nov 27 08:56:40 CET 2026
+goalflow_l3_circles_memfix start Fri Nov 27 09:00:54 CET 2026 head b2e61a7
