@@ -46,7 +46,8 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
    fixes, not behind them: (a) filter false alarms (69 of 99 L4 stalls): circle radius capped at class radius + a small
    allowance, clusters enter the filter after 2 scans except the near-field memory, 0.12 m clearance kept; (b) lambda3
    on; (c) track-edge critic on; (d) refinement against circles for the L0-L1 precision stalls. Each alone on seeds 0-99
-   at L0, L2, L4, accepted only if collisions do not rise; then the accepted set combined on 0-499 x L0-L4.
+   at L0, L2, L4, accepted only if collisions do not rise AND stalls drop (or success rises); per-change numbers in one
+   small table; then the accepted set combined on 0-499 x L0-L4.
 5. Latency: single-worker per-component profile (step 5); 241 ms with 5 workers sharing the GPU is not the number.
 6. EMX pitch check (roof mount, 5-9 deg); EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); GoalFlow at
    EMX after review; roof-mount shift check before any retraining.
