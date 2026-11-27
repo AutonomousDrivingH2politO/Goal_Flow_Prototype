@@ -620,9 +620,10 @@ bollard at 10-30 m, and whether `cluster_obstacles` returns a circle for each.
 ### After the full run: pre-registered changes (2026-11-27, before running; dev seeds only)
 
 Full run reviewed: GoalFlow is the safest planner at every level and matches (c) on success at L3-L4 with fewer
-collisions; the success gap is stalls. Changes, each tested alone on seeds 0-99 at L0, L2 and L4, then the combined
-config on seeds 0-499 x L0-L4; **a change is accepted only if collisions do not rise**:
-(a) filter false alarms (L2-L4): circle radius capped at the class radius + an allowance instead of the fitted radius;
+collisions; the success gap is stalls. Changes, in this order (lambda3 and the edge critic go with the margin fixes, not
+behind them), each tested alone on seeds 0-99 at L0, L2 and L4; **a change is accepted only if collisions do not
+rise**; then the accepted set combined on seeds 0-499 x L0-L4:
+(a) filter false alarms (69 of 99 L4 stalls had a candidate truly clear by >= 0.12 m): circle radius capped at the class radius + an allowance instead of the fitted radius;
 clusters enter the filter after 2 scans, except the near-field memory; the 0.12 m clearance is kept.
 (b) lambda3 on (door flips at L0-L2 exceed the baseline: 0.30 / 0.25 / 0.27 vs 0.05 / 0.14 / 0.26, per the rule above).
 (c) track-edge critic on (exits 11 / 10 at L0 / L1 vs 3 / 1; the smoke-test reason for leaving it off no longer holds).

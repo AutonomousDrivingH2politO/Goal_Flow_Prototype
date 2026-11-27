@@ -37,14 +37,16 @@ lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 
 ## 5. Queue, in order (behind the EMX baselines, not alongside)
 1. EMX baselines (running) -> per-level EMX baseline by the rule.
-2. COMPARISON.md additions: paired McNemar on success, GoalFlow vs baseline and vs (c), per level; stall overlap (GoalFlow
-   stalls on seeds where the baseline also stalls or brakes correctly), split truly blocked vs filter false alarm.
+2. COMPARISON.md additions (in `scripts/build_comparison.py`): paired McNemar on success, GoalFlow vs baseline and vs
+   (c), per level; stall overlap (GoalFlow stalls on seeds where the baseline also stalls), split truly blocked vs filter
+   false alarm.
 3. The two L4 collisions ("safety-filter miss, obstacle in hit memory"): render both, find why the remembered obstacle
    did not block (memory position drift, circle radius, or filter lookup); fix if it is a bug.
-4. Pre-registered changes (DEVIATIONS, 2026-11-27): (a) circle radius capped at class radius + allowance, clusters
-   enter the filter after 2 scans except near-field memory, 0.12 m clearance kept; (b) lambda3 on; (c) track-edge
-   critic on; (d) refinement against circles for the L0-L1 precision stalls. Each alone on seeds 0-99 at L0, L2, L4;
-   then the combined config on 0-499 x L0-L4. Accept a change only if collisions do not rise.
+4. Pre-registered changes (DEVIATIONS, 2026-11-27), in this order; lambda3 and the edge critic go with the margin
+   fixes, not behind them: (a) filter false alarms (69 of 99 L4 stalls): circle radius capped at class radius + a small
+   allowance, clusters enter the filter after 2 scans except the near-field memory, 0.12 m clearance kept; (b) lambda3
+   on; (c) track-edge critic on; (d) refinement against circles for the L0-L1 precision stalls. Each alone on seeds 0-99
+   at L0, L2, L4, accepted only if collisions do not rise; then the accepted set combined on 0-499 x L0-L4.
 5. Latency: single-worker per-component profile (step 5); 241 ms with 5 workers sharing the GPU is not the number.
 6. EMX pitch check (roof mount, 5-9 deg); EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); GoalFlow at
    EMX after review; roof-mount shift check before any retraining.
