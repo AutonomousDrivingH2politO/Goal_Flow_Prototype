@@ -13,9 +13,14 @@
 - Fork `ozaydincan/Goal_Flow_Prototype`, branch `feature/lidar-sim-demo`, **PR #4** open into `feature/phase0-audit`.
 - Last pushed commit: **4b70bbf** (full-run results). After it: 8e101c4 (EMX baselines script) and this handoff, pushed
   with this file.
-- **Running now:** EMX baselines (b), (a), (c), seeds 0-499, `scripts/run_emx_baselines.sh`, detached, started 03:13,
-  output `reports/lidar_demo/emx_baselines/` (RUNNING.lock while running, `chain.log`). Check its log before anything
-  else; don't start another run until it has finished.
+- **Running now: EMX baselines** (b) -> (a) -> (c), seeds 0-499, level EMX, front-axle mount, 7 workers, detached:
+  - command: `nohup ./scripts/run_emx_baselines.sh > /dev/null 2>&1 &` (each config: `caffeinate -i .venv/bin/python
+    scripts/eval_corridor.py --planners <observed_l3|observed_stubfix|observed_l3_noedge> --levels EMX --seeds 0-499
+    --workers 7 --out reports/lidar_demo/emx_baselines/<b|a|c>`), started 03:13 from 8e101c4;
+  - process group 95152 (chain script 95163; eval 95170 for config b); `RUNNING.lock` in the config's folder holds the
+    eval PID; progress `reports/lidar_demo/emx_baselines/<b|a|c>.log`, `chain.log` ends with "done";
+  - resumable (finished configs are skipped); to stop: `kill -- -95152`, then confirm with ps.
+  - Nothing else may run until it has finished.
 - Uncommitted: `docs/report/report.pdf` and `report.tex` (Can's edits, not touched by Claude); `reports/status/`
   handoff notes; `reports/lidar_demo/emx_baselines/` (run in progress).
 
@@ -25,22 +30,26 @@
 - (c) (b) without edge memory, reported alongside: `l0_rerun/c/` (L0), `l0_rerun_distdrift/c/` (L1-L4).
 - EMX level: chosen by the same rule from `reports/lidar_demo/emx_baselines/` once it exists.
 
-## 4. COMPARISON.md review needs
-Per level vs those baselines: success / collision / stalled / exits; brake rate; door flips (if GoalFlow flips more than
-the baseline, lambda3 is turned on and the run repeated: pre-registered, triggered at L0-L2); stall diagnostics (best
-true clearance at the last brake scan). Also flagged: GoalFlow track exits 11 / 10 at L0 / L1 vs 3 / 1 (edge critic off).
+## 4. COMPARISON.md: reviewed (Can, 2026-11-27)
+Headline: GoalFlow is the safest planner at every level and matches (c) on success at L3-L4 with fewer collisions; the
+success gap is stalls (L0-L1 mostly truly blocked, L2-L4 mostly filter false alarms). Door flips at L0-L2 trigger
+lambda3 (pre-registered); track exits 11 / 10 at L0 / L1 vs 3 / 1.
 
-## 5. Queue, in order
-1. COMPARISON.md review.
-2. EMX pitch check (EMX preset, roof mount, pitch 5-9 deg; hits per cone and bollard at 10-30 m; circle fitted?).
-3. EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+), then baselines at EMX (running now), then GoalFlow
-   at EMX after review.
-4. Roof-mount shift check (current model, `roof` preset, seeds 250000+, same protocol) before any retraining.
-5. Margin fixes (DEVIATIONS Part C item 18): refinement against the fitted circles, then a pre-registered clearance
-   critic (soft, toward 0.25 m, weight fixed in advance), MPPI (item 16) only as fallback.
-6. Latency profile (step 5); brake-rate column in the selection table (step 6); tracker birth rule + duplicate merging
-   (step 7).
-7. Seed 190/399 render fix; Orin expansion budget (after Can's expansions/s measurement).
+## 5. Queue, in order (behind the EMX baselines, not alongside)
+1. EMX baselines (running) -> per-level EMX baseline by the rule.
+2. COMPARISON.md additions: paired McNemar on success, GoalFlow vs baseline and vs (c), per level; stall overlap (GoalFlow
+   stalls on seeds where the baseline also stalls or brakes correctly), split truly blocked vs filter false alarm.
+3. The two L4 collisions ("safety-filter miss, obstacle in hit memory"): render both, find why the remembered obstacle
+   did not block (memory position drift, circle radius, or filter lookup); fix if it is a bug.
+4. Pre-registered changes (DEVIATIONS, 2026-11-27): (a) circle radius capped at class radius + allowance, clusters
+   enter the filter after 2 scans except near-field memory, 0.12 m clearance kept; (b) lambda3 on; (c) track-edge
+   critic on; (d) refinement against circles for the L0-L1 precision stalls. Each alone on seeds 0-99 at L0, L2, L4;
+   then the combined config on 0-499 x L0-L4. Accept a change only if collisions do not rise.
+5. Latency: single-worker per-component profile (step 5); 241 ms with 5 workers sharing the GPU is not the number.
+6. EMX pitch check (roof mount, 5-9 deg); EMX shift check (`scripts/emx_shift_check.py`, seeds 250000+); GoalFlow at
+   EMX after review; roof-mount shift check before any retraining.
+7. Brake-rate column in the selection table; tracker birth rule + duplicate merging; seed 190/399 render fix; Orin
+   expansion budget; MPPI (item 16) only as fallback.
 
 ## 6. Can's TODO
 - LiDAR optical centre x (from the rear axle), height, pitch.
