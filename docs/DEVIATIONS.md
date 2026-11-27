@@ -739,6 +739,14 @@ values confirmed by Can before any per-change run):**
     denser EMX beams alone do not help the classical planner; **EMX numbers stay unquoted until the artefact rates
     (dropout, clutter, edge noise, class flips) are measured from Juno recordings.**
   - Combined run prepared, not launched (`scripts/run_combined.sh`, planner `goalflow_l3_combined`); Can starts it.
+  - **Edge critic vectorised (2026-11-27, before the combined run; definition unchanged):** `observed_min_distance`
+    forward-fills the headings with cummax instead of a loop over steps, computes all candidates x steps x edge points in
+    one batched operation, and first skips edge points outside the bounding box of every densified reference pose
+    expanded by the box reach + 0.12 m (they cannot come within 0.12 m, where the critic is 0 anyway).
+    Equivalence: (a) 260 logged scans (L0 / L2 / L4, 32,760 candidates, 514 with a non-zero critic): max |old - new| = 0
+    and the same top-ranked candidate in 260 / 260 scans; (b) seeds 17 (L0), 4 (L2), 4 (L4) of the (c) per-change run
+    rerun: every episode column identical (incl. triggers). Cost per replan, single worker, machine otherwise idle, 4
+    episodes x 3 configs (534 replans each): no critic 142.7 ms, old critic 157.4 ms (+14.8), new 148.9 ms (+6.3).
 - **Flag before the combined run:** an accepted change that lowers success by more than 2 points, or adds a collision,
   at any single level is flagged to Can before the combined run.
 - radius allowance: the filter's circles already use the fixed class radius (bollard 0.225 m, cone 0.25 m; at most

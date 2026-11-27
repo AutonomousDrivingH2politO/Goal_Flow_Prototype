@@ -126,17 +126,30 @@ def observed_collision_exact(paths: torch.Tensor, points: list, margin: float = 
     return out
 
 
-def observed_min_distance(paths: torch.Tensor, points: torch.Tensor, max_step: float = 0.2) -> torch.Tensor:
+def observed_min_distance(paths: torch.Tensor, points, margin: float = 0.12, max_step: float = 0.2) -> torch.Tensor:
     """(M,) minimum distance from Juno's box along each executed path (M, T, 2; ego frame; densified to <= ``max_step``,
-    headings forward-filled, as in ``observed_collision_exact``) to a point set (N, 2); +inf without points."""
+    headings forward-filled, as in ``observed_collision_exact``) to a point set (N, 2); +inf without points.
+
+    Exact below ``margin`` (all the edge critic uses): points outside the bounding box of every densified reference pose
+    (and the start), expanded by the box reach + ``margin``, cannot come within ``margin`` of the box and are skipped,
+    so beyond ``margin`` the returned value may be larger than the true distance (the critic is 0 either way). All
+    candidates and steps are computed in one batched operation (heading forward-fill by cummax, no loops)."""
     from ..sim.config import VehicleConfig
     veh = VehicleConfig.from_yaml()
     x0, x1 = veh.body_x
     h = veh.width / 2
     M = paths.shape[0]
+    inf = torch.full((M,), float("inf"), dtype=paths.dtype, device=paths.device)
     if points is None or len(points) == 0:
-        return torch.full((M,), float("inf"), dtype=paths.dtype, device=paths.device)
-    pts = torch.as_tensor(points, dtype=paths.dtype, device=paths.device)[:, :2]
+        return inf
+    pts = np.asarray(points.cpu() if torch.is_tensor(points) else points, float).reshape(-1, 2)
+    Pc = paths.detach().cpu().numpy().reshape(-1, 2)
+    reach = math.hypot(max(abs(x0), abs(x1)), h) + margin + 1e-6
+    lo, hi = np.minimum(Pc.min(0), 0.0) - reach, np.maximum(Pc.max(0), 0.0) + reach
+    pts = pts[np.all((pts >= lo) & (pts <= hi), 1)]
+    if not len(pts):
+        return inf
+    pts = torch.as_tensor(pts, dtype=paths.dtype, device=paths.device)
     P = torch.cat([torch.zeros_like(paths[:, :1]), paths], 1)
     seg = (P[:, 1:] - P[:, :-1]).norm(dim=-1)
     f = int(min(max(math.ceil(float(seg.max()) / max_step), 1), 12))
@@ -144,11 +157,11 @@ def observed_min_distance(paths: torch.Tensor, points: torch.Tensor, max_step: f
     Q = (P[:, :-1, None] * (1 - w[:, None]) + P[:, 1:, None] * w[:, None]).flatten(1, 2)
     Q = torch.cat([Q, P[:, -1:]], 1)                                                # (M, K, 2)
     d = torch.diff(Q, dim=1)
-    yaw = torch.atan2(d[..., 1], d[..., 0])
-    yaw = torch.where(d.norm(dim=-1) > 1e-4, yaw, torch.full_like(yaw, float("nan")))
-    yaw = torch.cat([torch.zeros_like(yaw[:, :1]), yaw], 1)
-    for k in range(1, yaw.shape[1]):
-        yaw[:, k] = torch.where(torch.isnan(yaw[:, k]), yaw[:, k - 1], yaw[:, k])
+    raw = torch.atan2(d[..., 1], d[..., 0])
+    valid = torch.cat([torch.ones_like(raw[:, :1], dtype=torch.bool), d.norm(dim=-1) > 1e-4], 1)
+    Y = torch.cat([torch.zeros_like(raw[:, :1]), raw], 1)
+    k = torch.arange(Y.shape[1], device=paths.device)[None].expand(M, -1)
+    yaw = Y.gather(1, torch.cummax(torch.where(valid, k, torch.zeros_like(k)), dim=1).values)   # forward fill
     c, s_ = torch.cos(yaw), torch.sin(yaw)
     dx = pts[None, None, :, 0] - Q[..., 0:1]
     dy = pts[None, None, :, 1] - Q[..., 1:2]
@@ -397,7 +410,7 @@ class GoalFlow(nn.Module):
         if edge_w > 0 and edge_points is not None:
             # track-edge critic: hinge below the 0.12 m filter margin, not normalised (zero when clear)
             for b, ep in enumerate(edge_points):
-                d = observed_min_distance(S[b], ep)
+                d = observed_min_distance(S[b], ep, margin=safety_margin)
                 f[b] = f[b] - edge_w * ((safety_margin - d) / safety_margin).clamp(0, 1)
         out["scores_raw"] = f.clone()                             # before the safety mask (top-ranked = argmax)
         if safety:                                                # observed hits only (no privileged input)
