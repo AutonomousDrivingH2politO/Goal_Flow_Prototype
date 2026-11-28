@@ -51,7 +51,12 @@ pre-registered. **Running (approved): final test-seed run**, seeds 400000-400499
 94.9 / 93.2 / 91.3 / 86.0 %; goalflow_final: collisions 0 / 0 / 0 / 0.2 / 0.2 %, success 87.9 / 89.0 / 86.3 / 81.0 /
 73.4 %, below the opponent, (c) (except L4, n.s.) and (a)+filter at every level.
 
-**Approved, after the final run (DEVIATIONS "Follow-ups after the final run"; one at a time):** (1)
+**Follow-ups DONE 07:56 (DEVIATIONS "Follow-up results"):** nofix not ported (2 vs 1 collisions pooled, L3 1 vs 0;
+within noise, rule applied as registered); (a)+filter and nofix unaffected by juno_bangbang (0 collisions); GoalFlow
+juno: collisions from the brake delay (delay 0: 32 -> 1), success collapse from the speed below its 3 m/s training speed.
+Nothing running; nothing approved.
+
+**Was approved, after the final run (DEVIATIONS "Follow-ups after the final run"; one at a time):** (1)
 `observed_stubfix_filter_nofix` on dev 0-499 x L0-L4 (port to the car unless its collisions exceed (a)+filter's);
 (2) (a)+filter and nofix under juno_bangbang, seeds 0-99 x L0/L2/L4, collisions split while braking / not; (3)
 GoalFlow juno cause test: constant 2.0 m/s, juno with brake delay 0. **Running since 04:5x:**
@@ -115,3 +120,7 @@ roof-mount shift), item 9. Progress lines below are appended by the script as it
 - 11-27 20:46 item 5 juno_bangbang: GoalFlow exit 0, baselines last exit 0 (reports/lidar_demo/juno/)
 - 11-27 20:52 item 8 scene overlap: exit 0 (reports/lidar_demo/scene_overlap/)
 - 11-27 20:52 chain done
+- 11-28 05:07 follow-up 1 nofix on dev 0-499 x L0-L4 done (reports/lidar_demo/followups/nofix_dev/)
+- 11-28 05:19 follow-up 2 juno for (a)+filter and nofix done
+- 11-28 07:55 follow-up 3 GoalFlow juno cause test done
+- 11-28 07:55 follow-ups done

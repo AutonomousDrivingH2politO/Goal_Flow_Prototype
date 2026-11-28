@@ -1,0 +1,20 @@
+start Sat Nov 28 04:35:34 CET 2026 head dca2a07
+nofix_dev start Sat Nov 28 04:35:34 CET 2026
+nofix_dev exit 0 end Sat Nov 28 05:07:47 CET 2026
+Sat Nov 28 05:07:47 CET 2026 follow-up 1 nofix on dev 0-499 x L0-L4 done (reports/lidar_demo/followups/nofix_dev/)
+juno_a_filter start Sat Nov 28 05:07:47 CET 2026
+juno_a_filter exit 0 end Sat Nov 28 05:13:50 CET 2026
+juno_nofix start Sat Nov 28 05:13:50 CET 2026
+juno_nofix exit 0 end Sat Nov 28 05:19:51 CET 2026
+Sat Nov 28 05:19:51 CET 2026 follow-up 2 juno for (a)+filter and nofix done
+gf_const3 start Sat Nov 28 05:19:51 CET 2026
+gf_const3 exit 0 end Sat Nov 28 05:54:28 CET 2026
+gf_juno start Sat Nov 28 05:54:28 CET 2026
+gf_juno exit 0 end Sat Nov 28 06:34:58 CET 2026
+gf_const2 start Sat Nov 28 06:34:58 CET 2026
+gf_const2 exit 0 end Sat Nov 28 07:15:58 CET 2026
+gf_juno_nodelay start Sat Nov 28 07:15:59 CET 2026
+gf_juno_nodelay exit 0 end Sat Nov 28 07:55:56 CET 2026
+Sat Nov 28 07:55:56 CET 2026 follow-up 3 GoalFlow juno cause test done
+done Sat Nov 28 07:55:56 CET 2026
+Sat Nov 28 07:55:56 CET 2026 follow-ups done

@@ -915,6 +915,34 @@ finished (the final run's later configs import the same files). One run at a tim
    `brake_at_end` (the last planner command before the episode ended was a brake). Classical runs at 6 workers (the
    final run's 7 workers left ~0-5% CPU idle). Script `scripts/run_followups.sh`, output `reports/lidar_demo/followups/`.
 
+### Follow-up results (2026-11-28 07:56; `reports/lidar_demo/followups/`)
+
+**1. nofix memory variant (dev seeds 0-499 x L0-L4; success % / collisions / stalls):** (a)+filter 94.8 / 0 / 21,
+96.2 / 0 / 17, 96.4 / 0 / 17, 95.2 / 0 / 23, 85.5 / 1 / 66 (pooled 93.6% / 1 / 144); nofix 94.8 / 0 / 21, 96.6 / 0 / 15,
+95.8 / 0 / 20, 95.8 / 1 / 19, 85.3 / 1 / 67 (pooled 93.7% / 2 / 142). **By the pre-registered rule nofix is not ported:**
+its collisions are higher pooled (2 vs 1) and at L3 (1 vs 0). The difference is one episode (within noise); the rule is
+applied as registered, so the car candidate stays (a)+filter with the memory fix as frozen.
+
+**2. juno_bangbang for the car candidate (seeds 0-99, L0 / L2 / L4):** (a)+filter juno 95.8 / 0 / 4, 97.9 / 0 / 2,
+86.5 / 0 / 13 vs 3 m/s 95.8 / 0 / 2, 96.9 / 0 / 3, 83.3 / 0 / 15; nofix juno 95.8 / 0 / 4, 97.9 / 0 / 2, 86.5 / 0 / 13 vs
+3 m/s 95.8 / 0 / 2, 95.8 / 0 / 4, 85.4 / 0 / 13. No collisions in either speed mode (none while braking); success equal
+or slightly higher under Juno's speed control.
+
+**3. GoalFlow juno cause test (goalflow_final, seeds 0-99; success % / collisions / stalls, all collisions "while
+braking", cause "no safe candidate"):**
+
+| level | 3 m/s | juno_bangbang | constant 2.0 m/s | juno, brake delay 0 |
+|---|---|---|---|---|
+| L0 | 95.8 / 0 / 4 | 49.0 / 9 / 40 | 55.2 / 0 / 43 | 52.1 / 0 / 46 |
+| L2 | 92.7 / 0 / 7 | 54.2 / 10 / 34 | 53.1 / 0 / 45 | 44.8 / 0 / 53 |
+| L4 | 80.2 / 0 / 19 | 38.5 / 10 / 49 | 31.2 / 1 / 65 | 32.3 / 1 / 64 |
+
+**Two separate causes:** removing the brake delay removes the collisions (32 -> 1), so the collisions are late "no safe
+candidate" brakes made worse by the 0.3 s delay; the constant 2.0 m/s run (instant braking) has the same low success
+(31-55%) and high stalls without the delay, so the success collapse comes from driving below GoalFlow's training speed
+(3 m/s; speed out of range). The classical planners are unaffected by either. GoalFlow would need training data at
+Juno's 1.6-2.4 m/s before it could run with the real speed control.
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
