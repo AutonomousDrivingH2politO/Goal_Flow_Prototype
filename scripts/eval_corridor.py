@@ -39,6 +39,8 @@ LABELS = {
     "observed": "corridor-lattice, observed, pre-L3 (50e9ad9)",
     "observed_stubfix": "corridor-lattice, observed, pre-L3 + goal-line stub fix (a)",
     "observed_stubfix_filter": "(a) + GoalFlow's exact 0.12 m circle filter and near-field memory (memory fix)",
+    "observed_stubfix_filter_nofix": "(a) + the same filter with the plain near-field circle memory (no memory fix)",
+    "goalflow_final_2ms": "goalflow_final commanding 2.0 m/s (cause test)",
     "observed_l3": "corridor-lattice, observed, stub fix + L3 (b)",
     "observed_l3_noedge": "corridor-lattice, observed, stub fix + L3 without edge memory (c; vs single-scan GoalFlow)",
     "observed_l3_notrack": "corridor-lattice, observed, stub fix + L3 without obstacle tracking (d)",
@@ -108,7 +110,9 @@ def make_planner(name: str):
                    # on its brake-scan latency cost (DEVIATIONS)
                    "goalflow_l3_combined": dict(circle_filter=True, safety_margin=0.12, mem_fix=True, edge_w=1.0),
                    # FROZEN final GoalFlow config (Can, 2026-11-27; DEVIATIONS): circles + track-edge critic, no memory fix
-                   "goalflow_final": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0)}
+                   "goalflow_final": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0),
+                   # follow-up cause test (DEVIATIONS 2026-11-28): goalflow_final commanding 2.0 m/s (use --spawn-speed 2.0)
+                   "goalflow_final_2ms": dict(circle_filter=True, safety_margin=0.12, edge_w=1.0, speed=2.0)}
     if name == "goalflow_l3_circles_lambda3":
         assert LAMBDA3 is not None, "lambda3 not set yet (spread replay)"
     if name in gf_variants:           # closed-loop GoalFlow, L3 configuration (one model per worker)
@@ -129,6 +133,10 @@ def make_planner(name: str):
     if name == "observed_stubfix_filter":   # (a) + GoalFlow's safety filter and near-field memory (DEVIATIONS)
         from gfsem.planners.safety_wrap import FilteredObserved
         return FilteredObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name)
+    if name == "observed_stubfix_filter_nofix":   # (a)+filter with the plain running-mean memory (follow-up 1)
+        from gfsem.planners.safety_wrap import FilteredObserved
+        return FilteredObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0)), name,
+                                mem_fix=False)
     if name == "observed_l3":         # config (b): stub fix + approved L3 set, no time budget
         return CorridorObserved(LatticeCorridorPlanner(mode="observed", cfg=CorridorConfig(goal_cut_guard=1.0),
                                                        lcfg=l3_config()), name)
@@ -205,17 +213,37 @@ def run_one(job: tuple) -> dict:
     name, seed, level = job[:3]
     mount = job[3] if len(job) > 3 else "front_axle"
     speed_mode = job[4] if len(job) > 4 else "constant"
+    spawn_speed = job[5] if len(job) > 5 else None
     scene = _scene(seed)
     P = make_planner(name)
     if hasattr(P, "lidar"):
         P.lidar = LidarConfig.with_mount(mount)          # GoalFlow's visibility guard uses the run's mount
     gf = name.startswith("goalflow")
-    from gfsem.sim.config import ControllerConfig
-    simcfg = SimConfig(lidar=LidarConfig.with_mount(mount), control=ControllerConfig(speed_mode=speed_mode))
-    r = run_episode(scene, P, level, simcfg, record=gf)
+    from dataclasses import replace as _replace
+    from gfsem.sim.config import ControllerConfig, JunoSpeedConfig, SceneConfig
+    ctl = (ControllerConfig(speed_mode="juno_bangbang", juno=JunoSpeedConfig(brake_delay=0.0))
+           if speed_mode == "juno_bangbang_nobrakedelay" else ControllerConfig(speed_mode=speed_mode))
+    scfg = SceneConfig.from_yaml()
+    if spawn_speed is not None:
+        scfg = _replace(scfg, spawn_speed=spawn_speed, target_speed=spawn_speed)
+    simcfg = SimConfig(lidar=LidarConfig.with_mount(mount), control=ctl, scene=scfg)
+    _last_brake = [False]
+    _plan = P.plan
+
+    def _rec_plan(*args, **kw):                      # remember the last command (brake or not) before the episode ends
+        res = _plan(*args, **kw)
+        _last_brake[0] = bool(res.brake)
+        return res
+    P.plan = _rec_plan
+    try:
+        r = run_episode(scene, P, level, simcfg, record=gf)
+    finally:
+        del P.plan
+
     row = r.row()
     row["mount"] = mount
     row["speed_mode"] = speed_mode
+    row["brake_at_end"] = _last_brake[0]               # last planner command before the end (contact) was a brake
     inner = getattr(P, "p", P)
     stats = getattr(inner, "stats", [])
     if gf:
@@ -344,7 +372,8 @@ def main():
     ap.add_argument("--out", type=Path, default=Path("reports/lidar_demo/l0"))
     ap.add_argument("--l3", action="store_true", help="run 'observed' as config (b): stub fix + approved L3 set")
     ap.add_argument("--mount", default="front_axle", help="LiDAR mount preset (gfsem.sim.config.LIDAR_MOUNTS)")
-    ap.add_argument("--speed-mode", default="constant", choices=("constant", "juno_bangbang"),
+    ap.add_argument("--spawn-speed", type=float, default=None, help="spawn and initial target speed (default: scene)")
+    ap.add_argument("--speed-mode", default="constant", choices=("constant", "juno_bangbang", "juno_bangbang_nobrakedelay"),
                     help="constant 3 m/s (all results so far) or Juno's bang-bang valve control (placeholders)")
     a = ap.parse_args()
     if a.l3:
@@ -354,7 +383,7 @@ def main():
     jobs = []
     for name in a.planners.split(","):
         for lvl in (["L0"] if name in PRIVILEGED else levels):
-            jobs += [(name, s, lvl, a.mount, a.speed_mode) for s in seeds]
+            jobs += [(name, s, lvl, a.mount, a.speed_mode, a.spawn_speed) for s in seeds]
     a.out.mkdir(parents=True, exist_ok=True)
     # one run per output folder (house rule): refuse if a live process holds the lock; replace a stale one
     import os

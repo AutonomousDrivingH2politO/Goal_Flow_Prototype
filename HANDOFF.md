@@ -54,7 +54,9 @@ pre-registered. **Running (approved): final test-seed run**, seeds 400000-400499
 **Approved, after the final run (DEVIATIONS "Follow-ups after the final run"; one at a time):** (1)
 `observed_stubfix_filter_nofix` on dev 0-499 x L0-L4 (port to the car unless its collisions exceed (a)+filter's);
 (2) (a)+filter and nofix under juno_bangbang, seeds 0-99 x L0/L2/L4, collisions split while braking / not; (3)
-GoalFlow juno cause test: constant 2.0 m/s, juno with brake delay 0. Code is added only after the final run ends.
+GoalFlow juno cause test: constant 2.0 m/s, juno with brake delay 0. **Running since 04:5x:**
+`nohup ./scripts/run_followups.sh > /dev/null 2>&1 &`, output `reports/lidar_demo/followups/`, ~3.5 h; progress lines
+are appended at the end of this file.
 
 **Waiting for Can after the final run:** GoalFlow juno_bangbang separating test (optional); item 7 for (a)+filter (EMX
 shift, roof mount); item 9 (brake column, seed 190/399 render fix, Orin expansion budget).

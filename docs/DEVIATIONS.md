@@ -909,6 +909,11 @@ finished (the final run's later configs import the same files). One run at a tim
 3. **GoalFlow juno_bangbang cause test** (lower priority), same seeds: (i) constant speed 2.0 m/s (planner speed command
    and spawn speed 2.0; is the speed out of the training range?), (ii) juno_bangbang with brake delay 0 (late brake +
    delay?). Report which removes the collisions (vs juno_bangbang and vs constant 3 m/s on the same seeds).
+   *Note (before running):* the juno collapse was measured on `goalflow_l3_combined`; the cause test uses the frozen
+   `goalflow_final`, so its own references (juno_bangbang and constant 3 m/s, same seeds) are run too. Constant 3 m/s
+   references for (a)+filter and nofix come from their dev runs on the same seeds. "While braking" = column
+   `brake_at_end` (the last planner command before the episode ended was a brake). Classical runs at 6 workers (the
+   final run's 7 workers left ~0-5% CPU idle). Script `scripts/run_followups.sh`, output `reports/lidar_demo/followups/`.
 
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
