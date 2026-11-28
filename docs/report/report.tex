@@ -45,7 +45,7 @@
 
 \title{\textbf{GoalFlow for Juno}\\[2pt]\large Learned path planning through the Shell Eco-marathon obstacle course:\\ goals, architecture, obstacle avoidance and the methods behind it}
 \author{Team H2politO, Autonomous Driving division\\ \small Prepared for anyone joining the project}
-\date{27 November 2026}
+\date{28 November 2026}
 
 \begin{document}
 \maketitle
@@ -66,9 +66,11 @@ success at L3--L4 with far fewer collisions. Follow-up tests showed that the saf
 \emph{system} (filter and memory), not from the network alone, and that the same safety layer on the classical
 planner, \textbf{(a)+filter}, beats GoalFlow on both success and collisions at every level.
 
-\textbf{Conclusion.} The planner for Juno should be the corridor-lattice planner with the safety layer developed
-here. GoalFlow continues as a research track whose case rests on real data. Final numbers on the untouched test
-seeds (400000+) are being produced with both configurations frozen.
+\textbf{Conclusion} (confirmed on 2{,}500 untouched test runs per planner). The planner for Juno is the
+corridor-lattice planner with the safety layer developed here, \textbf{(a)+filter}: 1 collision in about 2{,}365
+feasible test runs, 86\% success at the noisiest level, and no collisions under Juno's real speed control. GoalFlow
+is as safe but stalls two to three times as often; it continues as a research track that needs retraining at
+Juno's speed and real data.
 \end{keybox}
 
 \tableofcontents
@@ -688,7 +690,9 @@ It went through several versions (challenges 13, 14, 21 and 22); the final one:
   \item keeps them in the car's own, drifting odometry frame, never the true pose.
 \end{itemize}
 A ``memory fix'' (re-anchor a remembered circle to a new observation; drop it when the scan sees its place free)
-reduced false alarms in screening but caused 13 collisions in the full run and was removed (challenge 22). The
+reduced false alarms in screening but caused 13 collisions in GoalFlow's full run and was removed from GoalFlow
+(challenge 22). The frozen (a)+filter keeps it; on the classical planner a direct comparison found no difference
+beyond noise, and the pre-registered rule kept it (Section~\ref{sec:final}). The
 remaining weakness is drift: remembered circles end up 0.08--0.31\,m off, which causes both false alarms and the
 rare collision. On the real car the memory is only as good as the odometry.
 
@@ -1039,6 +1043,67 @@ Encoder (network) & 6 & Circles, memory, goal selection, other & 4.7 \\
 The network parts total about 43\,ms and should speed up a lot with TensorRT on the Orin; the rollout (56\%) is many
 small sequential operations and needs rewriting (vectorised or fused) whatever the hardware.
 
+\subsection{Final results on untouched test seeds}
+\label{sec:final}
+All configurations frozen at commit f3f4a51 and run once on fresh seeds 400000--400499 (473 feasible scenes per
+level), front-axle mount, 3\,m/s. Success / collision \%; nothing was changed after these numbers.
+\begin{table}[H]
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Level & GoalFlow final & (a)+filter & (a) & (b) & (c) \\
+\midrule
+L0 & 87.9 / 0.0 & 93.2 / 0.0 & 94.3 / 0.0 & \textbf{96.8} / 0.0 & 94.1 / 0.0 \\
+L1 & 89.0 / 0.0 & 94.9 / 0.0 & \textbf{97.0} / 0.6 & 97.0 / 0.0 & 96.2 / 0.2 \\
+L2 & 86.3 / 0.0 & 93.2 / 0.0 & \textbf{96.0} / 1.1 & 96.2 / 0.0 & 93.9 / 0.8 \\
+L3 & 81.0 / 0.2 & 91.3 / 0.2 & \textbf{95.3} / 1.9 & 88.6 / 0.8 & 87.5 / 0.8 \\
+L4 & 73.4 / 0.2 & 86.0 / 0.0 & \textbf{90.9} / 2.5 & 77.0 / 2.1 & 76.5 / 2.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{itemize}[nosep]
+  \item \textbf{Stalls:} GoalFlow 11.4 / 11.0 / 13.5 / 18.6 / 26.2\%; (a)+filter 5.9 / 4.9 / 6.8 / 8.5 / 14.0\%. Correct stops
+        in the 27 scenes with no route: 26--27 for every planner.
+  \item \textbf{Paired McNemar on success:} GoalFlow is worse than the frozen opponent at every level ($p\le2\times10^{-7}$),
+        worse than (c) at L0--L3 ($p\le0.002$; L4 $p=0.21$), and worse than (a)+filter at every level ($p\le0.002$).
+        (a)+filter has lower success than (a) at L1--L4 ($p\le0.007$; L0 $p=0.06$) but fewer collisions everywhere, and
+        higher success than (b) at L4 (86.0 vs 77.0\%, $p=1.5\times10^{-5}$).
+  \item \textbf{The development seeds were optimistic, most for GoalFlow:} from dev to test GoalFlow lost 3--5 points of
+        success, (a)+filter 1.5--5 and (a) 1--2, consistent with GoalFlow's filter, memory and selection settings having
+        been chosen on the development seeds.
+  \item \textbf{Door flips:} GoalFlow 0.26--0.43 per run; (a) 0.08--1.16; (a)+filter the highest at L4 (1.34): when the
+        filter blocks a plan, the planner switches gap. A point to watch on the car.
+\end{itemize}
+
+\subsection{Follow-ups after the final run}
+\paragraph{Memory variant for the car} (pre-registered rule: port the plain memory unless it collides more). On dev
+seeds 0--499 the plain memory (``nofix'') scored 93.7\% success with 2 collisions pooled against 93.6\% and 1 for the
+frozen (a)+filter with the memory fix; one more collision at L3. The rule was applied as written, though the
+difference is within noise: \textbf{the car gets (a)+filter as frozen, memory fix included.}
+
+\paragraph{Juno's real speed control} (\code{juno\_bangbang}: 6--8\,km/h valve control, 0.3\,s brake delay, placeholder
+values; seeds 0--99). (a)+filter and the plain-memory variant had no collisions in either speed mode, and success was
+equal or slightly higher than at 3\,m/s ((a)+filter 95.8 / 97.9 / 86.5\% at L0 / L2 / L4 against 95.8 / 96.9 / 83.3\%).
+
+\paragraph{Why GoalFlow fails at Juno's speed} (seeds 0--99, success \% / collisions / stalls):
+\begin{table}[H]
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Level & 3\,m/s & Juno speed control & constant 2.0\,m/s & Juno control, no brake delay \\
+\midrule
+L0 & 95.8 / 0 / 4 & 49.0 / 9 / 40 & 55.2 / 0 / 43 & 52.1 / 0 / 46 \\
+L2 & 92.7 / 0 / 7 & 54.2 / 10 / 34 & 53.1 / 0 / 45 & 44.8 / 0 / 53 \\
+L4 & 80.2 / 0 / 19 & 38.5 / 10 / 49 & 31.2 / 1 / 65 & 32.3 / 1 / 64 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Two separate causes. The \textbf{collisions} come from the brake delay: all 32 happened while braking, and removing the
+0.3\,s delay leaves 1. GoalFlow brakes only when no candidate passes the 0.12\,m check, i.e.\ at the last moment, while
+the classical planner keeps 0.25\,m and rarely needs the filter. The \textbf{success collapse} comes from the speed: at a
+constant 2.0\,m/s with instant braking success is just as low, so GoalFlow fails below its 3\,m/s training speed.
+Retraining with data at 1.6--2.4\,m/s is a precondition for any use on Juno.
+
 %=====================================================================
 \section{What it looks like}
 \label{sec:visual}
@@ -1342,6 +1407,8 @@ on the roof at the base of the ZED support (the simulator: front axle).\\
 \textbf{What we did.} A \code{juno\_bangbang} speed mode and a roof mount preset with a placeholder windshield model,
 both behind configuration switches so earlier results reproduce exactly; stopping distances and a 30-row mounting
 table.\\
+\textbf{Outcome so far:} with placeholder values, (a)+filter is unaffected by Juno's speed control (0 collisions);
+GoalFlow is not (Section~\ref{sec:final}).\\
 \textbf{Future:} measure the mount position and pitch, the windshield and nose, the brake deceleration and delay
 (from the SEM stop-sign recording if it exists) and a coast-down; then rerun with the measured values.
 
@@ -1361,18 +1428,19 @@ bugs (a \code{String}/\code{Bool} type mismatch and an uninitialised flag).\\
 \section{Is GoalFlow worth it? An honest assessment}
 \label{sec:assessment}
 %=====================================================================
-Measured against the success criteria fixed at the start (dev seeds; the fresh test set will give the final numbers):
+Measured against the success criteria fixed at the start, on the untouched test seeds:
 \begin{table}[H]
 \small
 \begin{tabularx}{\linewidth}{@{}LLl@{}}
 \toprule
 Criterion & Result & Met? \\
 \midrule
-Success at least as high as both baselines, higher at L3--L4 & 6--14 points lower than the best classical planner; equal to (c) at L3--L4 & no \\
-Collisions no higher than either baseline & lowest of the three at every level in the circles run & yes \\
+Success at least as high as both baselines, higher at L3--L4 & 8--18 points lower than the frozen opponent; not significantly different from (c) only at L4 & no \\
+Collisions no higher than either baseline & 2 in 2{,}365 test runs, at or below every baseline & yes \\
 Visible left/right choices where regression collides & open loop: 3.17\% $\to$ 0.36\% collisions & yes \\
 No more door flips than the classical planner & more at L0--L2, fewer at L3--L4 & partly \\
 At most 50\,ms per plan on the Orin & 152\,ms on the Mac; not yet measured on the Orin & no \\
+\emph{Added:} works with Juno's real speed control & collapses (38--54\% success); needs retraining & no \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1389,10 +1457,12 @@ one must be re-engineered for each new case. That is a real possibility, not a d
 
 \textbf{Recommendation.}
 \begin{enumerate}[nosep]
-  \item Juno drives with the corridor-lattice planner plus the safety layer (circles, near-field memory, 0.12\,m
-        executed-path check).
-  \item GoalFlow becomes a research track: retrain for the roof mount, the EMX and Juno's speed; test offline on real
-        recordings; fine-tune; shadow mode. It is switched in only if it beats the classical planner on real data.
+  \item Juno drives with \textbf{(a)+filter as frozen}: the corridor-lattice planner plus the safety layer (circles,
+        near-field memory with the memory fix, 0.12\,m executed-path check). Confirmed on the test seeds and under
+        Juno's speed control.
+  \item GoalFlow becomes a research track: retrain with data at Juno's 1.6--2.4\,m/s, for the roof mount and the EMX;
+        brake earlier than the last moment (a clearance term or a larger margin) given the real brake delay; test offline
+        on real recordings; fine-tune; shadow mode. It is switched in only if it beats the classical planner on real data.
   \item What carries over regardless: the simulator, the evaluation tooling, the safety layer and the memory.
 \end{enumerate}
 
@@ -1407,7 +1477,8 @@ uninitialised flag). The chosen integration avoids waking Nav2 for a first test:
   \item \textbf{Perception front end} (ROS\,2): ground removal, clustering into class circles with ZED labels, track
         edges, odometry. Shared by both planners.
   \item \textbf{Corridor planner node} (Python is fast enough: 8--42\,ms): publishes a \code{nav\_msgs/Path} in
-        \code{odom} at about 10\,Hz, with the safety layer applied to its executed path.
+        \code{odom} at about 10\,Hz, with the safety layer applied to its executed path, ported exactly as frozen
+        (including the memory fix, whose free-space rule depends on the measured LiDAR mount and pitch).
   \item \textbf{Path follower}: pure pursuit to the steering topic.
   \item \textbf{Arbiter node}: chooses lane-follower or path follower (Bool topic, lane-follower by default, falls back
         after about 0.3\,s without a path); stop and brake commands override both.
@@ -1445,15 +1516,13 @@ possible later (C++, a rolling goal, a behaviour tree that replans, \code{map} v
 \section{Open problems and next steps}
 %=====================================================================
 \begin{enumerate}[nosep]
-  \item Final numbers on the fresh test seeds (400000+) for the frozen configurations: GoalFlow (circles + edge
-        critic), (a)+filter and the classical baselines (running on 27--28 Nov).
+  \item Port (a)+filter to AD-SEM (Section~\ref{sec:deploy}); equivalence test against the frozen code first.
   \item On the car: EMX mount and pitch, recordings, artefact rates, brake and coast measurements (challenge 25).
-  \item Perception front end, corridor node with the safety layer, arbiter (Section~\ref{sec:deploy}); fix the
-        \code{nav\_mode} bugs in AD-SEM.
+  \item Perception front end, track-edge detection, arbiter, brake interface; fix the \code{nav\_mode} bugs in AD-SEM.
   \item CARLA at Bylogix once a date is set: integration test of the full chain.
   \item EMX and roof-mount checks for (a)+filter in simulation; the expansion budget once Orin speed is measured.
-  \item GoalFlow research track: retrain (roof mount, EMX, Juno speed), vectorised rollout and TensorRT for latency,
-        offline tests on recordings, fine-tuning, shadow mode.
+  \item GoalFlow research track: retrain at 1.6--2.4\,m/s (roof mount, EMX), earlier braking given the brake delay,
+        vectorised rollout and TensorRT for latency, offline tests on recordings, fine-tuning, shadow mode.
 \end{enumerate}
 
 \appendix
