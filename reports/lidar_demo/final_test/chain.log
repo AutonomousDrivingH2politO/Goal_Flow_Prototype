@@ -1,0 +1,101 @@
+start Fri Nov 27 21:54:27 CET 2026 head 99434c0
+goalflow_final (goalflow_final) start Fri Nov 27 21:54:27 CET 2026
+goalflow_final exit 0 end Sat Nov 28 02:38:24 CET 2026
+observed_stubfix_filter (observed_stubfix_filter) start Sat Nov 28 02:38:24 CET 2026
+observed_stubfix_filter exit 0 end Sat Nov 28 03:09:03 CET 2026
+a (observed_stubfix) start Sat Nov 28 03:09:03 CET 2026
+a exit 0 end Sat Nov 28 03:34:50 CET 2026
+b (observed_l3) start Sat Nov 28 03:34:50 CET 2026
+b exit 0 end Sat Nov 28 04:02:14 CET 2026
+c (observed_l3_noedge) start Sat Nov 28 04:02:14 CET 2026
+c exit 0 end Sat Nov 28 04:29:48 CET 2026
+# Final comparison on the fresh test seeds 400000-400499 (frozen configs; DEVIATIONS 2026-11-27)
+
+Front-axle mount, constant 3 m/s, distance-proportional drift. Per-level opponent as frozen: (b) at L0, (a) at L1-L4; (c) alongside. No change of any kind after these numbers.
+
+## L0 (opponent (b))
+
+| planner | success % | collision % | stalled % | exits | brake rate | door flips / run | correct brakes |
+|---|---|---|---|---|---|---|---|
+| GoalFlow final | 87.9 | 0.0 | 11.4 | 3 | 5.2% | 0.26 | 26/27 |
+| (a)+filter | 93.2 | 0.0 | 5.9 | 4 | 1.9% | 0.08 | 27/27 |
+| (a) | 94.3 | 0.0 | 4.9 | 4 | 1.8% | 0.08 | 27/27 |
+| (b) | 96.8 | 0.0 | 1.7 | 7 | 1.3% | 0.07 | 26/27 |
+| (c) | 94.1 | 0.0 | 4.7 | 6 | 1.8% | 0.06 | 26/27 |
+
+McNemar on success (only-first vs only-second successes, exact two-sided p):
+- GoalFlow final vs opponent (b): 12 vs 54, p = 1.69e-07
+- GoalFlow final vs (c): 20 vs 49, p = 0.000636
+- GoalFlow final vs (a)+filter: 19 vs 44, p = 0.00223
+- (a)+filter vs (a): 0 vs 5, p = 0.0625
+- (a)+filter vs (b): 6 vs 23, p = 0.00232
+
+## L1 (opponent (a))
+
+| planner | success % | collision % | stalled % | exits | brake rate | door flips / run | correct brakes |
+|---|---|---|---|---|---|---|---|
+| GoalFlow final | 89.0 | 0.0 | 11.0 | 0 | 5.2% | 0.32 | 26/27 |
+| (a)+filter | 94.9 | 0.0 | 4.9 | 1 | 2.8% | 0.14 | 27/27 |
+| (a) | 97.0 | 0.6 | 2.1 | 1 | 2.3% | 0.14 | 27/27 |
+| (b) | 97.0 | 0.0 | 2.7 | 1 | 2.0% | 0.10 | 27/27 |
+| (c) | 96.2 | 0.2 | 3.2 | 2 | 2.4% | 0.11 | 27/27 |
+
+McNemar on success (only-first vs only-second successes, exact two-sided p):
+- GoalFlow final vs opponent (a): 4 vs 42, p = 5.1e-09
+- GoalFlow final vs (c): 7 vs 41, p = 6.24e-07
+- GoalFlow final vs (a)+filter: 13 vs 41, p = 0.000175
+- (a)+filter vs (a): 0 vs 10, p = 0.00195
+- (a)+filter vs (b): 6 vs 16, p = 0.0525
+
+## L2 (opponent (a))
+
+| planner | success % | collision % | stalled % | exits | brake rate | door flips / run | correct brakes |
+|---|---|---|---|---|---|---|---|
+| GoalFlow final | 86.3 | 0.0 | 13.5 | 1 | 6.1% | 0.27 | 27/27 |
+| (a)+filter | 93.2 | 0.0 | 6.8 | 0 | 4.2% | 0.28 | 27/27 |
+| (a) | 96.0 | 1.1 | 3.0 | 0 | 3.0% | 0.27 | 27/27 |
+| (b) | 96.2 | 0.0 | 3.6 | 1 | 3.6% | 0.15 | 27/27 |
+| (c) | 93.9 | 0.8 | 5.1 | 1 | 4.5% | 0.20 | 27/27 |
+
+McNemar on success (only-first vs only-second successes, exact two-sided p):
+- GoalFlow final vs opponent (a): 7 vs 53, p = 7.67e-10
+- GoalFlow final vs (c): 15 vs 51, p = 1.01e-05
+- GoalFlow final vs (a)+filter: 16 vs 49, p = 5.08e-05
+- (a)+filter vs (a): 4 vs 17, p = 0.0072
+- (a)+filter vs (b): 10 vs 24, p = 0.0243
+
+## L3 (opponent (a))
+
+| planner | success % | collision % | stalled % | exits | brake rate | door flips / run | correct brakes |
+|---|---|---|---|---|---|---|---|
+| GoalFlow final | 81.0 | 0.2 | 18.6 | 1 | 6.7% | 0.28 | 27/27 |
+| (a)+filter | 91.3 | 0.2 | 8.5 | 0 | 7.3% | 0.54 | 27/27 |
+| (a) | 95.3 | 1.9 | 2.7 | 0 | 5.2% | 0.57 | 27/27 |
+| (b) | 88.6 | 0.8 | 10.6 | 0 | 8.8% | 0.36 | 26/27 |
+| (c) | 87.5 | 0.8 | 11.6 | 0 | 9.6% | 0.44 | 26/27 |
+
+McNemar on success (only-first vs only-second successes, exact two-sided p):
+- GoalFlow final vs opponent (a): 6 vs 74, p = 5.4e-16
+- GoalFlow final vs (c): 31 vs 62, p = 0.00171
+- GoalFlow final vs (a)+filter: 14 vs 63, p = 1.41e-08
+- (a)+filter vs (a): 8 vs 27, p = 0.00188
+- (a)+filter vs (b): 39 vs 26, p = 0.136
+
+## L4 (opponent (a))
+
+| planner | success % | collision % | stalled % | exits | brake rate | door flips / run | correct brakes |
+|---|---|---|---|---|---|---|---|
+| GoalFlow final | 73.4 | 0.2 | 26.2 | 1 | 8.7% | 0.43 | 26/27 |
+| (a)+filter | 86.0 | 0.0 | 14.0 | 0 | 13.4% | 1.34 | 27/27 |
+| (a) | 90.9 | 2.5 | 6.1 | 2 | 10.1% | 1.16 | 27/27 |
+| (b) | 77.0 | 2.1 | 20.3 | 3 | 17.3% | 0.99 | 27/27 |
+| (c) | 76.5 | 2.5 | 20.5 | 2 | 17.7% | 1.02 | 27/27 |
+
+McNemar on success (only-first vs only-second successes, exact two-sided p):
+- GoalFlow final vs opponent (a): 12 vs 95, p = 3.49e-17
+- GoalFlow final vs (c): 54 vs 69, p = 0.207
+- GoalFlow final vs (a)+filter: 24 vs 84, p = 5.49e-09
+- (a)+filter vs (a): 14 vs 37, p = 0.00177
+- (a)+filter vs (b): 70 vs 27, p = 1.48e-05
+
+end Sat Nov 28 04:29:48 CET 2026

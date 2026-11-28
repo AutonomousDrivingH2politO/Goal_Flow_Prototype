@@ -33,7 +33,7 @@ class JunoSpeed:
     def __init__(self, cfg, dt: float):
         self.c, self.dt = cfg, dt
         self.valve = [False] * max(1, round(cfg.valve_delay / dt))     # pending commands, oldest first
-        self.brk = [False] * max(1, round(cfg.brake_delay / dt))
+        self.brk = [False] * max(1, round(cfg.brake_delay / dt)) if cfg.brake_delay > 0 else None   # None: no delay
         self.want_open = False
 
     def target(self, v: float, brake_cmd: bool) -> float:
@@ -43,8 +43,12 @@ class JunoSpeed:
         elif v <= c.v_lo:
             self.want_open = True
         self.valve.append(self.want_open and not brake_cmd)
-        self.brk.append(brake_cmd)
-        valve_on, brake_on = self.valve.pop(0), self.brk.pop(0)
+        valve_on = self.valve.pop(0)
+        if self.brk is None:
+            brake_on = brake_cmd
+        else:
+            self.brk.append(brake_cmd)
+            brake_on = self.brk.pop(0)
         a = -c.d_brake if brake_on else (c.a_open if valve_on else -c.d_coast)
         return max(0.0, v + a * self.dt)
 

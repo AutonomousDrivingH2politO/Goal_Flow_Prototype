@@ -5,9 +5,10 @@ obstacle course. It adapts **GoalFlow** (goal-driven flow matching; Xing et al.,
 [arXiv:2503.05689](https://arxiv.org/abs/2503.05689)) to Juno's 10° steering limit and RoboSense EMX LiDAR, and
 compares it in closed loop against a classical corridor-lattice planner in a purpose-built 2D simulator.
 
-> **Status (27 Nov 2026):** simulator study complete on development seeds; final numbers on untouched test seeds
-> (400000+) are being produced. Recommendation so far: drive Juno with the **corridor-lattice planner plus the
-> safety layer developed here**; keep GoalFlow as a research track for real data. Details:
+> **Status (28 Nov 2026):** simulator study complete, confirmed on untouched test seeds. **Recommendation: drive Juno
+> with the corridor-lattice planner plus the safety layer developed here, "(a)+filter"** (1 collision in about 2,365
+> test runs, no collisions under Juno's real speed control). GoalFlow is as safe but stalls 2-3 times as often and
+> fails below its 3 m/s training speed; it stays a research track. Details:
 > [`docs/report/report.pdf`](docs/report/report.pdf).
 
 ## How it works
@@ -28,22 +29,30 @@ noisy LiDAR scan → 6-channel bird's-eye view (128×128, 0.2 m)
 - **Noise ladder L0–L4:** from a perfect sensor to very noisy (range noise, dropout, clutter, edge noise, class
   flips, odometry drift proportional to distance).
 
-## Results so far (development seeds 0–499, front-axle mount, 3 m/s)
+## Results (fresh test seeds 400000–400499, frozen configs, front-axle mount, 3 m/s)
 
-Success / collision / stalled, % of the 477 feasible scenes per level:
+Success / collision, % of the 473 feasible scenes per level
+([`FINAL_COMPARISON.md`](reports/lidar_demo/final_test/FINAL_COMPARISON.md)):
 
-| Level | GoalFlow (circles) | Best classical | Classical + safety layer |
-|---|---|---|---|
-| L0 | 91.8 / 0.0 / 5.9 | 97.5 / 0.0 / 1.9 | 94.8 / 0.0 / 4.4 |
-| L1 | 91.6 / 0.0 / 6.3 | 97.9 / 0.6 / 1.3 | 96.2 / 0.0 / 3.6 |
-| L2 | 88.7 / 0.0 / 10.7 | 98.7 / 0.0 / 1.3 | 96.4 / 0.0 / 3.6 |
-| L3 | 85.7 / 0.0 / 14.3 | 97.3 / 0.8 / 1.9 | 95.2 / 0.0 / 4.8 |
-| L4 | 78.8 / 0.4 / 20.8 | 93.1 / 2.3 / 4.4 | 85.5 / 0.2 / 13.8 |
+| Level | GoalFlow final | (a)+filter | (a) | (b) | (c) |
+|---|---|---|---|---|---|
+| L0 | 87.9 / 0.0 | 93.2 / 0.0 | 94.3 / 0.0 | **96.8** / 0.0 | 94.1 / 0.0 |
+| L1 | 89.0 / 0.0 | 94.9 / 0.0 | **97.0** / 0.6 | 97.0 / 0.0 | 96.2 / 0.2 |
+| L2 | 86.3 / 0.0 | 93.2 / 0.0 | **96.0** / 1.1 | 96.2 / 0.0 | 93.9 / 0.8 |
+| L3 | 81.0 / 0.2 | 91.3 / 0.2 | **95.3** / 1.9 | 88.6 / 0.8 | 87.5 / 0.8 |
+| L4 | 73.4 / 0.2 | 86.0 / 0.0 | **90.9** / 2.5 | 77.0 / 2.1 | 76.5 / 2.5 |
 
-GoalFlow is the safest of the original planners but stalls more. Its safety comes from the geometric filter and
-near-field memory, which give the classical planner the same near-zero collision rate with higher success.
-Planning takes about 152 ms per step on an M1 Mac (classical: 8–42 ms); the on-car target is 50 ms on a
-Jetson AGX Orin.
+(a) classical baseline; (b) (a) + tracking, edge memory, hysteresis, hold; (c) (b) without edge memory (same
+information as GoalFlow); (a)+filter = (a) + GoalFlow's safety layer.
+
+- GoalFlow is as safe as (a)+filter but stalls 2-3 times as often; it is significantly behind every classical
+  opponent (paired McNemar), except (c) at L4.
+- The safety comes from the geometric filter and near-field memory, not the network: with the filter off, GoalFlow
+  collides in 8-9 of 100 episodes. On the classical planner the same layer brings collisions to about zero.
+- Under Juno's real speed control (6-8 km/h valve control, 0.3 s brake delay) (a)+filter has no collisions; GoalFlow
+  collapses (the brake delay causes its collisions, the lower speed its stalls), so it would need retraining.
+- Planning takes about 152 ms per step on an M1 Mac (classical: 8-42 ms); the on-car target is 50 ms on a Jetson
+  AGX Orin.
 
 ## Setup
 

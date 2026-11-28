@@ -16,11 +16,11 @@ from .goalflow_planner import GFResult, GoalFlowPlanner
 class _CircleMemory(GoalFlowPlanner):
     """Only the circle filter and its near-field memory from GoalFlowPlanner (no model)."""
 
-    def __init__(self, lidar=None):          # noqa: D107 (deliberately no super().__init__: no model is loaded)
+    def __init__(self, lidar=None, mem_fix: bool = True):   # noqa: D107 (no super().__init__: no model is loaded)
         from ..sim.config import LidarConfig, VehicleConfig
         self.memory_range, self.memory_obs_range, self.circle_gate = 4.0, 4.0, 0.6
         self.rear_x = VehicleConfig.from_yaml().body_x[0]
-        self.entry_scans, self.mem_fix = 1, True
+        self.entry_scans, self.mem_fix = 1, mem_fix
         self.lidar = lidar or LidarConfig()
         self.reset_memory()
 
@@ -29,11 +29,11 @@ class _CircleMemory(GoalFlowPlanner):
 
 
 class FilteredObserved:
-    def __init__(self, planner, name: str, horizon: float = 12.0, margin: float = 0.12):
+    def __init__(self, planner, name: str, horizon: float = 12.0, margin: float = 0.12, mem_fix: bool = True):
         from ..sim.config import ControllerConfig, VehicleConfig
         self.p, self.name, self.horizon, self.margin = planner, name, horizon, margin
         self.veh, self.ctl = VehicleConfig.from_yaml(), ControllerConfig()
-        self.mem = _CircleMemory()
+        self.mem = _CircleMemory(mem_fix=mem_fix)       # mem_fix=False: plain running-mean memory (goalflow_final's)
         self.filter_brakes = 0
 
     @property
