@@ -46,6 +46,11 @@ pre-registered. **Running (approved): final test-seed run**, seeds 400000-400499
 `nohup ./scripts/run_final_test.sh > /dev/null 2>&1 &`, output `reports/lidar_demo/final_test/`, log `chain.log` ends with
 "end"; each eval writes `RUNNING.lock`. Started 21:54 from 99434c0, process group 11915 (stop: `kill -- -11915`, confirm ps). **No changes of any kind after the numbers; nothing starts after it.**
 
+**Final test run DONE 2026-11-28 04:29** (`reports/lidar_demo/final_test/FINAL_COMPARISON.md`; frozen configs, seeds
+400000-400499 x L0-L4; no changes after these numbers). (a)+filter: collisions 0 / 0 / 0 / 0.2 / 0.0 %, success 93.2 /
+94.9 / 93.2 / 91.3 / 86.0 %; goalflow_final: collisions 0 / 0 / 0 / 0.2 / 0.2 %, success 87.9 / 89.0 / 86.3 / 81.0 /
+73.4 %, below the opponent, (c) (except L4, n.s.) and (a)+filter at every level.
+
 **Approved, after the final run (DEVIATIONS "Follow-ups after the final run"; one at a time):** (1)
 `observed_stubfix_filter_nofix` on dev 0-499 x L0-L4 (port to the car unless its collisions exceed (a)+filter's);
 (2) (a)+filter and nofix under juno_bangbang, seeds 0-99 x L0/L2/L4, collisions split while braking / not; (3)
