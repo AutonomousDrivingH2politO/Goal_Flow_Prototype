@@ -894,6 +894,22 @@ per-level opponent stays as frozen ((b) at L0, (a) at L1-L4; (c) alongside); not
 **No changes of any kind after seeing these numbers.** Note: (a)+filter keeps the memory fix as pre-registered and run
 on the dev seeds, although GoalFlow's final config drops it.
 
+### Follow-ups after the final run (approved 2026-11-28; pre-registered before any of these runs)
+
+Nothing changes in the frozen configs or `FINAL_COMPARISON.md`. Code for these is added only after the final run has
+finished (the final run's later configs import the same files). One run at a time, >= 5% CPU idle.
+
+1. **Memory variant for the car: `observed_stubfix_filter_nofix`** = (a)+filter with the plain near-field circle memory
+   (running mean of sightings; no re-anchoring, no free-ray drop), i.e. the same memory as `goalflow_final`. Run on dev
+   seeds 0-499 x L0-L4, reported next to (a)+filter. **Rule:** port nofix to the car unless its collisions are higher
+   than (a)+filter's (count, pooled over L0-L4 and at any level); success is secondary.
+2. **Juno speed profile for the car candidate:** (a)+filter and nofix with `--speed-mode juno_bangbang`, seeds 0-99 at
+   L0 / L2 / L4, vs constant 3 m/s on the same seeds; collisions split into "while braking" (the last planner command
+   before contact was a brake) and not.
+3. **GoalFlow juno_bangbang cause test** (lower priority), same seeds: (i) constant speed 2.0 m/s (planner speed command
+   and spawn speed 2.0; is the speed out of the training range?), (ii) juno_bangbang with brake delay 0 (late brake +
+   delay?). Report which removes the collisions (vs juno_bangbang and vs constant 3 m/s on the same seeds).
+
 ### Real-stack note: near-field visibility of the EMX (2026-11-25)
 
 With the sensor at the front axle (1.60 m ahead of the rear axle, 1.10 m high, pitched 7 deg down, lower beam
